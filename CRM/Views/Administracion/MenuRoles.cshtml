@@ -1,0 +1,355 @@
+﻿
+@{
+    ViewBag.Title = "MenuRoles";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcMenu').addClass("active");
+
+        $('#menurolestabla').DataTable({
+            "paging": false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+        });
+
+    });
+
+    function Modificar(id) {
+        $.ajax({
+            url: "/Administracion/SeleccionarMenuRolPorId/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $('#ModalModificar').modal('show');
+
+                $('#eMenu').val(data.IdConfiguracion);
+                $('#eRol').val(data.IdJquery);
+
+                if (data.Disponible) {                          // Para un checkbox
+                    $("#eAccesible").prop('checked', true);
+                }
+                else {
+                    $("#eAccesible").prop('checked', false);
+                }
+
+                $('#eId').val(data.Id);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificado() {
+        var valorDisponible;
+        if ($('#eAccesible').is(":checked")) {
+            //alert('Si');
+            valorDisp = 1;
+        }
+        else {
+            //alert('no');
+            valorDisp = 0;
+        }
+        $.ajax({
+            url: "/Administracion/ModificarMenuRol/",
+            data: {
+                idmenu: $('#eMenu').val(),
+                idrol: $('#eRol').val(),
+                accesible: valorDisp,
+                id: $('#eId').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se modificó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se guardó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function Agregar() {
+        $('#ModalAgregar').modal('show');
+    }
+
+    function GuardarAgregado() {
+        var valorDisp;
+        if ($('#aAccesible').is(":checked")) {
+            //alert('Si');
+            valorDisp = 1;
+        }
+        else {
+            //alert('no');
+            valorDisp = 0;
+        }
+        $.ajax({
+            url: "/Administracion/AgregarMenuRol/",
+            data: {
+                idmenu: $('#aMenu').val(),
+                idrol: $('#aRol').val(),
+                accesible: valorDisp
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se agregó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se agregó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Opciones de Menú que pueden accesar Roles</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body text-right">
+
+                    <a href="#" onclick="Agregar();" class="btn btn-primary">Nuevo</a>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <table id="menurolestabla" class="display compact" style="width:100%">
+                        <thead class="header">
+                            <tr>
+                                <th>Id</th>
+                                <th>Opcion Menú</th>
+                                <th>Rol</th>
+                                <th>Accesible</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var items in ViewBag.Registros)
+                            {
+                                var accesible = items.Menu.Disponible == true ? "Sí" : "No";
+                                <tr>
+                                    <td>@items.Menu.Id</td>
+                                    <td>@items.Menu.Nombre</td>
+                                    <td>@items.Menu.IdJquery</td>
+                                    <td>@accesible</td>
+                                    <td><a href="#" onclick="Modificar(@items.Menu.Id)">Modificar</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar registro de menú-rol</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aMenu" class="col-md-3 col-form-label">Opción Menú</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="aMenu" name="aMenu" style="width: 250px" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in CRM.Models.Catalogos.Seleccionar("menu", "2"))
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aRol" class="col-md-3 col-form-label">Rol</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="aRol" name="aRol" style="width: 250px" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in CRM.Models.Catalogos.Seleccionar("roles"))
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="aAccesible" name="aAccesible" value="" required>
+                                <span class="form-check-sign">Accesible</span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarAgregado();">Guardar</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar registro del menú</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="eMenu" class="col-md-3 col-form-label">Opción Menú</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eMenu" name="eMenu" style="width: 250px">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in CRM.Models.Catalogos.Seleccionar("menu","2"))
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eRol" class="col-md-3 col-form-label">Rol</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eRol" name="eRol" style="width: 250px">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in CRM.Models.Catalogos.Seleccionar("roles"))
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="eAccesible" name="eAccesible" value="" >
+                                <span class="form-check-sign">Accesible</span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+
+            </div>
+        </div>
+    </div>
+</div>

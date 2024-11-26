@@ -1,0 +1,640 @@
+﻿
+@{
+    ViewBag.Title = "Alta";
+}
+
+
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdRol" name="IdRol" value="@Session["IdRol"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Alta de Médico</h4>
+    </div>
+     <div class="row">
+
+        <div id="Espera" style="display:none; width:69px;height:90px;position:fixed;top:20%;left:50%;padding:2px;z-index:1000">
+            <img src="../assets/img/spinner.gif" width="64" height="64" /><br />Cargando...
+        </div>
+
+
+        <div class="col-md-12">
+
+
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Por favor, rellene los campos</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Nombre" class="col-md-3 col-form-label">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" onkeypress="return letras(event)" required class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="Nombre Médico" tabindex="1" autocomplete="off" >
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="RFC" class="col-md-3 col-form-label">RFC</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" onkeyup="mayus(this);" class="form-control form-control-sm input-solid" onchange="ValidarRFC()" id="RFC" name="RFC" placeholder="AAAA123456AA1" maxlength="13" required tabindex="2" autocomplete="off" data-toggle="tooltip" data-placement="top" title="El RFC consta de 4 letras, 6 números y 3 alfanuméricos, ejemplo: ">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <label class="form-radio-label">
+                                        <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" tabindex="3">
+                                        <span class="form-radio-sign">Interna</span>
+                                    </label>
+                                    <label class="form-radio-label ml-3">
+                                        <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2" checked>
+                                        <span class="form-radio-sign">Externa</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Direccion" class="col-md-3 col-form-label">Dirección</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid" required tabindex="4">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="CP" class="col-md-3 col-form-label" data-toggle="tooltip" data-placement="top" title="Código Postal">CP</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="CP" name="CP" maxlength="5" onblur="CodigoPostal();" style="width:58px" data-toggle="tooltip" data-placement="top" title="Presione la tecla Tab o dé click en cualquier parte del formulario después de agregar el código para mostrar los datos">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label id="lblColonias" for="Colonias" class="col-md-3 col-form-label" style="display: none">Colonia</label>
+                                <select id="Colonias" class="form-control form-control-sm input-solid" style="width: 180px; display: none" onchange="CodigoElegido();"></select>
+                                <div id="divCP" class="input-solid"></div>
+                                <input id="hCiudad" name="hCiudad" type="text" style="display: none">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Sector" class="col-md-3 col-form-label">Sector</label>
+                                <select class="form-control form-control-sm input-solid" id="Sector" name="Sector" style="width: 180px" required tabindex="7">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var sec in ViewBag.Sectores)
+                                    {
+                                        <option value="@sec.Id">@sec.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Telefono" class="col-md-3 col-form-label">Teléfono</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Telefono" name="Telefono" type="text" class="form-control form-control-sm input-solid input-number" required maxlength="18" tabindex="8" data-toggle="tooltip" data-placement="top" title="Sólo números">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Extension" class="col-md-3 col-form-label">Extensión</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Extension" name="Extension" type="text" placeholder="" class="form-control form-control-sm input-solid input-number" data-toggle="tooltip" data-placement="top" title="Sólo números">
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Paginaweb" class="col-md-3 col-form-label">Página Web</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="PaginaWeb" name="PaginaWeb" type="text" class="form-control form-control-sm input-solid" required tabindex="9">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="UDN" class="col-md-3 col-form-label" data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="UDN" name="UDN" style="width: 180px" required tabindex="13">
+                                        <option value="">&nbsp;</option>
+                                        @if (Session["IdRol"].ToString() == "7")
+                                        {
+                                            <option value="6" selected>Comisionista</option>
+                                        }
+                                        else
+                                        {
+                                            foreach (var udn in ViewBag.UDN)
+                                            {
+                                                <option value="@udn.Id">@udn.Nombre</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Pais" class="col-md-3 col-form-label">País</label>
+                                <select class="form-control form-control-sm input-solid" id="Pais" name="Pais" style="width: 180px">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var pai in ViewBag.Paises)
+                                    {
+                                        if (pai.Id == 140)
+                                        {
+                                            <option value="@pai.Id" selected="selected">@pai.Nombre</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@pai.Id">@pai.Nombre</option>
+                                        }
+                                    }
+
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4"></div>
+                        <div class="col-md-6 col-lg-4"></div>
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <label class="form-radio-label">
+                                        <input class="form-radio-input" type="radio" id="tipo1" name="Tipo" value="1" checked>
+                                        <span class="form-radio-sign">Cliente</span>
+                                    </label>
+                                    <label class="form-radio-label ml-3">
+                                        <input class="form-radio-input" type="radio" id="tipo2" name="Tipo" value="2">
+                                        <span class="form-radio-sign">Prospecto</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <div class="card-action label-align-center">
+                    <button id="Btn01" type="submit" class="btn btn-success animated bounceInDown" tabindex="11" onclick="PreGuardado();">Guardar Médico</button>
+                </div>
+
+
+                <div class="table-responsive">
+                    <div id="advertencia" class="alert alert-warning" role="alert" style="display: none"></div>
+
+
+                    <table id="basic-datatable" class="display conpact table-hover" style="width:100%"></table>
+
+                    <center>
+                        <button id="Btn02" class="btn btn-success animated" onclick="Agregar();" style="display: none">Guardar Médico</button>
+                    </center>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#opcEmpresas').addClass("nav-item active submenu");
+
+        $('.input-number').on('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        $('#lblColonias').hide();
+        $('#Colonias').hide();
+        $('#divCP').hide();
+
+        if ($('#IdRol').val() === '7') {
+            $('#test2').attr('checked', 'checked');
+        }
+
+    });
+
+    function PreGuardado() {
+        if ($('#Correo').val() === "") {
+            return;
+        }
+        //Verifica si existe alguna empresa con los datos que se intentan guardar
+        $.ajax({
+            url: "/Empresas/PreGuardado/",
+            data: {
+                Nombre: $('#Nombre').val(), IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.length > 0) {
+                    $('#Btn01').css('display', 'none');
+                    $('#Btn02').css('display', 'block');
+                    $('#advertencia').text('El nombre tiene coincidencia con los datos que se muestran, verifique.').css('display', 'block');
+                    $('#basic-datatable').empty();
+                    var firstRow = '<thead><tr><th>Nombre</th><th></th></tr></thead><tbody>';
+                    $('#basic-datatable').append(firstRow);
+                    for (var i = 0; i < data.length; i++) {
+                        var row = '<tr>';
+                        row += '<td>' + data[i].Nombre + '</td>';
+                        row += '<td><a href=# onclick=SolicitarCompartir(' + data[i].Id + ');>Solicitar Compartir</a></td>';
+                        row += '</tr>';
+                        $('#basic-datatable').append(row);
+                    }
+                    var lastRow = '</tbody></table>';
+                    $('#basic-datatable').append(lastRow);
+                }
+                else {
+                    Agregar();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Agregar() {
+        $.ajax({
+            url: "/Empresas/GuardarCompleto/",
+            data: {
+                Nombre: $('#Nombre').val(), RFC: $('#RFC').val(), TipoEmpresa: $("input[name='optionsRadios']:checked").val(),
+                Direccion: $('#Direccion').val(), Ciudad: $('#hCiudad').val(), Estado: $('#Estado').val(), CP: $('#CP').val(),
+                Sector: $('#Sector').val(), Telefono: $('#Telefono').val(), Extension: $('#Extension').val(), PaginaWeb: $('#PaginaWeb').val(),
+                IdConfiguracion: $('#IdConfiguracion').val(), IdUDN: $('#UDN').val(), IdUsuario: $('#IdUsuario').val(),
+                Pais: $('#Pais').val(), Tipo: $('#Tipo').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data == 0) {
+                    swal({
+                        title: 'GESTION',
+                        text: 'El nombre ya existe y no se puede duplicar, intente con un nombre diferente.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Empresas/Index';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        title: 'GESTION',
+                        text: 'Se agregó el nuevo registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '/Empresas/Index';
+                        }
+                    );
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    $('.input-number').on('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    function CodigoPostal() {
+        $.ajax({
+            async: true,
+            url: "/Oportunidades/CodigoPostal/",
+            data: {
+                numero: $('#CP').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data.length + '/' + data[0].CP + '/' + data[0].Direccion + ' ' + data[0].CP);
+                if (typeof data[0] === 'undefined') {
+                    $('#divCP').empty();
+                    $('#divCP').val('');
+                    $('#divCP').append('Incorrecto!');
+                    $('#lblColonias').hide();
+                    $('#Colonias').hide();
+                }
+                else if (data.length >= 2) {
+                    //Agregar los cps encontrados en un select
+                    $('#divCP').empty();
+                    $('#Colonias').empty();
+                    $('#lblColonias').show();
+                    $('#Colonias').show();
+                    $('#Colonias').append('<option value=></option>');
+                    for (var i = 0; i < data.length; i++) {
+                        $('#Colonias').append('<option value=' + data[i].Direccion + '>' + data[i].Direccion + '</option>');
+                    }
+                }
+                else if (data.length === 1) {
+                    $('#divCP').empty();
+                    $('#divCP').val('');
+                    $('#divCP').show();
+                    $('#divCP').append(data[0].Direccion);
+                    $('#hCiudad').val(data[0].Direccion);
+                    $('#Colonias').hide();
+                    $('#lblColonias').hide();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    function CodigoElegido() {
+        var valor = $('#Colonias option:selected').text();
+        $('#lblColonias').hide();
+        $('#Colonias').hide();
+        $('#divCP').empty();
+        $('#divCP').show();
+        $('#divCP').append(valor);
+        $('#hCiudad').val(valor);
+    }
+
+    function SolicitarCompartir(idempresa) {
+        swal({
+            title: 'Solicitar Compartir Médico',
+            html: '<br><input class="form-control" placeholder="" id="input-field">',
+            content: {
+                element: "input",
+                attributes: {
+                    placeholder: "Solicito se comparta el Médico",
+                    type: "text",
+                    id: "input-field",
+                    className: "form-control"
+                },
+            },
+            buttons: {
+                cancelar: {
+                    visible: true,
+                    className: 'btn btn-danger'
+                },
+                confirmar: {
+                    className: 'btn btn-success'
+                }
+            },
+        }).then(
+            function () {
+                //Enviar un correo solicitando el cambio o el agregado
+                if ($('#input-field').val() == '') { }
+                else {
+                    EnviarCorreo($('#IdUsuario').val(), idempresa, $('#input-field').val());
+                }
+            }
+        );
+    }
+
+    function EnviarCorreo(idusuario, idempresa, mensaje) {
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/EnviarCorreoCambios",
+            data: { idusuario: idusuario, idempresa: idempresa, mensaje: mensaje },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se envió el correo con la solicitud.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+
+
+    function ValidarRFC() {
+        var rfc = $('#RFC').val();
+
+        if (rfcValido(rfc, true)) {
+            // RFC correcto
+        } else {
+            // RFC incorrecto
+            $.notify({
+                message: "RFC no valido!."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+    }
+
+    //Función para validar un RFC
+    // Devuelve el RFC sin espacios ni guiones si es correcto
+    // Devuelve false si es inválido
+    // (debe estar en mayúsculas, guiones y espacios intermedios opcionales)
+    function rfcValido(rfc, aceptarGenerico = true) {
+        const re = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/;
+        var validado = rfc.match(re);
+
+        if (!validado)  //Coincide con el formato general del regex?
+            return false;
+
+        //Separar el dígito verificador del resto del RFC
+        const digitoVerificador = validado.pop(),
+            rfcSinDigito = validado.slice(1).join(''),
+            len = rfcSinDigito.length,
+
+            //Obtener el digito esperado
+            diccionario = "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ",
+            indice = len + 1;
+        var suma,
+            digitoEsperado;
+
+        if (len == 12) suma = 0
+        else suma = 481; //Ajuste para persona moral
+
+        for (var i = 0; i < len; i++)
+            suma += diccionario.indexOf(rfcSinDigito.charAt(i)) * (indice - i);
+        digitoEsperado = 11 - suma % 11;
+        if (digitoEsperado == 11) digitoEsperado = 0;
+        else if (digitoEsperado == 10) digitoEsperado = "A";
+
+        //El dígito verificador coincide con el esperado?
+        // o es un RFC Genérico (ventas a público general)?
+        if ((digitoVerificador != digitoEsperado)
+            && (!aceptarGenerico || rfcSinDigito + digitoVerificador != "XAXX010101000"))
+            return false;
+        else if (!aceptarGenerico && rfcSinDigito + digitoVerificador == "XEXX010101000")
+            return false;
+        return rfcSinDigito + digitoVerificador;
+    }
+
+
+    //Handler para el evento cuando cambia el input
+    // -Lleva la RFC a mayúsculas para validarlo
+    // -Elimina los espacios que pueda tener antes o después
+    function validarInput(input) {
+        var rfc = input.value.trim().toUpperCase(),
+            resultado = document.getElementById("resultado"),
+            valido;
+
+        var rfcCorrecto = rfcValido(rfc);   // ⬅️ Acá se comprueba
+
+        if (rfcCorrecto) {
+            valido = "Válido";
+            resultado.classList.add("ok");
+        } else {
+            valido = "No válido"
+            resultado.classList.remove("ok");
+        }
+
+        resultado.innerText = "RFC: " + rfc
+            + "\nResultado: " + rfcCorrecto
+            + "\nFormato: " + valido;
+    }
+
+
+    function mayus(e) {
+        e.value = e.value.toUpperCase();
+    }
+
+    function letras(e) {
+        var key = e.keyCode || e.which,
+            tecla = String.fromCharCode(key).toLowerCase(),
+            letras = " áéíóúabcdefghijklmnñopqrstuvwxyz",
+            especiales = [8, 37, 39, 46],
+            tecla_especial = false;
+
+        for (var i in especiales) {
+            if (key == especiales[i]) {
+                tecla_especial = true;
+                break;
+            }
+        }
+
+        if (letras.indexOf(tecla) == -1 && !tecla_especial) {
+            return false;
+        }
+    }
+</script>

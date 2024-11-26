@@ -1,0 +1,609 @@
+﻿@{
+    ViewBag.Title = "Modificar Contactos " + DateTime.Now;
+}
+<link href="../assets/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="../assets/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#m2').addClass('active');
+        $('#Espera').hide();
+
+        $.fn.dataTable.moment("DD/MM/YYYY");    // permite ordernar fechas correctamente....
+
+
+        $('#tableA').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 10,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            dom: 'Bfrtip',
+            buttons: [
+            ]
+        });
+
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 5,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+        });
+
+
+        var obj = {}
+        obj['Id'] = $('#IdCampaña').val();
+        var jsonObject = {
+            "Marketing": obj
+        }
+
+        // ================================================================================================================================================ 
+        // Cargamos los datos de la gráfica
+        $.ajax({
+            url: "@Url.Action("EstadisticasProspectos", "Marketing")",
+            type: "POST",
+            data: JSON.stringify(jsonObject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var radio = 35;
+                var ancho = 15;
+
+                Circles.create({
+                    id: 'circles-1',
+                    radius: radio,
+                    value: data.totalProspectos,
+                    maxValue: data.totalProspectos*1.20,
+                    width: ancho,
+                    text: data.Registrados,
+                    colors: ['#f1f1f1', '#2BB930'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-2',
+                    radius: radio,
+                    value: data.totalActividades,
+                    maxValue: data.totalActividades*1.35,
+                    width: ancho,
+                    text: data.Registrados,
+                    colors: ['#f1f1f1', '#FF2C42'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+            },
+            error: function(data) {
+                
+            }
+        });
+        // ==================================================================================================================================================
+
+    });
+
+    function SeguimientoContacto(idcontacto, idcampaña)
+    {
+        location.href ="/Contactos/Editar?Id=" + idcontacto + '&a=1';
+
+        /*
+        $('#ModalActualizarSeguimientoContacto').modal('show');
+        //Obtener el detalle del contacto para la campaña
+        $.ajax({
+            type: 'GET',
+            url: "/Marketing/MarketingContactoSeleccionar/",
+            data: {
+                idcontacto: idcontacto,
+                idcampaña: idcampaña
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#contactocampaña').text(data.Contactos.Nombre + ' ' + data.Contactos.ApellidoPaterno + ' ' + data.Contactos.ApellidoMaterno);
+                $('#idcontactocampaña').val(data.MarketingContactos.IdContacto);
+                $('#idcampañacontacto').val(data.MarketingContactos.IdCampaña);
+                $('#seguimientocampaña').val(data.MarketingContactos.Seguimiento);
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+        */
+    }
+
+    function ActualizarSeguimientoContacto(idcontacto,idcampaña,seguimiento) {
+        $.ajax({
+            type: 'GET',
+            url: "/Marketing/MarketingContactoActualizar/",
+            data: {
+                idcontacto: $('#idcontactocampaña').val(),
+                idcampaña: $('#idcampañacontacto').val(),
+                seguimiento: $('#seguimientocampaña').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalActualizarSeguimientoContacto').modal('hide');
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function SeguroEliminarRegistro(idcontacto, idcampaña) {
+        swal({
+            title: 'Eliminación de Contacto',
+            text: "¿Está seguro de querer eliminar este contacto?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-danger'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                $.ajax({
+                    type: 'GET',
+                    url: "/Marketing/MarketingContactoEliminar/",
+                    data: {
+                        idcontacto: idcontacto,
+                        idcampaña: idcampaña
+                    },
+                    contentType: "application/json",
+                    dataType: 'json',
+                    beforeSend: function () {
+                        $('#Espera').show();
+                    },
+                    success: function (data) {
+
+                        $.notify('Se eliminó el registro seleccionado.', {
+                            autohide: true, type: 'success', placement: {
+                                from: 'bottom',
+                                align: 'right'
+                            }
+                        });
+
+                        location.href = '';
+                    },
+                    complete: function () {
+                        $('#Espera').hide();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    },
+                });
+            }
+        });
+    }
+
+    function CambiarEstado(idcampaña, idcontacto) {
+        var asistido = 0;
+        if ($("#asistencia").prop('checked') == true) {
+            asistido = 1;
+        }
+        else {
+            asistido = 0;
+        }
+        $.ajax({
+            type: 'GET',
+            url: "/Marketing/MarketingContactoAsistencia/",
+            data: {
+                idcampaña: idcampaña,
+                idcontacto: idcontacto,
+                estado: asistido
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function AgregarContacto(idcontactoagregar) {
+        $.ajax({
+            type: 'GET',
+            url: "/Marketing/MarketingContactoAgregarACampaña/",
+            data: {
+                idcampaña: $('#IdCampaña').val(),
+                idcontacto: idcontactoagregar
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function DescargarExcelActividades()
+    {
+
+        var obj = {}
+        obj['Id'] = $('#IdCampaña').val();
+        var jsonObject = {
+            "Marketing": obj
+        }
+
+        $.ajax({
+            url: "@Url.Action("ExcelContactos", "Marketing")",
+            type: "POST",
+            data: JSON.stringify(jsonObject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data) {
+                window.location = '/Marketing/Download?fileName=' + data.FileGuid;
+            },
+            error: function(data) {
+                alert('error...........................................');
+            }
+        });
+    }
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdCampaña" value="@Request["IdCampaña"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Modificar Contactos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    @Html.Partial("_MenuMarketing")
+                    <br />
+                    <div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h4>Contactos seleccionados para esta campaña</h4>
+                            </div>
+                            <div class="col-sm-12 col-md-4">
+                                <button name="btnExcel" id="btnExcel" type="submit" value="ExpExcel" class="btn btn-success" style="width:auto;" onclick="DescargarExcelActividades();">&nbsp;&nbsp;<i class="fas fa-file-excel" style="color:#fff; font-size:24px;"></i>&nbsp;&nbsp;&nbsp;Reporte de Prospectos&nbsp;&nbsp;&nbsp;</button>
+                            </div>
+                            <div class="col-sm-12 col-md-1">
+                                &nbsp;
+                            </div>
+                            <div class="col-sm-12 col-md-3" style="margin:0px; padding:0px; text-align:center;">
+                                <div class="card-body" style="background-color:#fff; margin:0px; padding:0px; text-align:center;">
+                                    <div id="circles-1"></div>
+                                    <h4>Contactos</h4>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-3" style="margin:0px; padding:0px; text-align:center;">
+                                <div class="card-body" style="background-color:#fff; margin:0px; padding:0px; text-align:center;">
+                                    <a href="/Marketing/Graficos?id=@Request["IdCampaña"]" data-toggle="tooltip" data-placement="top" title="Detalle de Actividades">
+                                        <div id="circles-2"></div>
+                                        <h4>Actividades</h4>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-1">
+                                &nbsp;
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+
+                                    <table id="tableA" class="display table-striped table-hover" style="width:100%">
+                                        <thead class="header2">
+                                            <tr>
+                                                <th class="text-center">Nombre</th>
+                                                <th class="text-center">Empresa</th>
+                                                <th class="text-center">Correo</th>
+                                                <th class="text-center">Celular</th>
+                                                <th class="text-center">Telefono</th>
+                                                <th class="text-center">UDN</th>
+                                                <th class="text-center">Tipo</th>
+                                                <th class="text-center">Cargo</th>
+                                                <th class="text-center">Area</th>
+                                                
+
+
+                                                <th style="width: 0px; display: none">Campaña</th>
+                                                <th style="width: 0px; display: none">Inicio</th>
+                                                <th style="width: 0px; display: none">Fin</th>
+                                                <th style="width: 0px; display: none">Seguimiento</th>
+                                                <th>Alta</th>
+                                                <th align="center">Asistió</th>
+                                                <th>Seguimiento</th>
+                                                <th>Eliminar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @if (ViewBag.MarketingContactos != null)
+                                            {
+                                                foreach (var itm in ViewBag.MarketingContactos)
+                                                {
+                                            <tr>
+                                                <td><a href="/Contactos/Editar?Id=@itm.MarketingContactos.IdContacto">@itm.Contactos.Nombre @itm.Contactos.ApellidoPaterno @itm.Contactos.ApellidoMaterno</a></td>
+                                                <td>@itm.Empresas.Nombre</td>
+                                                <td>@itm.Contactos.Correo</td>
+                                                <td>@itm.Contactos.Celular</td>
+                                                <td>@itm.Contactos.Telefono</td>
+                                                <td>@itm.UDN.Nombre</td>
+                                                <td>@itm.Contactos.sTipoPersona</td>
+                                                <td>@itm.Contactos.Cargo</td>
+                                                <td>@itm.Contactos.Area</td>
+
+                                                <td style="width: 0px; display: none">@itm.Marketing.Nombre</td>
+                                                <td style="width: 0px; display: none">@itm.Marketing.Inicio</td>
+                                                <td style="width: 0px; display: none">@itm.Marketing.Fin</td>
+                                                <td style="width: 0px; display: none">@itm.MarketingContactos.Seguimiento</td>
+                                                <td align="center">@itm.MarketingContactos.FechaAlta.ToString("dd/MM/yyyy")</td>
+                                                <td align="center"><input type="checkbox" value="@itm.MarketingContactos.Asistencia" id="asistencia" name="asistencia" checked="@(true == itm.MarketingContactos.Asistencia)" onclick="CambiarEstado(@itm.MarketingContactos.IdCampaña,@itm.MarketingContactos.IdContacto);" /></td>
+                                                <td align="center"><a href="#" onclick="SeguimientoContacto(@itm.MarketingContactos.IdContacto,@itm.MarketingContactos.IdCampaña);"><i class='fas fa-clipboard-list'></i></a></td>
+                                                <td align="center"><a href="#" onclick="SeguroEliminarRegistro(@itm.MarketingContactos.IdContacto,@itm.MarketingContactos.IdCampaña);"><i class='fas fa-trash text-danger'></i></a></td>
+                                            </tr>
+                                                }
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+            
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+                    @if (ViewBag.EstadoActual == 1)
+                    {
+
+                        <div class="row">
+
+                            <div class="col-md-4 col-lg-4"></div>
+
+                            <div class="col-md-4 col-lg-4"></div>
+
+                            <div class="col-md-4 col-lg-4">
+                                <!--Agregar un nuevo contacto si no existe actualmente-->
+                                <div class="form-group form-inline">
+                                    <!--label for="Fin" class="col-md-3 col-form-label"><a href="/Contactos/Alta3?IdCampaña=@Request["IdCampaña"]" class="btn btn-primary">Agregar Nuevo Contacto</a></label-->
+                                    <label for="Fin" class="col-md-3 col-form-label"><a href="/Contactos/Alta2" class="btn btn-primary">Agregar Nuevo Contacto</a></label>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" name="IdCampaña" value="@TempData["IdCampaña"]" />
+
+
+                        <div class="row">
+
+                            <div class="col-md-12 col-lg-12">
+
+                                @if (ViewBag.Contactos != null)
+                                {
+                                    <div class="table-responsive">
+                                        <h4>Ver todos los contactos para seleccionar y agregar</h4>
+                                        <table id="basic-datatables-" class="display table-striped table-hover" style="width:100%">
+                                            <thead class="header">
+                                                <tr>
+                                                    <th class="text-center">Nombre</th>
+                                                    <th class="text-center">Empresa</th>
+                                                    <th class="text-center">Correo</th>
+                                                    <th class="text-center">Celular</th>
+                                                    <th class="text-center">Telefono</th>
+                                                    <th class="text-center">UDN</th>
+                                                    <th class="text-center">Tipo</th>
+                                                    <th class="text-center">Cargo</th>
+                                                    <th class="text-center">Area</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                @foreach (var item in ViewBag.Contactos)
+                                                {
+                                                    <tr>
+                                                        <td>@item.Contactos.Nombre @item.Contactos.ApellidoPaterno @item.Contactos.ApellidoMaterno</td>
+                                                        <td>@item.Empresas.Nombre</td>
+                                                        <td>@item.Contactos.Correo</td>
+                                                        <td>@item.Contactos.Celular</td>
+                                                        <td>@item.Contactos.Telefono</td>
+                                                        <td>@item.UDN.Nombre</td>
+                                                        <td>@item.Contactos.sTipoPersona</td>
+                                                        <td>@item.Contactos.Cargo</td>
+                                                        <td>@item.Contactos.Area</td>
+                                                        <td align="center">
+                                                            <input type="checkbox" value="@item.Contactos.Id" name="contacto" onclick="AgregarContacto(@item.Contactos.Id);" />
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                       
+
+                        <div class="card-action label-align-center">
+                            <button name="Boton1" type="submit" class="btn btn-success" onclick="location.href='';">Agregar Contactos Seleccionados</button>
+                            &nbsp;
+                            <button name="Boton2" type="submit" class="btn btn-warning">Agregar Todos</button>
+                        </div>
+
+                        
+                    }
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActualizarSeguimientoContacto" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Acualizar el Seguimiento para el Contacto</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label id="contactocampaña" class="col-md-11 col-form-label"></label>
+                                <div class="col-md-8 p-0"></div>
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" id="idcontactocampaña" value="" />
+                        <input type="hidden" id="idcampañacontacto" value="" />
+
+                        <div class="col-md-12 col-lg-12">
+                            <div class="form-group form-inline">
+                                <textarea id="seguimientocampaña" class="form-control" cols="50" rows="5"></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-12 col-lg-12">
+                            <!--div class="form-group form-inline">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" id="asistencia" name="asistencia" value="1">
+                                        <span class="form-check-sign">Confirmar asistencia</span>
+                                    </label>
+                                </div>
+                            </div-->
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="ActualizarSeguimientoContacto();">Aceptar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scriptsTables{
+
+    <script src="../assets/js/plugin/datatables/dataTables.buttons.min.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.flash.min.js"></script>
+    <script src="../assets/js/plugin/datatables/jszip.min.js"></script>
+    <script src="../assets/js/plugin/datatables/pdfmake.min.js"></script>
+    <script src="../assets/js/plugin/datatables/vfs_fonts.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.html5.min.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.print.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+}
+

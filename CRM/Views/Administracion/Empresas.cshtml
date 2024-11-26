@@ -1,0 +1,186 @@
+﻿
+@{
+    ViewBag.Title = "Empresas";
+}
+<script>
+    $(document).ready(function () {
+        $('#opcContactos').addClass("nav-item active submenu");
+        $('#provs').addClass("collapse show");
+        $('#op2').addClass("active");
+    });
+
+    function Guardar() {
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/ModificarEmpresaProveedor/",
+            data: {
+                nombre: $('#eNombre').val(),
+                rfc: $('#eRFC').val(),
+                telefono: $('#eTelefono').val(),
+                id: $('#eId').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                if (data > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardaron los datos modificados de la empresa.',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '';
+                        });
+
+                }
+                
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModalModificar(valor) {
+        $.ajax({
+            url: "/Administracion/SeleccionarEmpresaProveedorPorId",
+            data: { id: valor },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $('#ModalModificarEmpresa').modal('show');
+
+                $('#eNombre').val(data.Nombre);
+                $('#eRFC').val(data.RFC);
+                $('#eTelefono').val(data.Telefono);
+                $('#eId').val(data.Id);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Empresas de Proveedores</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                        <thead class="header">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>RFC</th>
+                                <th>Teléfono</th>
+                                <th>Modificar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var items in ViewBag.EmpresasProveedores)
+                            { 
+                                <tr>
+                                    <td>@items.Nombre</td>
+                                    <td>@items.RFC</td>
+                                    <td>@items.Telefono</td>
+                                    <td><a href="#" onclick="ModalModificar(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Modificar'></i></a></td>
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    </table>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="ModalModificarEmpresa" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar Empresa de Proveedor</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="eNombre" id="eNombre" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eRFC" class="col-md-3 col-form-label fc-left">RFC</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="eRFC" id="eRFC" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eTelefono" class="col-md-3 col-form-label fc-left">Teléfono</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="eTelefono" id="eTelefono" placeholder="">
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="eId" name="eId" value="" > 
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="Guardar();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

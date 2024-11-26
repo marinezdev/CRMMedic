@@ -1,0 +1,251 @@
+﻿
+@{
+    ViewBag.Title = "Busqueda";
+}
+<style>
+
+    .highlight {
+        background-color: #FFFF88;
+    }
+
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('#opcOport').addClass("nav-item active submenu");
+        $('#oport').addClass("collapse show");
+        $('#sopcBusq').addClass("active");
+
+        $('#filabusqueda').addClass('row');
+    });
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#Clasificacion').val();
+        //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+        $.ajax({
+            url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+                console.log(data);
+                var len = data.length;
+                $('#SubClasificacion').empty();
+                for (var i = 0; i < len; i++) {
+                    $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function Buscar() {
+        if ($('#Nombre').val() == "" && $('#Empresa').val() == "" && $('#Inicio').val() == "" && $('#Fin').val() == "" && $('#Clasificacion').val() == "" && $('#SubClasificacion').val() == "") {
+            swal({
+                title: 'CRM ASAE',
+                text: 'Agregue un valor en un campo para iniciar la búsqueda',
+                icon: 'info',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-info'
+                    }
+                }
+            });
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/Buscar2",
+            data: {
+                Nombre: $('#Nombre').val(),
+                Empresa: $('#Empresa').val(),
+                Inicio: $('#Inicio').val(),
+                Fin: $('#Fin').val(),
+                Clasificacion: $('#Clasificacion').val(),
+                SubClasificacion: $('#SubClasificacion').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.length > 0) {
+                    // Cargar los datos encontrados
+                    $('#basic-datatables').empty();
+                    $('#basic-datatables').addClass('display table table-striped table-hover');
+                    var firstrow = '<tr><th>Asunto</th><th>Empresa</th><th></th></tr>';
+                    $('#basic-datatables').append(firstrow);
+                    for (var i = 0; i < data.length; i++) {
+                        var row = '<tr>' +
+                            '<td>' + data[i].Oportunidades.Nombre + '</td>' +
+                            '<td>' + data[i].Empresas.Nombre + '</td>' +
+                            '<td><a href=/Oportunidades/Editar?Id=' + data[i].Oportunidades.Id + '&IdU=' + data[i].Oportunidades.IdUsuario + '>Actualizar</a></td>' +
+                            '</tr > ';
+                        $('#basic-datatables').append(row);
+                    }
+                    data = null;
+                    $('#filabusqueda').addClass('row collapse');
+                }
+                else {
+                    $('#basic-datatables').empty();
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ningún registro coincide con su búsqueda',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Buscar Asuntos para Detallado</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Opciones de Búsqueda</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <a data-toggle="collapse" href="#filabusqueda" role="link" aria-expanded="false" aria-controls="filabusqueda">Oculta/Muestra Opciones de Búsqueda</a>
+
+                    <form method="post" action="Buscar">
+                        <div id="filabusqueda">
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Nombre" class="col-md-2 col-form-label">Nombre</label>
+                                    <div class="col-md-7 p-0">
+                                        <input type="text" class="form-control input-solid" id="Nombre" name="Nombre">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Empresa" class="col-md-2 col-form-label">Empresa</label>
+                                    <select class="form-control input-solid" id="Empresa" name="Empresa" style="width: 250px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var item in ViewBag.Empresas)
+                                        {
+                                            <option value="@item.Id">@item.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Inicio" class="col-md-3 col-form-label">Del</label>
+                                    <div class="col-md-7 p-0">
+                                        <input type="date" class="form-control input-solid" id="Inicio" name="Inicio">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Fin" class="col-md-3 col-form-label">Al</label>
+                                    <div class="col-md-7 p-0">
+                                        <input type="date" class="form-control input-solid" id="Fin" name="Fin">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Clasificacion" class="col-md-4 col-form-label">Clasificación</label>
+                                    <select class="form-control input-solid" id="Clasificacion" name="Clasificacion" style="width: 200px" onchange="ClasificacionSeleccionada();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="SubClasificacion" class="col-md-4 col-form-label">Sub-Clasificación</label>
+                                    <select class="form-control input-solid" id="SubClasificacion" name="SubClasificacion" style="width: 200px">
+                                        <option value="">&nbsp;</option>
+
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="card-action label-align-center col-md-12">
+                                <!--button type="submit" class="btn btn-primary" onclick="Buscar();">Buscar</button-->
+                                <input type="submit" class="btn btn-primary" value="Buscar" />
+                            </div>
+
+                        </div>
+                    </form>
+
+                    @if (ViewBag.Encontrado != null)
+                    {
+
+                        <table id="basic-datatables" class="display table table-striped table-hover">
+                            <thead><tr><th>Asunto</th><th>Empresa</th><th></th></tr></thead>
+                            <tbody>
+
+                                @foreach (var items in ViewBag.Encontrado)
+                                {
+                                    <tr>
+                                        <td>@items.Oportunidades.Nombre</td>
+                                        <td>@items.Empresas.Nombre</td>
+                                        <td><a href=/Oportunidades/Editar?Id=@items.Oportunidades.Id&IdU=@items.Oportunidades.IdUsuario>Actualizar</a></td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $('#filabusqueda').addClass('row collapse');
+                        </script>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

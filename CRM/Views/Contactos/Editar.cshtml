@@ -1,0 +1,2154 @@
+﻿@{
+    ViewBag.Title = "Contactos";
+}
+
+@section ScriptsAdicionalesLocales
+{
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var obtenerParametrodeURL = function getUrlParameter(sParam) {
+                var sPageURL = window.location.search.substring(1),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName,
+                    i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+            };
+
+            $('#opcContactos').addClass("nav-item active submenu");
+
+            $('#empNombre').keyup(function () {
+                $(this).val($(this).val().toUpperCase());
+            });
+
+            var idd = obtenerParametrodeURL('Id');
+            var act = obtenerParametrodeURL('a');
+
+            if (act == '1') {
+                $('#pills-home-tab').attr('aria-selected', false).addClass('nav-link');
+                $('#pills-profile-tab').attr('aria-selected', true).addClass('nav-link active');
+                $('#pills-profile').addClass('tab-pane fade show active');
+            }
+            else {
+                $('#pills-home-tab').attr('aria-selected', true).addClass('nav-link active');
+                $('#pills-home').addClass('tab-pane fade show active');
+            }
+
+            SeleccionarPorId(idd);
+            SeleccionarActividadesContacto(idd);
+
+            if ($('#Contadas').val() >= 1) {
+                $('#Activo').prop('disabled', true);
+            }
+
+            $('#BtnModificar').hide();
+
+            $('.input-number').on('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            $('#Espera').hide();
+
+            //Eventos
+
+            $('#btnGuardarCambios').click(function () {
+                GuardarModificado();
+            });
+
+            $('lAgregarNuevaEmpresa').click(function () {
+
+            });
+
+            $('lAgregarNuevaArea').click(function () {
+
+            });
+
+            $('lCompartir').click(function () {
+
+            });
+
+        });
+
+        //****Funciones
+
+        function SeleccionarPorId(id) {
+            $.ajax({
+                url: "/Contactos/SeleccionarDetalleContactoEdicion/" + id,
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+
+                    if ($('#IdConfiguracion').val() === '3') {
+                        $('#Nombre').val(data.Contactos.ApellidoPaterno + ' ' + data.Contactos.ApellidoMaterno + ' ' + data.Contactos.Nombre);
+                    }
+                    else if ($('#IdConfiguracion').val() === '2') {
+                        $('#Nombre').val(data.Contactos.Nombre);
+                        $('#ApellidoPaterno').val(data.Contactos.ApellidoPaterno);
+                        $('#ApellidoMaterno').val(data.Contactos.ApellidoMaterno);
+                        $('#titulo').text('Edición de Paciente: ' + data.Contactos.Nombre + ' ' + data.Contactos.ApellidoPaterno + ' ' + data.Contactos.ApellidoMaterno);
+                    }
+                    $('#Correo').val(data.Contactos.Correo);
+                    $('#Telefono').val(data.Contactos.Telefono);
+                    $('#Celular').val(data.Contactos.Celular);
+                    $('#Direccion').val(data.Contactos.Direccion);
+                    $('#CP').val(data.Contactos.CP);
+                    $('#divCP').text(data.Contactos.Ciudad);
+                    $('#hCiudad').val(data.Contactos.Ciudad);
+                    $('#Estado').val(data.Contactos.Estado);
+                    $('#Pais').val(data.Contactos.Pais);
+                    $('#Select_TipoPersona').val(data.Contactos.TipoPersona);
+                    $('#Cargo').val(data.Contactos.Cargo);
+                    $('#FechaCumpleaños').val(data.Contactos.FechaCumpleaños);
+                    $('#Edad').val(data.Contactos.Edad);
+                    $('#Empresa').val(data.Empresas.Id);
+                    $('#TipoContacto').val(data.Contactos.TipoContacto);
+                    if (data.Contactos.TipoContacto === 1) {                          // Para un radiobutton
+                        $('input:radio[class=form-radio-input][id=tipocontacto1]').prop('checked', true);
+                    }
+                    else {
+                        $('input:radio[class=form-radio-input][id=tipocontacto1]').prop('checked', false);
+                    }
+
+                    if (data.Contactos.TipoContacto === 2) {                          // Para un radiobutton
+                        $('input:radio[class=form-radio-input][id=tipocontacto2]').prop('checked', true);
+                    }
+                    else {
+                        $('input:radio[class=form-radio-input][id=tipocontacto2]').prop('checked', false);
+                    }
+                    $('#Notas').val(data.Contactos.Notas);
+                    $('#IdContacto').val(data.Contactos.Id);
+                    $('#IdEmpresa').val(data.Empresas.Id);
+                    $('#IrAEmpresa').attr("href", "/Empresas/Editar?Id=" + data.Empresas.Id);
+                    $('#Area').val(data.Contactos.IdArea);
+                    $('#UDN').val(data.Contactos.IdUDN);
+
+                    if (data.Contactos.Ingreso == 1)
+                        $('#Ingreso').val("CRM");
+                    else if (data.Contactos.Ingreso == 2)
+                        $('#Ingreso').val("Facebook");
+                    else if (data.Contactos.Ingreso == 3)
+                        $('#Ingreso').val("Página Web");
+                    else if (data.Contactos.Ingreso == 4)
+                        $('#Ingreso').val("Otros");
+
+
+                    if (data.Contactos.ContactoUsuario == 1)
+                        $('#AsignacionUsuario').hide();
+
+                    if (data.Contactos.Activo)
+                        $("#Activo").prop('checked', true);
+
+                    if (data.Contactos.Sexo === 'H') {                          // Para un radiobutton
+                        $('input:radio[class=form-radio-input][id=sexo1]').prop('checked', true);
+                    }
+                    else {
+                        $('input:radio[class=form-radio-input][id=sexo1]').prop('checked', false);
+                    }
+
+                    if (data.Contactos.Sexo === 'M') {                          // Para un radiobutton
+                        $('input:radio[class=form-radio-input][id=sexo2]').prop('checked', true);
+                    }
+                    else {
+                        $('input:radio[class=form-radio-input][id=sexo2]').prop('checked', false);
+                    }
+
+                    MostrarCompartidos(data.Contactos.Id);
+
+                    SeleccionarAdicionalPorId(data.Contactos.Id);
+
+                    ValidarSiEmpresaCompartida(data.Contactos.Id, data.Empresas.Id, $('#IdUsuario').val())
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function SeleccionarAdicionalPorId(id) {
+            $.ajax({
+                url: "/Contactos/SeleccionarAdicionalPorId/",
+                data: { idcontacto: id },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    $('#ContactosPuesto').val(data.Puesto);
+                    $('#ContactosDepartamento').val(data.Departamento);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function GuardarModificado() {
+            
+            ValidarContactoUsuarioPermisos();
+            if ($('#Activo').is(":checked")) {
+                valorActivo = 1;
+            }
+            else {
+                valorActivo = 0;
+            }
+            if (!validarCorreo($('#Correo').val())) {
+
+            }
+            if ($('input:radio[name=sexo]:checked').val() == undefined) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Por favor indique el sexo del contacto',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-warning'
+                        }
+                    },
+                }).then(
+                    function () {
+                        return;
+                    }
+                );
+            }
+            else {
+                $.ajax({
+                    url: "/Contactos/Modificar1/",
+                    data: {
+                        Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                        Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(), Direccion: $('#Direccion').val(),
+                        Ciudad: $('#hCiudad').val(), CP: $('#CP').val(), Estado: $('#Estado').val(), Cargo: $('#Cargo').val(), FechaCumpleaños: $('#FechaCumpleaños').val(),
+                        Edad: $('#Edad').val(),
+                        Empresa: $('#Empresa').val(),
+                        TipoContacto: $('input:radio[name=tipocontacto]:checked').val(),
+                        Notas: $('#Notas').val(),
+                        Idcontacto: $('#IdContacto').val(), IdEmpresa: $('#IdEmpresa').val(), UDN: $('#UDN').val(),
+                        IdArea: $('#Area').val(), Pais: $('#Pais').val(), Activo: valorActivo,
+                        Sexo: $('input:radio[name=sexo]:checked').val(),
+                        TipoPersona: $('#Select_TipoPersona').val(),
+                    },
+                    type: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('#Espera').show();
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data == 1) {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Se guardó el registro modificado',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                },
+                            }).then(
+                                function () {
+                                    location.href = '/Contactos/NIndex';
+                                }
+                            );
+                        }
+                        else if (data == 0) {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Error al guardar.',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-danger'
+                                    }
+                                },
+                            });
+                        }
+                        else if (data == 2) {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Sólo puede modificar el creador del registro, solicítele los cambios deseados.',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                },
+                            }).then(
+                                function () {
+                                    SolicitarCambios($('#IdContacto').val());
+                                });
+                        }
+                    },
+                    complete: function () {
+                        $('#Espera').hide();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    }
+                });
+            }
+        }
+
+        function SolicitarCambios(idcontacto) {
+            swal({
+                title: 'Solicitar Modificación de Detalle',
+                html: '<br><input class="form-control" placeholder="Agregue brevemente lo que desea que cambie el creador del contacto id="input-field">',
+                content: {
+                    element: "input",
+                    attributes: {
+                        placeholder: "Solicito que se cambie o agregue",
+                        type: "text",
+                        id: "input-field",
+                        className: "form-control"
+                    },
+                },
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        className: 'btn btn-success'
+                    }
+                },
+            }).then(
+                function () {
+                    //Enviar un correo solicitando el cambio o el agregado
+                    if ($('#input-field').val() == '') { }
+                    else {
+                        EnviarCorreo(idcontacto, $('#input-field').val());
+                    }
+                }
+            );
+        }
+
+        function EnviarCorreo(idcontacto, mensaje) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/EnviarCorreoCambios",
+                data: { idcontacto: idcontacto, mensaje: mensaje },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data == "1") {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se envió el correo con la solicitud.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function ObtenerDireccionEmpresaSeleccionada() {
+            var empresa = $('#Empresa').val();
+            $.ajax({
+                url: "/Empresas/SeleccionarDireccionEmpresa/" + empresa,
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    $('#Direccion').val(data.Direccion);
+                    $('#Ciudad').val(data.Ciudad);
+                    $('#Estado').val(data.Estado);
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function AsignarComoUsuarioDeSistema() {
+            $('#ModalNuevo').modal('show');
+            $('#aNombre').val($('#Nombre').val());
+            $('#aApellidoPaterno').val($('#ApellidoPaterno').val());
+            $('#aApellidoMaterno').val($('#ApellidoMaterno').val());
+            $('#aRol').val(5);
+        }
+
+        //Guardar un contacto como usuario
+        function GuardarNuevo() {
+            $.ajax({
+                type: "GET",
+                url: "/Administracion/AgregarUsuarioContacto/",
+                data: {
+                    aNombre: $('#aNombre').val(), aApellidoPaterno: $('#aApellidoPaterno').val(), aApellidoMaterno: $('#aApellidoMaterno').val(),
+                    aClave: $('#aClave').val(), aContraseña: $('#aContraseña').val(), arol: $('#aRol').val(), aActivo: $('#aActivo').val(), IdConfiguracion: $('#IdConfiguracion').val()
+                },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    ActualizarContactoUsuario(data);
+                    var len = data.length;
+                    if (len > 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se ha cambiado el estado de contacto a usuario del sistema.',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(
+                            function () {
+                                location.href = '/Contactos/NIndex';
+                            }
+                        );
+
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Ha habido un error al intentar guardar el registro',
+                            icon: 'error',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-error'
+                                }
+                            }
+                        });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function ActualizarContactoUsuario(nuevoidusuario) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/ModificarContactoUsuario/",
+                data: {
+                    IdContacto: $('#IdContacto').val(), NuevoId: nuevoidusuario
+                },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el nuevo usuario',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                }
+            });
+        }
+
+        function TextAreaGrande(element) {
+            zIndex: 10003,
+                $(element).attr('rows', '10');
+        }
+
+        function TextAreaNormal(element) {
+            $(element).attr('rows', 0);
+        }
+
+        function AbrirlModalAgregarEmpresa() {
+            $('#ModalAgregarEmpresa').modal('show');
+        }
+
+        function GuardarNuevaEmpresa() {
+            $.ajax({
+                type: "GET",
+                url: "/Empresas/Guardar/",
+                data: {
+                    Nombre: $('#empNombre').val(),
+                    RFC: $('#empRFC').val(),
+                    TipoEmpresa: $("input[name='optionsRadios']:checked").val(),
+                    IdConfiguracion: $('#IdConfiguracion').val()
+                },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    if (data > 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardó la nueva empresa, ahora puede seleccionarla del listado.',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(
+                            function () {
+                                //Actualizar el select de las empresas
+                                CargarEmpresas();
+                                //location.reload();
+                            });
+
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Ha habido un error al intentar guardar el registro',
+                            icon: 'error',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-error'
+                                }
+                            }
+                        });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function CargarEmpresas() {
+            $.ajax({
+                type: "GET",
+                url: "/Empresas/SeleccionarEmpresasPorIdConfiguracion/",
+                data: { id: $('#IdConfiguracion').val() },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    $('#Empresa').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        $('#Empresa').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function validarCorreo(email) {
+            var regex = /[\w-\.]{2,}@@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+
+            if (!regex.test($('#Correo').val().trim())) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'El correo electrónico es inválido, revise',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-warning'
+                        }
+                    },
+                });
+                return false;
+            }
+            return true;
+        }
+
+        function AbrirModalNuevaArea() {
+            $('#ModalArea').modal('show');
+        }
+
+        function AgregarArea() {
+            $.ajax({
+                type: 'GET',
+                url: "/Contactos/AgregarArea/",
+                data: { Nombre: $('#aNombreArea').val() },
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+
+                    $('#Area').empty();
+                    $('#Area').append('<option value=></option>');
+                    for (var i = 0; i < data.length; i++) {
+                        $('#Area').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function CodigoPostal() {
+            if ($('#CP').val() == '') {
+                return;
+            }
+            $.ajax({
+                async: true,
+                url: "/Oportunidades/CodigoPostal/",
+                data: {
+                    numero: $('#CP').val()
+                },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data.length + '/' + data[0].CP + '/' + data[0].Direccion + ' ' + data[0].CP);
+                    if (typeof data[0] === 'undefined') {
+                        $('#divCP').empty();
+                        $('#divCP').val('');
+                        $('#divCP').append('Incorrecto!');
+                        $('#lblColonias').hide();
+                        $('#Colonias').hide();
+                    }
+                    else if (data.length >= 2) {
+                        //Agregar los cps encontrados en un select
+                        $('#divCP').empty();
+                        $('#Colonias').empty();
+                        $('#lblColonias').show();
+                        $('#Colonias').show();
+                        $('#Colonias').append('<option value=></option>');
+                        for (var i = 0; i < data.length; i++) {
+                            $('#Colonias').append('<option value=' + data[i].Direccion + '>' + data[i].Direccion + '</option>');
+                        }
+                    }
+                    else if (data.length === 1) {
+                        $('#divCP').empty();
+                        $('#divCP').val('');
+                        $('#divCP').show();
+                        $('#divCP').append(data[0].Direccion);
+                        $('#hCiudad').val(data[0].Direccion);
+                        $('#Colonias').hide();
+                        $('#lblColonias').hide();
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function CodigoElegido() {
+            var valor = $('#Colonias option:selected').text();
+            $('#lblColonias').hide();
+            $('#Colonias').hide();
+            $('#divCP').empty();
+            $('#divCP').show();
+            $('#divCP').append(valor);
+            $('#hCiudad').val(valor);
+        }
+
+        function DireccionEmpresa() {
+            $.ajax({
+                async: true,
+                url: "/Empresas/SeleccionarDireccionEmpresa/",
+                data: {
+                    id: $('#Empresa').val()
+                },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    $('#Direccion').val(data.Direccion);
+                    $('#CP').val(data.CP);
+                    $('#divCP').show();
+                    $('#divCP').empty();
+                    $('#divCP').append(data.Ciudad);
+                    $('#hCiudad').val(data.Ciudad);
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function GuardarActividad() {
+            $.ajax({
+                url: "/Contactos/AgregarActividadContacto/",
+                data: {
+                    idusuario: $('#IdUsuario').val(),
+                    idcontacto: $('#IdContacto').val(),
+                    idtipoactividad: $('#TipoActividad').val(),
+                    fecha: $('#Fecha').val(),
+                    notas: $('#NotasAct').val()
+                },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (typeof data[0] === 'undefined') {
+                        $('#basic-datatables').empty();
+                    }
+                    else {
+                        $('#basic-datatables').empty();
+                        var firstRow = '<thead><tr><th>Usuario</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th><th>Modificar</th></tr></thead><tbody>';
+                        $('#basic-datatables').append(firstRow);
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].ActividadesContactoDetalle.Fecha.substr(6)));
+                            var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                            var row = '<tr>' +
+                                '<td>' + data[i].Usuarios.Nombre + '</td>' +
+                                '<td>' + data[i].Catalogos.Nombre + '</td>' +
+                                '<td>' + fecha.getDate() + '/' + mes + '/' + fecha.getFullYear() + '</td>' +
+                                '<td>' + data[i].ActividadesContactoDetalle.Notas + '</td>' +
+                                '<td><a href=# onclick=MostrarActividadParaModificar(' + data[i].ActividadesContactoDetalle.Id + ');>Modificar</a></td>' +
+                                '</tr>';
+                            $('#basic-datatables').append(row);
+                        }
+
+                        $('#TipoActividad').val('');
+                        $('#Fecha').val('');
+                        $('#NotasAct').val('');
+                        $.notify('Se agregó la actividad', { autohide: true, placement: { from: 'bottom', align: 'right' }, type: 'success' });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function SeleccionarActividadesContacto(id) {
+            $.ajax({
+                url: "/Contactos/SeleccionarActividadesContacto/",
+                data: { idcontacto: id },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (typeof data[0] === 'undefined') {
+                        $('#basic-datatables').empty();
+                    }
+                    else {
+                        $('#basic-datatables').empty();
+                        var firstRow = '<thead><tr><th>Usuario</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th><th>Modificar</th></tr></thead><tbody>';
+                        $('#basic-datatables').append(firstRow);
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].ActividadesContactoDetalle.Fecha.substr(6)));
+                            var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                            var row = '<tr>' +
+                                '<td>' + data[i].Usuarios.Nombre + '</td>' +
+                                '<td>' + data[i].Catalogos.Nombre + '</td>' +
+                                '<td>' + fecha.getDate() + '/' + mes + '/' + fecha.getFullYear() + '</td>' +
+                                '<td>' + data[i].ActividadesContactoDetalle.Notas + '</td>' +
+                                '<td><a href=# onclick=MostrarActividadParaModificar(' + data[i].ActividadesContactoDetalle.Id + ');>Modificar</a></td>' +
+                                '</tr>';
+                            $('#basic-datatables').append(row);
+                            $('#IdContacto').val(id);
+                        }
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function MostrarActividadParaModificar(id) {
+            $.ajax({
+                url: "/Contactos/SeleccionarActividadId/",
+                data: { idactividad: id },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    $('#TipoActividad').val(data.ActividadesContactoDetalle.IdTipoActividad);
+                    var fecha = new Date(parseInt(data.ActividadesContactoDetalle.Fecha.substr(6)));
+                    var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                    var fechacompuesta = fecha.getDate() + '/' + mes + '/' + fecha.getFullYear();
+                    $('#Fecha').attr('type', 'text');
+                    $('#Fecha').val(fechacompuesta);
+                    $('#NotasAct').val(data.ActividadesContactoDetalle.Notas);
+                    $('#IdActividad').val(data.ActividadesContactoDetalle.Id);
+
+                    $('#BtnGuardar').hide();
+                    $('#BtnModificar').show();
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+
+        }
+
+        function GuardarActividadModificada() {
+            $.ajax({
+                url: "/Contactos/ModificarActividad/",
+                data: { idtipoactividad: $('#TipoActividad').val(), fecha: $('#Fecha').val(), notas: $('#NotasAct').val(), id: $('#IdActividad').val() },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    $('#TipoActividad').index = 0;
+                    $('#Fecha').val('').attr('type', 'date');
+                    $('#NotasAct').val('');
+                    $('#BtnGuardar').show();
+                    $('#BtnModificar').hide();
+
+                    $.notify('Se guardaron los cambios exitosamente.', { autohide: true, type: 'success', placement: { from: 'bottom', align: 'right' } });
+
+                    SeleccionarActividadesContacto($('#IdContacto').val());
+
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function EnvioDeCorreo() {
+            if ($('#TipoActividad').val() == '9') {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Opción no disponible en este ámbito.',
+                    icon: 'warning',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-warning'
+                        }
+                    }
+                });
+            }
+        }
+
+        function Compartir() {
+            $.ajax({
+                url: "/Contactos/CompartirRegistro/",
+                data: { idcontacto: $('#IdContacto').val(), idusuario: $('#NuevoResponsable').val() },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    if (data == "1") {
+                        $('#ModalCompartir').modal('hide');
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se compartió este registro con el usuario asignado.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                        MostrarCompartidos($('#IdContacto').val());
+                    }
+                    else {
+                        $('#ModalCompartir').modal('hide');
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'El registro ya está compartido con el usuario indicado.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-warning'
+                                }
+                            },
+                        });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function MostrarCompartidos(id) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/ContactoUsuariosCompartidos",
+                data: { idcontacto: id },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (data.length === 0) {
+                        $('#divCompartidos').empty();
+                    }
+                    else {
+                        $('#divCompartidos').empty();
+                        var tabla = '<table class=table><tr><th>Compartido con</th><th></th></tr>';
+                        for (var i = 0; i < data.length; i++) {
+                            tabla += '<tr><td>' + data[i].Usuarios.Nombre + '</td><td><a href=# onclick=EliminarUsuario(' + data[i].Usuarios.Id + ');>Eliminar</a></td></tr>';
+                        }
+                        tabla += '</table>';
+                        $('#divCompartidos').append(tabla);
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function EliminarUsuario(idusuario) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/EliminarUsuarioCompartido",
+                data: { idcontacto: $('#IdContacto').val(), idusuario: idusuario },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (data == 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Sin permiso para eliminar la relación.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-warning'
+                                }
+                            },
+                        });
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se eliminó el usuario con el que se compartía este registro.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                        MostrarCompartidos($('#IdContacto').val());
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function GuardarAdicional() {
+            $.ajax({
+                url: "/Contactos/GuardarAdicional/",
+                data: { idcontacto: $('#IdContacto').val(), idpuesto: $('#ContactosPuesto').val(), iddepartamento: $('#ContactosDepartamento').val() },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (data === 1) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se agregaron los datos.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                    }
+                    else if (data >= 2) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardaron los cambios.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                    }
+                    else if (data === 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'No se modificó el registro, sólo puede hacerlo el que lo creó, solicítele cualquier cambio.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-warning'
+                                }
+                            },
+                        }).then(
+                            function () {
+                                SolicitarCambios($('#IdUsuario').val(), $('#Id').val())
+                            });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function SolicitarCambios(idusuario, idcontacto) {
+            swal({
+                title: 'Solicitar Modificación de Detalle',
+                html: '<br><input class="form-control" placeholder="Agregue brevemente lo que desea que cambie el creador de la empresa" id="input-field">',
+                content: {
+                    element: "input",
+                    attributes: {
+                        placeholder: "Solicito que se cambie o agregue",
+                        type: "text",
+                        id: "input-field",
+                        className: "form-control"
+                    },
+                },
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        className: 'btn btn-success'
+                    }
+                },
+            }).then(
+                function () {
+                    //Enviar un correo solicitando el cambio o el agregado
+                    if ($('#input-field').val() == '') { }
+                    else {
+                        EnviarCorreo(idusuario, idcontacto, $('#input-field').val());
+                    }
+                }
+            );
+        }
+
+        function EnviarCorreo(idusuario, idcontacto, mensaje) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/EnviarCorreoCambios",
+                data: { idusuario: idusuario, idcontacto: idcontacto, mensaje: mensaje },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    if (data == "1") {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se envió el correo con la solicitud.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            },
+                        });
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function ValidarSiEmpresaCompartida(idcontacto, idempresa, idusuario) {
+            $.ajax({
+                type: "GET",
+                url: "/Contactos/ValidarSiEmpresaCompartida",
+                data: { idcontacto: idcontacto, idempresa: idempresa, idusuario: idusuario },
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data == true) {
+                        $('#IrAEmpresa').show();
+                    }
+                    else {
+                        $('#IrAEmpresa').hide();
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+        function ValidarContactoUsuarioPermisos() {
+            $.ajax({
+                type: "POST",
+                url: "/Administracion/ValidarContactosSiUSuarioEsPropietarioOTienePermisoParaModificar",
+                data: JSON.stringify({
+                    idcontacto: $('#IdContacto').val(),
+                    idusuario: $('#IdUsuario').val()
+                }),
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (data == 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Sólo el creador del contacto puede modificar su contenido.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-warning'
+                                }
+                            },
+                        });
+                    }
+                    return;
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+
+    </script>
+}
+
+
+
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdContacto" name="IdContacto" />
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+<input type="hidden" id="Contadas" value="@ViewBag.ContactosEnOportunidadesContadas" />
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 id="titulo" class="page-title"></h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="false">Edición</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-adicional-tab" data-toggle="pill" href="#pills-adicional" role="tab" aria-controls="pills-adicional" aria-selected="false">Adicional</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Actividades</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-oportunidades-tab" data-toggle="pill" href="#pills-oportunidades" role="tab" aria-controls="pills-profile" aria-selected="false">Oportunidades</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-marketing-tab" data-toggle="pill" href="#pills-marketing" role="tab" aria-controls="pills-profile" aria-selected="false">Marketing</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                        <div class="tab-pane fade" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                            <p style="width: 650px;"></p>
+
+                            <div class="row">
+
+                                <div class="col-md-6 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Nombre" class="col-md-3 col-form-label">Nombre</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Nombre" name="Nombre" type="text" class="form-control form-control-sm input-solid" tabindex="1">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="ApellidoPaterno" class="col-md-4 col-form-label">Ap. Paterno</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="ApellidoPaterno" name="ApellidoPaterno" type="text" class="form-control form-control-sm input-solid" tabindex="2">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="ApellidoMaterno" class="col-md-4 col-form-label">Ap. Materno</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="ApellidoMaterno" name="ApellidoMaterno" type="text" class="form-control form-control-sm input-solid" tabindex="3">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Correo" class="col-md-3 col-form-label">Correo</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Correo" name="Correo" type="text" class="form-control form-control-sm input-solid" tabindex="4">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Telefono" class="col-md-4 col-form-label">Teléfono</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="Telefono" name="Telefono" type="text" class="form-control form-control-sm input-solid" tabindex="5">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Celular" class="col-md-4 col-form-label">Celular</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="Celular" name="Celular" type="text" class="form-control form-control-sm input-solid" tabindex="6">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"><center><a href="#" onclick="AbrirlModalAgregarEmpresa();" class="nav-link" data-toggle="tooltip" data-placement="right" title="Agregar una empresa rápidamente y cambiar su detalle después">Agregar Médico</a></center></div>
+                                <div class="col-md-4 col-lg-4"><center><a href="#" onclick="AbrirModalNuevaArea();" class="nav-link">Agregar Nueva Area</a></center></div>
+                                <div class="col-md-4 col-lg-4"></div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Empresa" class="col-md-3 col-form-label">Médico</label>
+
+                                        @CRM.Utilerias.CustomHelpers.SelectEmpresas(Session["IdConfiguracion"].ToString(), Session["IdRol"].ToString(), Session["IdUsuario"].ToString())
+
+                                        <a id="IrAEmpresa" href=""><i class="fas fa-hand-point-left" data-toggle="tooltip" data-placement="top" title="Ir a la empresa"></i></a>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Area" class="col-md-4 col-form-label">Area</label>
+                                        <select class="form-control form-control-sm input-solid" id="Area" name="Area" style="width: 190px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var tp in ViewBag.Area)
+                                            {
+                                                <option value="@tp.Id">@tp.Nombre</option>
+                                            }
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Cargo" class="col-md-4 col-form-label">Cargo</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="Cargo" name="Cargo" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Direccion" class="col-md-3 col-form-label">Dirección</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="CP" class="col-md-4 col-form-label" data-toggle="tooltip" data-placement="top" title="Código Postal">CP</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="CP" name="CP" type="text" class="form-control form-control-sm input-solid input-number" tabindex="8" maxlength="5" onblur="CodigoPostal();" style="width:58px" data-toggle="tooltip" data-placement="top" title="Presione la tecla Tab o dé click en cualquier parte del formulario después de agregar el código para mostrar los datos">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label id="lblColonias" for="Colonias" class="col-md-3 col-form-label" style="display: none">Colonia</label>
+                                        <select id="Colonias" class="form-control form-control-sm input-solid" style="width: 180px; display: none" onchange="CodigoElegido();"></select>
+                                        <div id="divCP" class="input-solid"></div>
+                                        <input id="hCiudad" name="hCiudad" type="text" style="display:none">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Pais" class="col-md-3 col-form-label">País</label>
+                                        <select class="form-control form-control-sm input-solid" id="Pais" name="Pais" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var pai in ViewBag.Paises)
+                                            {
+                                                <option value="@pai.Id">@pai.Nombre</option>
+                                            }
+
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="FechaCumpleaños" class="col-md-4 col-form-label">Cumpleaños</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="FechaCumpleaños" name="FechaCumpleaños" placeholder="dd/mm" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="UDN" class="col-md-4 col-form-label" data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</label>
+                                        <div class="col-md-8 p-0">
+                                            <select class="form-control form-control-sm input-solid" id="UDN" name="UDN" style="width: 180px" required>
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var udn in ViewBag.UDN)
+                                                {
+                                                    <option value="@udn.Id">@udn.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Edad" class="col-md-3 col-form-label">Edad</label>
+                                        <div class="col-md-4 p-0">
+                                            <input id="Edad" name="Edad" placeholder="" maxlength="2" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-4 col-form-label">Origen</label>
+                                        <input id="Ingreso" class="form-control form-control-sm input-solid">
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Area" class="col-md-4 col-form-label">Tipo Persona </label>
+                                        <select class="form-control form-control-sm input-solid" id="Select_TipoPersona" name="Select_TipoPersona" style="width: 190px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var tp in ViewBag.TipoPersona)
+                                            {
+                                                <option value="@tp.Id">@tp.Nombre</option>
+                                            }
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-radio-label">
+                                                <input class="form-radio-input" type="radio" id="tipocontacto1" name="tipocontacto" value="1" checked>
+                                                <span class="form-radio-sign">Cliente</span>
+                                            </label>
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" id="tipocontacto2" name="tipocontacto" value="2">
+                                                <span class="form-radio-sign">Prospecto</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-radio-label">
+                                                <input class="form-radio-input" type="radio" id="sexo1" name="sexo" value="H">
+                                                <span class="form-radio-sign">Hombre</span>
+                                            </label>
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" id="sexo2" name="sexo" value="M">
+                                                <span class="form-radio-sign">Mujer</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-8">
+
+                                    <div class="form-group">
+                                        <label for="Notas">Notas</label>
+                                        <textarea id="Notas" name="Notas" class="form-control input-solid" cols="60" rows="3"></textarea>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-2">
+
+                                    <br /><br />
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input id="Activo" name="Activo" class="form-check-input" type="checkbox">
+                                            <span class="form-check-sign">Activo</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <center>
+                                        <button id="btnGuardarCambios" class="btn btn-success">Guardar Cambios</button>
+                                    </center>
+                                </div>
+                                <div class="col-md-4">
+
+                                    <center>
+                                        <a href="#" class="nav-link" data-toggle="modal" data-target="#ModalCompartir">Compartir</a>
+                                    </center>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4"><div id="divCompartidos"></div></div>
+
+                            </div>
+
+                        </div>
+                        <div id="pills-adicional" class="tab-pane fade" role="tabpanel" aria-labelledby="pills-adicional-tab">
+                            <p style="width: 650px;"></p>
+
+                            <div>
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="ContactosPuesto" class="col-md-3 col-form-label">Puesto</label>
+                                            <select class="form-control form-control-sm input-solid" id="ContactosPuesto" name="ContactosPuesto" style="width: 180px">
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var conpue in CRM.Models.Catalogos.Seleccionar("ContactosPuesto"))
+                                                {
+                                                    <option value="@conpue.Id">@conpue.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="ContactosDepartamento" class="col-md-4 col-form-label">Departamento</label>
+                                            <select class="form-control form-control-sm input-solid" id="ContactosDepartamento" name="ContactosDepartamento" style="width: 180px">
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var condep in CRM.Models.Catalogos.Seleccionar("ContactosDepartamento"))
+                                                {
+                                                    <option value="@condep.Id">@condep.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="col-md-4 col-lg-4"></div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-12 col-lg-12">
+
+                                        <center>
+                                            <button class="btn btn-success" onclick="GuardarAdicional();">Guardar</button>
+                                        </center>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div id="pills-profile" class="tab-pane fade" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <p style="width: 650px;"></p>
+
+                            <div class="row">
+
+                                <div class="col-md-6 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="TipoActividad" class="col-md-4 col-form-label">Tipo Actividad</label>
+                                        <select class="form-control form-control-sm input-solid" id="TipoActividad" name="TipoActividad" style="width: 190px" onchange="EnvioDeCorreo();">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var tp in CRM.Models.Catalogos.Seleccionar("TipoActividad"))
+                                            {
+                                                <option value="@tp.Id">@tp.Nombre</option>
+                                            }
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-group form-inline">
+                                        <label for="Fecha" class="col-md-3 col-form-label">Fecha</label>
+                                        <div class="col-md-8 p-0">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Fecha" name="Fecha" required placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" id="IdActividad" name="IdActividad" />
+                                <input type="hidden" id="IdContacto" name="IdContacto" />
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group">
+                                    <label for="NotasAct" class="col-md-3 col-form-label">Notas</label>
+                                    <textarea id="NotasAct" name="NotasAct" class="form-control form-inline input-solid" tabindex="11" cols="80"></textarea>
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+                                    <button id="BtnGuardar" class="btn btn-success" onclick="GuardarActividad();">Guardar Actividad</button>
+                                    <button id="BtnModificar" class="btn btn-success" onclick="GuardarActividadModificada();">Guardar Modificado</button>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%;">
+                                    <thead class="header">
+                                        <tr>
+                                            <th>Usuario</th>
+                                            <th>Tipo Actividad</th>
+                                            <th>Fecha</th>
+                                            <th>Notas</th>
+                                            <th>Modificar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+
+                        </div>
+                        <div id="pills-oportunidades" class="tab-pane fade" role="tabpanel" aria-labelledby="pills-oportunidades-tab">
+                            <p style="width: 650px;"></p>
+                            <h4>Oportunidades en las que está asignado el Contacto</h4>
+
+                            @if (ViewBag.ContactoEnOportunidades.Count > 0)
+                            {
+                                <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                                    <thead class="header">
+                                        <tr>
+                                            <th>Oportunidad</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var itm in ViewBag.ContactoEnOportunidades)
+                                        {
+                                            <tr>
+                                                <td>@itm.Nombre</td>
+                                                <td>
+                                                    @if (CRM.Utilerias.CustomHelpers.ValidarSiUsuarioPuedeVerOportunidadesNoSuyas(itm.Id.ToString(), Session["IdUsuario"].ToString()))
+                                                    {
+                                                        <a href="/Oportunidades/Editar?Id=@itm.Id">Detalle</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span></span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            }
+
+
+                        </div>
+                        <div id="pills-marketing" class="tab-pane fade" role="tabpanel" aria-labelledby="pills-marketing-tab">
+                            <p style="width: 650px;"></p>
+                            <h4>Campañas en las que se ha asignado el Contacto, seguimiento</h4>
+
+
+                            <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                                <thead class="header">
+                                    <tr>
+                                        <th>Contacto</th>
+                                        <th>Campaña</th>
+                                        <th>Seguimiento</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.Marketing != null)
+                                    {
+                                        foreach (var itm in ViewBag.Marketing)
+                                        {
+                                            <tr>
+                                                <td>@itm.Contactos.Nombre @itm.Contactos.ApellidoPaterno @itm.Contactos.ApellidoMaterno</td>
+                                                <td><a href="/Marketing/ModificarCampaña?idCampaña=@itm.MarketingContactos.IdCampaña">@itm.Marketing.Nombre</a></td>
+                                                <td>@itm.MarketingContactos.Seguimiento</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+
+
+
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar @CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "S") como Usuario del Sistema</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="aNombre" id="aNombre" placeholder="" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoPaterno" class="col-md-3 col-form-label fc-left">Ap. Paterno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="aApellidoPaterno" id="aApellidoPaterno" placeholder="" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoMaterno" class="col-md-3 col-form-label fc-left">Ap. Materno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="aApellidoMaterno" id="aApellidoMaterno" placeholder="" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aClave" class="col-md-3 col-form-label">Clave</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" id="aClave" name="aClave" placeholder="" required tabindex="400">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aContraseña" class="col-md-3 col-form-label">Contraseña</label>
+                            <div class="col-md-9 p-0">
+                                <input type="password" class="form-control input-full" id="aContraseña" name="aContraseña" placeholder="" required tabindex="401">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aRol" class="col-md-3 col-form-label">Rol</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control" id="aRol" name="aRol" style="width: 250px" disabled>
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.Roles)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-inline">
+                            <label for="aActivo" class="col-md-3 col-form-label fc-left">Activo</label>
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="aActivo" name="aActivo" checked>
+                                <span class="form-check-sign"></span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="GuardarNuevo();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregarEmpresa" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar @CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control form-control-sm input-solid" name="empNombre" id="empNombre" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoPaterno" class="col-md-3 col-form-label fc-left">RFC</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control form-control-sm input-solid" name="empRFC" id="empRFC" placeholder="LLLNNNNNNAAA" maxlength="12" autocomplete="off" data-toggle="tooltip" data-placement="top" title="El RFC se compone de 3 letras, 6 números y tres letras o números, agregar sin guiones">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <label></label><br />
+                                    <label class="form-radio-label">
+                                        <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" checked>
+                                        <span class="form-radio-sign">Interna</span>
+                                    </label>
+                                    <label class="form-radio-label ml-3">
+                                        <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2">
+                                        <span class="form-radio-sign">Externa</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarNuevaEmpresa();">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalArea" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Area</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="aNombreArea" class="col-md-3 col-form-label fc-left">Nombre</label>
+                        <div class="col-md-9 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" name="aNombreArea" id="aNombreArea" placeholder="" required>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarArea();">Aceptar</button>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="ModalCompartir" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Compartir Modificaciones de este Contacto</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+                    <p>Seleccionar el usuario con el que se compartirán los cambios.</p>
+                    <p>A partir de ahora el usuario seleccionado podrá modificar este registro.</p>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Usuario</label>
+                                <div class="col-md-8 p-0">
+                                    <select id="NuevoResponsable" class="form-group form-control-sm input-solid" style="width:180px">
+                                        <option value=""></option>
+                                        @foreach (var item in ViewBag.ResponsablesParaCompartir)
+                                        {
+                                            <option value="@item.Id">@item.Nombre @item.ApellidoPaterno @item.ApellidoMaterno</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <button type="button" class="btn btn-sm btn-success" onclick="Compartir();">Aceptar</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+<script>
+
+    $('#Fecha').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

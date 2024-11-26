@@ -1,0 +1,322 @@
+﻿
+@{
+    ViewBag.Title = "Catalogos";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcCatal').addClass("active");
+
+        $('#catalogos').DataTable({
+            "searching": false,
+            "paging": false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            info: false,            
+            columns: [
+                { data: 'Id' },
+                { data: 'Nombre' }
+            ],
+            columnDefs: [
+                {
+                    targets: [2],
+                    data: "Id",
+                    render: function (data) {
+                        return '<a href="#" onclick=Modificar(' + data + ');>Modificar</a>';
+                    }
+                }, {
+                    targets: [3],
+                    render: function (data) {
+                        return '<a href="#" onclick=Agregar();>Nuevo</a>';
+                    }
+                }, {
+                    targets: [4],
+                    data: "Id",
+                    render: function (data) {
+                        return '<a href="#" onclick=Eliminar('+ data +');>Eliminar</a>';
+                    }
+                }
+            ]
+        });
+
+    });
+
+    function MostrarDatosDeTabla(tabla) {
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/SeleccionarTabla',
+            data: { tabla: tabla },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#NombreTabla').val(tabla);
+                $('#h3NombreTabla').text('Tabla: ' + tabla);
+                $('#catalogos').DataTable().clear().rows.add(data).draw();                
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Agregar() {
+        $('#ModalModificar').modal('show');
+        $('#Nombre').val('');
+        $('#BtnNuevo').show();
+        $('#BtnModificar').hide();
+    }
+
+    function GuardarNuevo() {
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/TablasAgregarNuevo',
+            data: { tabla: $('#NombreTabla').val(), nombre: $('#Nombre').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#catalogos').DataTable().clear().rows.add(data).draw();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Modificar(id) {
+        $('#ModalModificar').modal('show'); 
+        $('#BtnNuevo').hide();
+        $('#BtnModificar').show();
+        $('#ModalLabel').text("Modificar registro de tabla: " + $('#NombreTabla').val());
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/TablasSeleccionarPorId',
+            data: { tabla: $('#NombreTabla').val(), id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                $('#IdRegistro').val(data.Id);
+                $('#Nombre').val(data.Nombre);
+                //$('#catalogos').DataTable().clear().rows.add(data).draw();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificado(id) {
+        $('#ModalModificar').modal('hide');
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/TablasModificarRegistro',
+            data: {
+                tabla: $('#NombreTabla').val(),
+                id: $('#IdRegistro').val(),
+                nombre: $('#Nombre').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#catalogos').DataTable().clear().rows.add(data).draw();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Eliminar(id) {
+        $.ajax({
+            url: "/Administracion/EliminarDocumentosASAEClasificacion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se eliminó el registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Si hay registros relacionados NO se borrará, revise bien la tabla de documentos (sólo para documentos, no es para borrar de otras tablas).',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+<input type="hidden" id="NombreTabla" name="NombreTabla" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Catálogos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <br /><br />
+
+                    <div class="row">
+
+                        <div class="col-2">
+
+                            <ul class="nav flex-column">
+                                <li class="nav-item"><a href="#" id="tablaActividades" onclick="MostrarDatosDeTabla('Actividades');">Actividades</a></li>
+                                <li class="nav-item"><a href="#" id="tablaArea" onclick="MostrarDatosDeTabla('Area');">Area</a></li>
+                                <li class="nav-item"><a href="#" id="tablaFuente" onclick="MostrarDatosDeTabla('Fuente');">Fuente</a></li>
+                                <li class="nav-item"><a href="#" id="tablaIndustria" onclick="MostrarDatosDeTabla('Industria');">Industria</a></li>
+                                <li class="nav-item"><a href="#" id="tablaMoneda" onclick="MostrarDatosDeTabla('Moneda');">Moneda</a></li>
+                                <li class="nav-item"><a href="#" id="tablaRubros" onclick="MostrarDatosDeTabla('Rubros');">Rubros</a></li>
+                                <li class="nav-item"><a href="#" id="tablaSubIndustria" onclick="MostrarDatosDeTabla('SubIndustria');">SubIndustria</a></li>
+                                <li class="nav-item"><a href="#" id="tablaTipo" onclick="MostrarDatosDeTabla('Tipo');">Tipo</a></li>
+                                <li class="nav-item"><a href="#" id="tablaTipoActividad" onclick="MostrarDatosDeTabla('TipoActividad');">Tipo Actividad</a></li>
+                                <li class="nav-item"><a href="#" id="tablaTipoPersona" onclick="MostrarDatosDeTabla('TipoPersona');">Tipo Persona</a></li>
+                                <li class="nav-item"><a href="#" id="tablaMarketingEstado" onclick="MostrarDatosDeTabla('MarketingEstado');">Marketing Estado</a></li>
+                                <li class="nav-item"><a href="#" id="tablaMarketingMedio" onclick="MostrarDatosDeTabla('MarketingMedio');">Marketing Medio</a></li>
+                                <li class="nav-item"><a href="#" id="tablaDocumentosASAEClasificacion" onclick="MostrarDatosDeTabla('DocumentosASAEClasificacion');">Docs ASAE Clasificación</a></li>
+                                <li class="nav-item"><a href="#" id="tablaDocumentosASAEUsuarioPosicion" onclick="MostrarDatosDeTabla('DocumentosASAEUsuarioPosicion');">Docs ASAE Usuarios Posición</a></li>
+                                <li class="nav-item"><a href="/Administracion/DocsSubClas">Docs ASAE Subclasificaciones</a></li>
+                                <li class="nav-item"><a href="/Administracion/Extensiones">Docs ASAE Tipos de archivo y peso</a></li>
+                            </ul>
+
+
+                        </div>
+
+                        <div class="col-10">
+                            
+                            <div id="divTabla"></div>
+
+                            <h3 id="h3NombreTabla"></h3>
+
+                            <table id="catalogos" class="display compact" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Nombre</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="Version" class="col-md-3 col-form-label fc-left">Nombre</label>
+                        <div class="col-md-8 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="">
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="IdRegistro" name="IdRegistro" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="BtnNuevo" class="btn btn-success" data-dismiss="modal" onclick="GuardarNuevo();">Guardar Nuevo</button>
+                <button type="button" id="BtnModificar" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar Modificación</button>                
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,284 @@
+﻿
+@{
+    ViewBag.Title = "AgregarArchivoResponsable";
+}
+
+<script>
+
+    $(document).ready(function () {
+    });
+
+    function SeleccionarPorId(id) {
+        $.ajax({
+            url: "/Oportunidades/ArchivosBitacoraSeleccionarPorId/" + id,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalNotas').modal('show');
+                $('#Notas').val(data.Notas);
+                $('#Version').val(data.Version);
+                $('#IdArchivo').val(data.Id);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                //if (mensajesErrorActivados) {
+                //    swal({
+                //        title: 'CRM ASAE',
+                //        text: 'Ha habido un error al intentar procesar los datos (Seleccionar Por Id)',
+                //        icon: 'error',
+                //        buttons: {
+                //            confirm: {
+                //                className: 'btn btn-error'
+                //            }
+                //        }
+                //    });
+                //}
+            }
+        });
+    }
+
+    function AgregarNotas() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarNotasArchivosBitacora",
+            data: {
+                Notas: $("#Notas").val(),
+                Version: $("#Version").val(),
+                Id: $("#IdArchivo").val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data === 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Oportunidades/AgregarArchivoResponsable?Id=' + $('#IdOportunidad').val();
+                        });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha ocurrido un error, revíselo en la consola para más información.',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                }).then(
+                    function () {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    });
+            }
+        });
+    }
+
+    function SeguroEliminarArchivo(id) {
+        swal({
+            title: 'Eliminación de Archivo',
+            text: "¿Está seguro de querer eliminar este archivo?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                location.href = '/Oportunidades/EliminarArchivo?id=' + id;
+            }
+        });
+    }
+
+
+</script>
+
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Subir Archivos/Documentos</h4>
+    </div>
+
+    <!--Menu-->
+    <ul class="nav nav-line nav-color-secondary">
+        <li class="nav-item">
+
+            <a href="/Home/Index2" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                Volver
+            </a>
+        </li>
+
+        <li class="nav-item">
+
+            <a href="/Oportunidades/ContactoActividades?IdB=@Session["IdBitacora"].ToString()&IdO=@Session["IdOportunidad"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-clipboard-list"></i>
+                </span>
+                Actividades
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="/Oportunidades/AgregarArchivoResponsable?IdB=@Session["IdBitacora"].ToString()&IdO=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fas fa-file-upload"></i>
+                </span>
+                Subir Archivos/Documentos
+            </a>
+        </li>
+    </ul>
+
+    <div class="row">
+
+        <div class="col-md-12">
+        <div class="card">
+
+            <div class="card-body">
+
+                <strong>
+                    @if (Session["NombreTema"] == null || Session["NombreTema"].ToString() == "")
+                    {
+                    }
+                    else
+                    {
+                        <label style="font-weight: bold">Objeto:&nbsp;@Session["NombreTema"].ToString()</label>
+
+                    }
+                </strong>
+
+                <div class="row form-inline col-md-12">
+
+                    <div class="form-group">
+
+                        <form method="post" action="AgregarArchivoResponsable" enctype="multipart/form-data" class="input-group animated bounceInDown">
+                            <input type="file" id="file" name="file">&nbsp;
+                            <input type="hidden" id="IdBitacora" name="IdBitacora" value="@Session["IdBitacora"].ToString()" />
+                            <input type="submit" value="Subir" class="input-group-prepend" data-dismiss="modal" style="height:25px; background-color: limegreen; color: white" />
+                        </form>
+
+                    </div>
+
+                </div>
+
+                @Html.Raw(ViewBag.Procesado)
+
+
+                <div class="table-responsive">
+                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width: 100%">
+                        <thead class="header">
+                            <tr>
+                                <th>Nombre del Archivo</th>
+                                <th>Fecha</th>
+                                <th>Versión</th>
+                                <th>Notas</th>
+                                <th>Modificar</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (ViewBag.ArchivosBitacora != null)
+                            {
+                                foreach (var items in ViewBag.ArchivosBitacora)
+                                {
+                                    <tr>
+                                        <td><a href="~/ArchivosBitacora/@items.Nombre" target="_blank">@items.Nombre</a></td>
+                                        <td>@items.Fecha</td>
+                                        <td>@items.Version</td>
+                                        <td>@items.Notas</td>
+                                        <td align="center"><a href="#" onclick="SeleccionarPorId(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Modificar'></i></a></td>
+                                        <td align="center">
+                                            <span class="stamp stamp-sm bg-danger">
+                                                <a href="#" onclick="SeguroEliminarArchivo(@items.Id);"><i class='fas fa-trash' data-toggle='tooltip' data-placement='top' title='Eliminar'></i></a>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
+        </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNotas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Notas</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="Version" class="col-md-3 col-form-label fc-left">Versión</label>
+                        <div class="col-md-8 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" id="Version" name="Version" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label for="Notas" class="col-md-3 col-form-label fc-left">Notas</label>
+                        <div class="col-md-9 p-0">
+                            <textarea class="form-control form-control-sm input-solid" name="Notas" id="Notas" cols="35" rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="IdArchivo" name="IdArchivo" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="AgregarNotas();">Aceptar</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

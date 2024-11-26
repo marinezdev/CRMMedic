@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.asae.com.mx" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://www.asae.com.mx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.asae.com.mx">
+      <s:element name="CorreoMetPrivado">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="host" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="puerto" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="usuario" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="contra" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="from" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="body" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CorreoMetPrivadoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CorreoMetPrivadoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CorreoAsaeTickets">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="host" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="puerto" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="usuario" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="contra" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EmailCopia" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="from" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="body" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CorreoAsaeTicketsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CorreoAsaeTicketsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CorreoAsaeCRM_AgendaEvento">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="host" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="puerto" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="usuario" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="contra" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EmailCopia" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="from" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="body" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="archivoNombre" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoTitulo" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="EventoFechaI" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="EventoFechaF" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoOrganizaNombre" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoOrganizaMail" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoAsunto" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoDescripcion" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EventoUbicacion" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CorreoAsaeCRM_AgendaEventoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CorreoAsaeCRM_AgendaEventoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="CorreoMetPrivadoSoapIn">
+    <wsdl:part name="parameters" element="tns:CorreoMetPrivado" />
+  </wsdl:message>
+  <wsdl:message name="CorreoMetPrivadoSoapOut">
+    <wsdl:part name="parameters" element="tns:CorreoMetPrivadoResponse" />
+  </wsdl:message>
+  <wsdl:message name="CorreoAsaeTicketsSoapIn">
+    <wsdl:part name="parameters" element="tns:CorreoAsaeTickets" />
+  </wsdl:message>
+  <wsdl:message name="CorreoAsaeTicketsSoapOut">
+    <wsdl:part name="parameters" element="tns:CorreoAsaeTicketsResponse" />
+  </wsdl:message>
+  <wsdl:message name="CorreoAsaeCRM_AgendaEventoSoapIn">
+    <wsdl:part name="parameters" element="tns:CorreoAsaeCRM_AgendaEvento" />
+  </wsdl:message>
+  <wsdl:message name="CorreoAsaeCRM_AgendaEventoSoapOut">
+    <wsdl:part name="parameters" element="tns:CorreoAsaeCRM_AgendaEventoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="CorreoSoap">
+    <wsdl:operation name="CorreoMetPrivado">
+      <wsdl:input message="tns:CorreoMetPrivadoSoapIn" />
+      <wsdl:output message="tns:CorreoMetPrivadoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeTickets">
+      <wsdl:input message="tns:CorreoAsaeTicketsSoapIn" />
+      <wsdl:output message="tns:CorreoAsaeTicketsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeCRM_AgendaEvento">
+      <wsdl:input message="tns:CorreoAsaeCRM_AgendaEventoSoapIn" />
+      <wsdl:output message="tns:CorreoAsaeCRM_AgendaEventoSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CorreoSoap" type="tns:CorreoSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CorreoMetPrivado">
+      <soap:operation soapAction="http://www.asae.com.mx/CorreoMetPrivado" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeTickets">
+      <soap:operation soapAction="http://www.asae.com.mx/CorreoAsaeTickets" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeCRM_AgendaEvento">
+      <soap:operation soapAction="http://www.asae.com.mx/CorreoAsaeCRM_AgendaEvento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CorreoSoap12" type="tns:CorreoSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CorreoMetPrivado">
+      <soap12:operation soapAction="http://www.asae.com.mx/CorreoMetPrivado" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeTickets">
+      <soap12:operation soapAction="http://www.asae.com.mx/CorreoAsaeTickets" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CorreoAsaeCRM_AgendaEvento">
+      <soap12:operation soapAction="http://www.asae.com.mx/CorreoAsaeCRM_AgendaEvento" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Correo">
+    <wsdl:port name="CorreoSoap" binding="tns:CorreoSoap">
+      <soap:address location="http://www.asae.com.mx:5050/Correo.asmx" />
+    </wsdl:port>
+    <wsdl:port name="CorreoSoap12" binding="tns:CorreoSoap12">
+      <soap12:address location="http://www.asae.com.mx:5050/Correo.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,729 @@
+﻿
+@{
+    ViewBag.Title = "Usuarios Edición";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcContactos').addClass("nav-item active submenu");
+        $('#Nombre').select();
+
+        $('.input-number').on('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    });
+
+    function AbrirlModalAgregarEmpresa() {
+        $('#ModalAgregarEmpresa').modal('show');
+    }
+
+    function GuardarNuevaEmpresa() {
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/AgregarEmpresaProveedor/",
+            data: {
+                nombre: $('#empNombre').val(),
+                rfc: $('#empRFC').val(),
+                telefono: $('#empTelefono').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                if (data > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó la nueva empresa, ahora puede seleccionarla del listado.',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //Actualizar el select de las empresas
+                            CargarEmpresasProveedor();
+                            //location.reload();
+                        });
+
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'EL RFC ya está ocupado por otra empresa',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CargarEmpresas() {
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/SeleccionarEmpresasPorIdConfiguracion/",
+            data: { id: $('#IdConfiguracion').val() },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#Empresa').empty();
+                for (var i = 0; i < data.length; i++) {
+                    $('#Empresa').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'No se procesaron los datos correctamente',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function CargarEmpresasProveedor() {
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/SeleccionarEmpresasProveedores/",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#Empresa').empty();
+                for (var i = 0; i < data.length; i++) {
+                    $('#Empresa').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function validarCorreo(email) {
+        var regex = /[\w-\.]{2,}@@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+
+        if (!regex.test($('#Correo').val().trim())) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'El correo electrónico es inválido, revise',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                },
+            });
+            return false;
+        }
+        return true;
+    }
+
+    function GuardarModificado() {
+        if ($('#Correo').val() === "") {
+            swal({
+                title: 'CRM',
+                text: 'El campo de correo electrónico NO puede quedarse vacío',
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                }
+            });
+        }
+       
+        var checado = 0;
+        if ($("input[name='optionsRadios']:checked").val() == "1") {
+            checado = 1;
+        }
+        else {
+            checado = 2;
+        }
+        var checado2 = 0;
+        if ($("input[name='RadiosInternoExterno']:checked").val() == "1") {
+            checado2 = 1;
+        }
+        else {
+            checado2 = 2;
+        }
+        $.ajax({
+            url: "/Administracion/GuardarResponsableModificado/",
+            data: {
+                Nombre: $('#Nombre').val(), Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(),
+                Empresa: $('#Empresa').val(), Direccion: $('#Direccion').val(), Ciudad: $('#Ciudad').val(), Notas: $('#Notas').val(),
+                IdUsuario: $('#IdUsuario').val(), FisicaMoral: checado, RFC: $('#RFC').val(), InternoExterno: checado2
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El correo electrónico ya esta siendo usado en otro contacto, revise',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }
+                if (data >= 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El registro se modificó exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Administracion/UsuariosR';
+                        }
+                    );
+                }
+                //$('#Guardado1').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function MostrarCambiarCorreo() {
+        $('#ModalModificarCorreo').modal('show');
+        ListarCorreosCambiados();
+    }
+
+    function CambiarCorreo() {
+        $.ajax({
+            url: "/Administracion/CambiarCorreo/",
+            data: {
+                idusuario: $('#IdUsuario').val(),
+                correo: $('#CorreoNuevo').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se ha modificado el correo de la persona y se ha reenviado un correo para avisarle de este cambio',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Administracion/UsuariosR';
+                        }
+                    );
+                }
+            },
+            error: function () {
+            }
+        });
+    }
+
+    function ListarCorreosCambiados() {
+        $.ajax({
+            url: "/Administracion/ListarCorreosCambiados/",
+            data: {
+                idusuario: $('#IdUsuario').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                //Agregar tabla
+                $('#divCorreosAnteriores').empty();
+                var tabla = '<table class=table><tr><th>Correos Anteriores</th></tr>';
+                for (var i = 0; i < data.length; i++) {
+                    tabla += '<tr><td>' + data[i] + '</td></tr>';
+                }
+                tabla += '</table>';
+                $('#divCorreosAnteriores').append(tabla);
+
+            },
+            error: function () {
+            }
+        });
+    }
+
+    function CambiarEmpresasALocales() {
+        CargarEmpresas();
+        $('#AgregadoEmpresa').hide();
+    }
+
+    function CambiarEmpresasAProveedores() {
+        CargarEmpresasProveedor();
+        $('#AgregadoEmpresa').show();
+    }
+
+</script>
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@ViewBag.DetalleUsuario.Usuarios.Id.ToString()" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Edición de @CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "S")</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Edición</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-asuntos" role="tab" aria-controls="pills-profile" aria-selected="false">Asuntos</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                            <p style="width: 650px;"></p>
+                            
+                            @if (Session["IdConfiguracion"].ToString() == "3")
+                            {
+
+                                <div class="row">
+
+                                    <div class="col-md-8 col-lg-8">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Nombre" class="col-md-2 col-lg-2 col-form-label float-left">Nombre</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="Apellido(s), Nombre(s)" required tabindex="1" autocomplete="off" style="width:400px" value="@ViewBag.DetalleUsuario.Usuarios.Nombre">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="ApellidoPaterno" placeholder="" style="visibility: hidden; width:10px">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="ApellidoMaterno" placeholder="" style="visibility: hidden; width:10px">
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="RFC" class="col-md-3 col-lg-3 col-form-label float-left">RFC</label>
+                                            <div class="col-md-9 p-0">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="RFC" name="RFC" value="@ViewBag.DetalleUsuario.Usuarios.RFC">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-6 col-lg-4">
+                                        <center>
+                                            @if (Session["IdRol"].ToString() == "2")
+                                            {
+                                                <a href="#" id="AgregadoEmpresa" onclick="AbrirlModalAgregarEmpresa();" class="nav-link" data-toggle="tooltip" data-placement="right" title="Agregar una empresa rápidamente y cambiar su detalle después">Agregar Empresa</a>
+                                            }
+                                        </center>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4"></div>
+                                    <div class="col-md-6 col-lg-4"></div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+                                        <div class="form-group form-inline">
+                                            <label for="Empresa" class="col-md-3 col-form-label">Empresa</label>
+                                            <div class="col-md-8 p-0">
+                                                <select class="form-control form-control-sm input-solid" id="Empresa" name="Empresa" style="width: 180px" required tabindex="5" onchange="ClasificacionSeleccionada();">
+                                                    <option value="">&nbsp;</option>
+                                                    @foreach (var itm in ViewBag.Empresas)
+                                                    {
+                                                        if (ViewBag.DetalleUsuario.Usuarios.Empresa == itm.Id)
+                                                        {
+                                                            <option value="@itm.Id" selected>@itm.Nombre</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@itm.Id">@itm.Nombre</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group text-center">
+                                            <div class="form-check">
+                                                <label class="form-radio-label">
+                                                    <input class="form-radio-input" type="radio" id="test3" name="RadiosInternoExterno" value="1" @(ViewBag.DetalleUsuario.Usuarios.InternoExterno == 1 ? "checked" : "") onchange="CambiarEmpresasALocales();">
+                                                    <span class="form-radio-sign">Interno</span>
+                                                </label>
+                                                <label class="form-radio-label ml-3">
+                                                    <input class="form-radio-input" type="radio" id="test4" name="RadiosInternoExterno" value="2" @(ViewBag.DetalleUsuario.Usuarios.InternoExterno == 2 ? "checked" : "") onchange="CambiarEmpresasAProveedores();">
+                                                    <span class="form-radio-sign">Externo</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group text-center">
+                                            <div class="form-check">
+                                                <label class="form-radio-label">
+                                                    <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" @(ViewBag.DetalleUsuario.Usuarios.FisicaMoral == 1 ? "checked" : "")>
+                                                    <span class="form-radio-sign">Fisica</span>
+                                                </label>
+                                                <label class="form-radio-label ml-3">
+                                                    <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2" @(ViewBag.DetalleUsuario.Usuarios.FisicaMoral == 2 ? "checked" : "")>
+                                                    <span class="form-radio-sign">Moral</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            }
+                            else if (Session["IdConfiguracion"].ToString() == "2")
+                            {
+                                <div class="row">
+
+                                    <div class="col-md-6 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Nombre" class="col-md-3 col-form-label label-align-right">Nombre</label>
+                                            <div class="col-md-9 p-0">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Nombre" placeholder="Nombre(s)" required tabindex="1" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-6 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="ApellidoPaterno" class="col-md-3 col-form-label">Ap. Paterno</label>
+                                            <div class="col-md-9 p-0">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="ApellidoPaterno" placeholder="" required tabindex="2" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-6 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="ApellidoMaterno" class="col-md-4 col-form-label">Ap. Materno</label>
+                                            <div class="col-md-7 p-0">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="ApellidoMaterno" placeholder="" required tabindex="3" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            }
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Correo" class="col-md-3 col-form-label label-align-right">Correo</label>
+                                        <div class="col-md-9 p-0">
+                                            <input type="email" class="form-control form-control-sm input-solid" id="Correo" name="Correo" placeholder="Correo Electrónico" required tabindex="4" autocomplete="off" value="@ViewBag.DetalleUsuario.Usuarios.Correo" readonly>
+                                        </div>
+                                        @if (Session["IdConfiguracion"].ToString() == "3")
+                                        {
+                                            <div class="col-md-12 p-0">
+                                                <center>
+                                                    <button class="btn btn-sm btn-warning" onclick="MostrarCambiarCorreo();">Cambiar Correo</button>
+                                                </center>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Telefono" class="col-md-3 col-form-label">Teléfono</label>
+                                        <div class="col-md-9 p-0">
+                                            <input type="text" class="form-control form-control-sm input-solid input-number" id="Telefono" name="Telefono" placeholder="" required tabindex="5" maxlength="18" autocomplete="off" data-toggle="tooltip" data-placement="top" title="Sólo números" value="@ViewBag.DetalleUsuario.Usuarios.Telefono">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Celular" class="col-md-4 col-form-label">Celular</label>
+                                        <div class="col-md-7 p-0">
+                                            <input type="text" class="form-control form-control-sm input-solid input-number" id="Celular" name="Celular" placeholder="" required tabindex="6" maxlength="18" autocomplete="off" data-toggle="tooltip" data-placement="top" title="Sólo números" value="@ViewBag.DetalleUsuario.Usuarios.Celular">
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                            
+                            <div class="row">
+                               
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Direccion" class="col-md-3 col-form-label">Dirección</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid" tabindex="7" value="@ViewBag.DetalleUsuario.Usuarios.Direccion">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Ciudad" class="col-md-3 col-form-label">Ciudad</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Ciudad" name="Ciudad" type="text" class="form-control form-control-sm input-solid" tabindex="8" value="@ViewBag.DetalleUsuario.Usuarios.Ciudad">
+                                        </div>
+                                    </div>
+
+                                </div>                                
+                                
+                                <div class="col-md-4 col-lg-4"></div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-8 col-lg-8">
+
+                                    <div class="form-group">
+                                        <label for="Notas">Notas</label>
+                                        <textarea id="Notas" name="Notas" class="form-control input-solid" cols="100" tabindex="14">@ViewBag.DetalleUsuario.Usuarios.Notas</textarea>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4"><center><br /><br /><button id="Btn02" class="btn btn-success animated" onclick="GuardarModificado();">Guardar Modificaciones</button></center></div>
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="pills-asuntos" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <p style="width: 650px;"></p>
+                            <h4>Asuntos en los que está asignado el proveedor</h4>
+
+                            <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                                <thead class="header">
+                                    <tr>
+                                        <th>Asunto</th>
+                                        <th>Vencimiento</th>
+                                        <th>Administrador Asunto</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.PersonasEnAsuntos != null)
+                                    {
+                                        foreach (var itm in ViewBag.PersonasEnAsuntos)
+                                        {
+                                    <tr>
+                                        <td>@itm.Oportunidades.Nombre</td>
+                                        <td>@itm.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                        <td>@CRM.Utilerias.CustomHelpers.NombreCreadorOportunidad(itm.Oportunidades.Id.ToString())</td>
+                                        <td><a href="/Oportunidades/Edicion?Id=@itm.Oportunidades.Id">Detalle</a></td>
+                                    </tr>
+                                        }
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregarEmpresa" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar @CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="empNombre" id="empNombre" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aRFC" class="col-md-3 col-form-label fc-left">RFC</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="empRFC" id="empRFC" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aTelefono" class="col-md-3 col-form-label fc-left">Teléfono</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="empTelefono" id="empTelefono" placeholder="">
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="GuardarNuevaEmpresa();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificarCorreo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar Correo Actual</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="CorreoNuevo" class="col-md-3 col-form-label fc-left">Correo nuevo</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="CorreoNuevo" id="CorreoNuevo" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12 col-lg-12">
+                        <center>
+                            <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="CambiarCorreo();">Guardar</button>
+                        </center>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12 col-lg-12">
+
+                        <center>
+                            <div class="form-group form-inline">
+                                <div id="divCorreosAnteriores"></div>
+                            </div>
+                        </center>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                
+            </div>
+        </div>
+    </div>
+</div>

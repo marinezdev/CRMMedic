@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewBag.Title = "Clasificacion";
+}
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#multi-filter-select').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 5,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+    });
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">Clasificaciones y Sub-Clasificaciones</h4>
+    </div>
+
+
+    <div class="table-responsive">
+        <table id="multi-filter-select" class="display compact table-striped table-hover" style="width:100%">
+            <thead class="header">
+                <tr>
+                    <th></th>
+                    <th>@CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</th>
+                    <th>@CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</th>
+                    <th>Clasificación</th>
+                    <th>SubClasificación</th>
+                    <th>Creado</th>
+                    <th>Cierre</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>@CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</th>
+                    <th>@CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</th>
+                    <th>Clasificación</th>
+                    <th>SubClasificación</th>
+                    <th>Creado</th>
+                    <th>Cierre</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+            <tbody>
+
+                @if (ViewBag.Resultado != null)
+                {
+                    foreach (var items in ViewBag.Resultado)
+                    {
+                        <tr>
+                            <td style="color: transparent; width:0px">@items.Oportunidades.Id</td>
+                            <td>@items.Oportunidades.Nombre</td>
+                            <td>@items.Empresas.Nombre</td>
+                            <td>@items.Clasificacion.Nombre</td>
+                            <td>@items.Subclasificacion.Nombre</td>
+                            <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+
+                            @CRM.Utilerias.CustomHelpers.EstadosdeProceso(items.Bitacora.NombreEstado)
+
+                            <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">Editar</a></td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+</div>

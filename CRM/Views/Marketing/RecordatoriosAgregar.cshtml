@@ -1,0 +1,402 @@
+﻿
+@{
+    ViewBag.Title = "Agregar Recordatorio";
+}
+
+<!--link href="../assets/css/summernote.css" rel="stylesheet" /-->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+
+        //$('form').submit(function () {
+        //    $(this).find("button[type='submit']").prop('disabled', true);
+        //});
+
+        $("#Boton1").click(function () {
+            $("form").attr("action", "/Marketing/RecordatoriosAgregar").prop('disabled', true);
+        });
+
+        $("#Boton2").click(function () {
+            $("form").attr("action", "/Marketing/RecordatoriosAgregar").prop('disabled', true);
+        });
+
+    });
+
+</script>
+
+<style>
+
+    .responsiva { max-width: 100%; height: auto }
+
+</style>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Agregar Nuevo Correo de Recordatorio</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <a href="/Marketing/ModificarCampaña?IdCampaña=@Request["IdCampaña"]">Campaña</a> | <a href="/Marketing/ModificarContactos?IdCampaña=@Request["IdCampaña"]">Contactos</a> | <a href="/Marketing/Recordatorios?IdCampaña=@Request["IdCampaña"]">Recordatorios</a>
+
+                    <form method="post" action="/Marketing/RecordatoriosAgregar">
+                        <input type="hidden" id="IdCampaña" name="IdCampaña" value="@Request["IdCampaña"]" />
+
+                        <div class=" mail-wrapper bg-white" style="width:100%">
+                            <div class="page-content mail-content">
+                                <div class="email-head d-lg-flex d-block"></div>
+                                <div class="email-compose-fields">
+                                    <div class="form-group row">
+                                        <label for="fecha" class="col-form-label col-md-1">Enviar a</label>
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <label class="form-radio-label">
+                                                        <input class="form-radio-input" type="radio" id="enviara1" name="enviara" value="1" checked>
+                                                        <span class="form-radio-sign">Todos</span>
+                                                    </label>
+                                                    <label class="form-radio-label ml-3">
+                                                        <input class="form-radio-input" type="radio" id="enviara2" name="enviara" value="2">
+                                                        <span class="form-radio-sign">Confirmados</span>
+                                                    </label>
+                                                    <label class="form-radio-label ml-3">
+                                                        <input class="form-radio-input" type="radio" id="enviara3" name="enviara" value="3">
+                                                        <span class="form-radio-sign">No Confirmados</span>
+                                                    </label>
+                                                    <label class="form-radio-label ml-3">
+                                                        <input class="form-radio-input" type="radio" id="enviara4" name="enviara" value="4">
+                                                        <span class="form-radio-sign">Asistió</span>
+                                                    </label>
+                                                    <label class="form-radio-label ml-3">
+                                                        <input class="form-radio-input" type="radio" id="enviara5" name="enviara" value="5">
+                                                        <span class="form-radio-sign">No asistió</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="fecha" class="col-form-label col-md-1">Fecha</label>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" id="fecha" name="fecha" required>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" id="agenda" name="agenda" value="1">
+                                            <span class="form-check-sign">Agregar Agenda</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="agendado" style="display: none; background-color:aquamarine">
+                                    <h4>Datos para la agenda del evento</h4>
+                                    <div class="form-group row">
+
+                                        <div class="col-md-4 col-lg-4">
+
+                                            <div class="form-group row">
+                                                <label for="InicioEvento" class="col-form-label col-md-3">Fecha Inicio</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="InicioEvento" name="InicioEvento" placeholder="" maxlength="12" autocomplete="off">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-4 col-lg-4">
+
+                                            <div class="form-group form-inline">
+                                                <label for="HoraInicio" class="col-form-label col-md-3">Hora Inicio</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="HoraInicio" name="HoraInicio" placeholder="HH:MM" maxlength="12" autocomplete="off">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-4 col-lg-4">
+
+                                            <div class="form-group row">
+                                                <label for="FinEvento" class="col-form-label col-md-3">Fecha Fin</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="FinEvento" name="FinEvento" placeholder="" maxlength="12" autocomplete="off">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-4 col-lg-4">
+
+                                            <div class="form-group form-inline">
+                                                <label for="HoraFin" class="col-form-label col-md-3">Hora Fin</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="HoraFin" name="HoraFin" placeholder="HH:MM" maxlength="12" autocomplete="off">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-4 col-lg-4">
+
+                                            <div class="form-group form-inline">
+                                                <label for="Ubicacion" class="col-form-label col-md-3">Ubicación</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="Ubicacion" name="Ubicacion" placeholder="CDMX" maxlength="12" autocomplete="off">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-8 col-lg-8">
+
+                                            <div class="form-group form-inline">
+                                                <label for="Descripcion" class="col-form-label col-md-3">Descripción (breve)</label>
+                                                <div class="col-md-9 col-lg-9">
+                                                    <input type="text" class="form-control" id="Descripcion" name="Descripcion" placeholder="" maxlength="150" autocomplete="off" style="width:450px">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-8 col-lg-8">
+
+                                            <div class="form-group form-inline">
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group row">
+                                    <label for="asunto" class="col-form-label col-md-1">Asunto</label>
+                                    <div class="col-md-11">
+                                        <input type="text" class="form-control" id="asunto" name="asunto" required>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <a href="#" data-toggle="modal" data-target="#ModalPlantillas">Plantillas de correo</a>
+                                </div>
+                            </div>
+                            <div class="email-editor">
+                                <textarea name="editor" id="editor" required></textarea>
+                            </div>
+                        </div>
+                        
+
+                        <div class="card-action label-align-center">
+                            <button name="Boton1" id="Boton1" type="submit" value="BotonA" class="btn btn-success">Terminar</button>
+                            &nbsp;
+                            <button name="Boton2" id="Boton2" type="submit" value="BotonB" class="btn btn-primary">Guardar y Probar el Correo Creado</button>
+                        </div>
+
+
+                    </form>
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalPlantillas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1">Plantillas de Correo</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    @CRM.Utilerias.CustomHelpers.ContenidoPlantillas()
+                    
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalVistaPrevia" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content"  style="background-color: gainsboro">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1">Vista Previa de la Plantilla</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <center>
+                    <div style="border:1px solid gray">
+
+                        
+                           <img id="imagenaver" src="" class="responsiva" >
+
+                    </div>
+                </center>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+<script src="../assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+<script src="../assets/js/plugin/bootstrap-toogle/bootstrap-toggle.min.js"></script>
+
+<script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script src="../assets/js/plugin/summernote/summernote-bs4.min.js"></script>
+<script src="../assets/js/plugin/summernote/summernote-es.js"></script>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#agenda').click(function () {
+            $('#agendado').toggle();
+
+        });
+
+    });
+
+    $('#editor').summernote({
+        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Helvetica', 'Times new Roman'],
+        tabsize: 2,
+        height: 300,
+        lang: 'es-ES',
+    });
+
+    $('#fecha').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#InicioEvento').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#FinEvento').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#HoraInicio').datetimepicker({
+        format: 'HH:mm',
+    });
+
+    $('#HoraFin').datetimepicker({
+        format: 'HH:mm',
+    });
+
+    $('#ModalVistaPrevia').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Botón que dispara el modal
+        var recipiente = button.data('id')   // Extrae la info de los atributos data-* 
+        var modal = $(this)
+        modal.find('.modal-title').text('Nombre de imagen: ' + recipiente)
+        //modal.find('.imagenaver').src='../../assets/img/' + recipient
+        modal.find('.modal-body input').val(recipiente)
+        $(".modal-body #imagenaver").attr("src", '../../assets/img/' + recipiente);
+    })
+
+    function CopiarCodigo(id) {
+        $('#ModalPlantillas').modal('hide');
+        //$('#editor').html('Hola');
+        //$('#editor').summernote('code', '<h1>Bienvenido</h1><p>Hola, modifica estas líneas como lo necesites para crear tu correos</p>');
+        //alert("Se obtendrá el código de la plantilla " + id);
+
+        $.ajax({
+            url: "/Marketing/MarketingCorreoPlantilla/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $('#editor').summernote('code', data.Codigo);
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+
+    } 
+    
+
+</script>
+

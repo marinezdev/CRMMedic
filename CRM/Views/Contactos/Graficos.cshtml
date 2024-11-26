@@ -1,0 +1,422 @@
+﻿
+@{
+    ViewBag.Title = "Graficos";
+}
+
+<script>
+
+    $(document).ready(function () {
+        //Selecciona y deja activa opción del menú
+        $('#opcContactos').addClass("nav-item active submenu");
+
+        $("#multi-filter-select").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Contactos/Editar?Id=' + firstCellText;
+            }
+        });
+
+        $('#multi-filter-select').DataTable({
+            columnDefs: [
+                {
+                    "orderable": false,
+                    "targets": [0, 8, 10, 11],
+                    "width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 20,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        $('#Espera').hide();
+
+        $.ajax({
+            url: "/Contactos/ConteosFiltros",
+            data: { idconfiguracion: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                
+                var valormaximo = 200;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circles01',
+                    radius: radio,
+                    value: data[0].Contactos.clientes,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cliente
+
+                Circles.create({
+                    id: 'circles02',
+                    radius: radio,
+                    value: data[0].Contactos.prospectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF8C21'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //prospecto
+
+                Circles.create({
+                    id: 'circles03',
+                    radius: radio,
+                    value: data[0].Contactos.hombre,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#5EFF3A'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //hombres
+
+                Circles.create({
+                    id: 'circles04',
+                    radius: radio,
+                    value: data[0].Contactos.mujeres,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#63FF99'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //mujeres
+
+                Circles.create({
+                    id: 'circles05',
+                    radius: radio,
+                    value: data[0].Contactos.outsorcings,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#59d05d'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //outsourcing
+
+                Circles.create({
+                    id: 'circles06',
+                    radius: radio,
+                    value: data[0].Contactos.servicios,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#fdaf4b'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //servicios
+
+                Circles.create({
+                    id: 'circles07',
+                    radius: radio,
+                    value: data[0].Contactos.soluciones,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#177dff'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //soluciones
+
+                Circles.create({
+                    id: 'circles08',
+                    radius: radio,
+                    value: data[0].Contactos.valdemar,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#ff1aaa'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //valdemar
+
+                Circles.create({
+                    id: 'circles09',
+                    radius: radio,
+                    value: data[0].Contactos.comisiones,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#aaa321'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //comisionista
+
+                Circles.create({
+                    id: 'circles10',
+                    radius: radio,
+                    value: data[0].Contactos.redes,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d0486f'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //redes
+
+                Circles.create({
+                    id: 'circles11',
+                    radius: radio,
+                    value: data[0].Empresas.sistemas,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d04eef'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //sistemas
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+
+            }
+        });
+
+    });
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Medidores Pacientes</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row text-center">
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles01"></div>
+                                <center><a href="/Contactos/Graficos?opc=1" class="text-small">Cliente</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles02"></div>
+                                <center><a href="/Contactos/Graficos?opc=2" class="text-small">Prospecto</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles03"></div>
+                                <center><a href="/Contactos/Graficos?opc=3" class="text-small">Hombres</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles04"></div>
+                                <center><a href="/Contactos/Graficos?opc=4" class="text-small">Mujeres</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles05"></div>
+                                <center><a href="/Contactos/Graficos?opc=5" class="text-small">Serv. Esp.</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles06"></div>
+                                <center><a href="/Contactos/Graficos?opc=6" class="text-small">Serv. Mtto.</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles07"></div>
+                                <center><a href="/Contactos/Graficos?opc=7" class="text-small">Sol. Emp.</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles08"></div>
+                                <center><a href="/Contactos/Graficos?opc=8" class="text-small">Tecnología</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles09"></div>
+                                <center><a href="/Contactos/Graficos?opc=9" class="text-small">Comisionista</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles10"></div>
+                                <center><a href="/Contactos/Graficos?opc=10" class="text-small">Redes Sociales</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round">
+                            <div class="body">
+                                <div id="circles11"></div>
+                                <center><a href="/Contactos/Graficos?opc=11" class="text-small">Sistemas</a></center>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="multi-filter-select" class="display compact table-striped table-hover" style="width:100%; cursor: pointer">
+                            <thead class="header">
+                                <tr>
+                                    <th style="width:0px"></th>
+                                    <th>Nombre</th>
+                                    <th>Empresa</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Celular</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Creado&nbsp;por</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th style="width:0px"></th>
+                                    <th>Nombre</th>
+                                    <th>Empresa</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Celular</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Creado&nbsp;por</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+
+                                @if (ViewBag.Contactos != null)
+                                {
+                                    foreach (var items in ViewBag.Contactos)
+                                    {
+                                        var tipocontacto = items.Contactos.TipoContacto == 1 ? "Cliente" : "Prospecto";
+
+                                        <tr>
+                                            <td style="color: transparent; width:0px">@items.Contactos.Id</td>
+                                            <td class="text-nowrap">@items.Contactos.Nombre @items.Contactos.ApellidoPaterno @items.Contactos.ApellidoMaterno</td>
+                                            <td>@items.Empresas.Nombre</td>
+                                            <td>@items.UDN.Nombre</td>
+                                            <td>@items.Contactos.Correo</td>
+                                            <td>@items.Contactos.Telefono</td>
+                                            <td>@items.Contactos.Celular</td>
+                                            <td>@tipocontacto</td>
+                                            <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.Contactos.Ingreso.ToString(), "MarketingMedio")</td>
+                                            <td>@items.Contactos.Edad</td>
+                                            <td align="center">
+                                                @if (items.Contactos.Sexo == "H")
+                                                {
+                                                    <i class='fas fa-male text-info'></i>
+                                                }
+                                                else if (items.Contactos.Sexo == "M")
+                                                {
+                                                    <i class='fas fa-female' style="color:#FF14DB"></i>
+                                                }
+                                            </td>
+                                            <td>@items.Contactos.CreadorNombre</td>
+                                            <td align="center"><a href=/Contactos/Editar?Id =@items.Contactos.Id><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Detalle'></i></a></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+

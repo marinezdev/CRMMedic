@@ -1,0 +1,88 @@
+﻿@model List<CRM.Models.Models.Modelos>
+@{
+    ViewBag.Title = "Listado02";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+        });
+    });
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Contactos Externos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <a href="/Marketing/ModificarCampaña?IdCampaña=@Request["IdCampaña"]">Campaña</a> | <a href="/Marketing/ModificarCorreo?IdCampaña=@Request["IdCampaña"]">Correo</a> | <a href="/Marketing/Recordatorios?IdCampaña=@Request["IdCampaña"]">Recordatorios</a> | <a href="/Marketing/Estadisticas?IdCampaña=@Request["IdCampaña"]">Estadísticas</a>
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="table-responsive">
+                                <h4>Contactos externos registrados para esta campaña</h4>
+                                <table id="basic-datatables-" class="display compact table-bordered table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">Nombre</th>
+                                            <th>Correo</th>
+                                            <th>Empresa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @if (Model != null)
+                                        {
+                                            foreach (var itm in Model)
+                                            {
+                                                <tr>
+                                                    <td>@itm.Contactos.Nombre @itm.Contactos.ApellidoPaterno @itm.Contactos.ApellidoMaterno</td>
+                                                    <td>@itm.Contactos.Correo</td>
+                                                    <td>@itm.Empresas.Nombre</td>
+                                                </tr>
+                                            }
+                                        }
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

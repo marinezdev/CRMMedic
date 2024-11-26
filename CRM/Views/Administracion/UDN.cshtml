@@ -1,0 +1,376 @@
+﻿@model IEnumerable<CRM.Models.Models.UDN>
+@{
+    ViewBag.Title = "UDN";
+}
+
+    <script>
+
+        $(document).ready(function () {
+            $('#opcAdmin').addClass("nav-item active submenu");
+            $('#admin').addClass("collapse show");
+            $('#sopcUDN').addClass("active");
+        });
+
+        function ModalAgregar() {
+            $('#ModalNuevo').modal('show');
+        }
+
+        function Guardar() {
+            $.ajax({
+                type: "GET",
+                url: "/Administracion/AgregarUDN/",
+                data: {
+                    aNombre: $('#aNombre').val()
+                },
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    var len = data.length;
+                    if (len > 0) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardó el registro',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(
+                            function () {
+                                location.reload();
+                            });
+
+                        // Cargar de nuevo los datos
+                        //$('#basic-datatables').empty();
+                        //for (var i = 0; i < len; i++) {
+                        //    var row = '<tr>' +
+                        //        '<td>' + data[i].Usuarios.Nombre + '</td>' +
+                        //        '<td><a href=# onclick=SeleccionarPorId(' + data[i].Usuarios.Id + ');>Detalle</a></td>' +
+                        //        '</tr > ';
+                        //    $('#basic-datatables').append(row);
+                        //}
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Ha intentando guardar un usuario existente, revise el listado de usuarios y sus datos.',
+                            icon: 'error',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-error'
+                                }
+                            }
+                        });
+                    }
+                },
+                error: function (errormessage) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'No se procesaron los datos correctamente',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                }
+            });
+        }
+
+        function ModalModificar(id) {
+            $('#ModalModificar').modal('show');
+            $.ajax({
+                type: "GET",
+                url: "/Administracion/SeleccionarUDNPorId/",
+                data: {
+                    id: id
+                },
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    //console.log(data.Nombre);
+                    $('#eId').val(data.Id);
+                    $('#eNombre').val(data.Nombre);
+
+                    if (data.Activo) {   // Para un checkbox
+                        $("#eActivo").prop('checked', true);
+                    }
+                    else {
+                        $("#eActivo").prop('checked', false);
+                    }
+                },
+                error: function (errormessage) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'No se procesaron los datos correctamente',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                }
+            });
+        }
+
+        function GuardarModificado() {
+            var valorActivo;
+            if ($('#eActivo').is(":checked")) {
+                //alert('Si');
+                valorActivo = 1;
+            }
+            else {
+                //alert('no');
+                valorActivo = 0;
+            }
+            $.ajax({
+                type: "GET",
+                url: "/Administracion/ModificarUDN/",
+                data: {
+                    id: $('#eId').val(),
+                    nombre: $('#eNombre').val(),
+                    activo: valorActivo
+                },
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    //console.log(data);
+                    if (data == 1) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardó el registro modificado',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(
+                            function () {
+                                location.href = '';
+                            });
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Hay registros relacionados con el elemento que quiere desactivar en Oportunidades, Contactos, Empresas, revise e intente de nuevo.',
+                            icon: 'warning',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-danger'
+                                }
+                            }
+                        })
+                    }
+                },
+                error: function (errormessage) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'No se procesaron los datos correctamente',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                }
+            });
+        }
+
+    </script>
+
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">Unidades de Negocio</h4>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="card">
+
+
+                    <div class="card-body">
+
+                        <!--button class="btn btn-primary animated bounceInDown" onclick="ModalAgregar();">Nuevo</button-->
+
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Nombre</th>
+                                    <th>Activo</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (Model == null)
+                                {
+                                    <tr><td colspan="3">Sin datos para mostrar</td></tr>
+                                }
+                                @foreach (CRM.Models.Models.UDN i in Model)
+                                {
+                                    var estado = i.Activo == true ? "Activo" : "Inactivo";
+                                    <tr>
+                                        <td>@i.Id</td>
+                                        <td>@i.Nombre</td>
+                                        <td>@estado</td>
+                                        <td><a href="#" onclick="ModalModificar(@i.Id);">Detalle</a></td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    <script type="text/javascript">
+                    $(function () {
+                        var msg = '@ViewData["Mensaje"]';
+                        if (msg == 'Agregado') {
+                            //Mensajes('Exitoso', 'Se guardó el nuevo registro', 2);
+                            swal({
+                                title: 'Exitoso',
+                                text: 'Se guardó el nuevo registro',
+                                icon: 'success',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            });
+                        }
+                        else if (msg == 'Modificado') {
+                            //Mensajes('Exitoso', 'Se guardó el registro modificado', 2);
+                            swal({
+                                title: 'Exitoso',
+                                text: 'Se guardó el registro modificado',
+                                icon: 'success',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            });
+                        }
+                        else if (msg == 'Falla') {
+                            //Mensajes('Atención', 'No se guardaron los datos, revise su información', 4);
+                            swal({
+                                title: 'Atención',
+                                text: 'No se guardaron los datos, revise su información',
+                                icon: 'warning',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                }
+                            });
+                        }
+                        else {
+
+                        }
+                    });
+                    </script>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Agregar Nueva Unidad de Negocio</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" name="aNombre" id="aNombre" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="Guardar();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Cambiar Nombre de Unidad de Negocio</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" id="eId" name="eId" />
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" name="eNombre" id="eNombre" >
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-check form-inline">
+                                <label for="eActivo" class="col-md-3 col-form-label fc-left">Activo</label>
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="eActivo" name="eActivo">
+                                    <span class="form-check-sign"></span>
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>

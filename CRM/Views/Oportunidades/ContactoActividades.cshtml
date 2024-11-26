@@ -1,0 +1,584 @@
+﻿
+@{
+    ViewBag.Title = "ContactoActividades";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+    });
+
+    function ModificarActividad(idactividad) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ContactoActividadSeleccionarDetalle",
+            data: {
+                id: idactividad,
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                $('#IdActividad').val(data.Id);
+                $('#TipoActividad').val(data.TipoActividad);
+
+                var fecha = new Date(parseInt(data.Fecha.substr(6)));
+                var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                $('#Vencimiento').val(fecha.getFullYear() + '-' + mes + '-' + fecha.getDate());
+
+                $('#Descripcion').val(data.Notas);
+            }, complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            },
+        });
+    }
+
+    function ModalAsunto(idoportunidad) {
+        //Cargar el detalle del asunto
+        $('#ModalAsunto').modal('show');
+        SeleccionarOportunidadPorId(idoportunidad);
+    }
+
+    function SeleccionarOportunidadPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data);
+                //Cargar el detalle del asunto
+                $('#NombreAsunto').text(data.Oportunidades.Nombre);
+                $('#Importe').text(data.Oportunidades.Importe);
+
+                var fechaCierre = new Date(parseInt(data.Oportunidades.Cierre.substr(6)));
+                var mes = (fechaCierre.getMonth() + 1) < 10 ? '0' + (fechaCierre.getMonth() + 1) : (fechaCierre.getMonth() + 1);
+                $('#Cierre').text(fechaCierre.getFullYear() + '-' + mes + '-' + fechaCierre.getDate());
+                $('#Atencion').text(data.Oportunidades.PeriodoAtencionNombre);
+
+                $('#Contraparte').text(data.Oportunidades.Contraparte);
+
+                var fechaAviso = new Date(parseInt(data.Oportunidades.Aviso.substr(6)));
+                var mes = (fechaAviso.getMonth() + 1) < 10 ? '0' + (fechaAviso.getMonth() + 1) : (fechaAviso.getMonth() + 1);
+                $('#Aviso').text(fechaAviso.getFullYear() + '-' + mes + '-' + fechaAviso.getDate());
+
+                var ultimafechaescalacion = new Date(parseInt(data.Escalacion.Fecha.substr(6)));
+                var mes = (ultimafechaescalacion.getMonth() + 1) < 10 ? '0' + (ultimafechaescalacion.getMonth() + 1) : (ultimafechaescalacion.getMonth() + 1);
+                $('#Escalacion').text(ultimafechaescalacion.getFullYear() + '-' + mes + '-' + ultimafechaescalacion.getDate());
+
+                $('#Clasificacion').text(data.Clasificacion.Nombre);
+                $('#SubClasificacion').text(data.SubClasificacion.Nombre);
+
+                $('#Notas').text(data.Oportunidades.Notas);
+
+                SeleccionarActividadesPorId(id);
+
+                SeleccionarArchivosPorId(id);
+            },
+            error: function (data) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            },
+        });
+    }
+
+    function SeleccionarActividadesPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesActividades/SeleccionarOportunidadesActividades/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //Cargar las actividades
+                //console.log(data);
+                var len = data.length;
+                $('#basic-datatables-actividades').empty();
+
+                var firstRow = '<tr><th>Notas</th></tr>';
+                $('#basic-datatables-actividades').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var row = '<tr>' +
+                        '<td>' + data[i].Notas + '</td>' +
+                        '</tr>';
+                    $('#basic-datatables-actividades').append(row);
+                }
+            },
+            error: function (data) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            },
+        });
+    }
+
+    function SeleccionarArchivosPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ObtenerArchivos/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //Cargar los archivos
+                var len = data.length;
+                $('#basic-datatables-archivos').empty();
+                var firstRow = '<tr><th>Nombre</th><th></th></tr>';
+                $('#basic-datatables-archivos').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Nombre + '</td>' +
+                        '<td><a href=/Archivos/' + data[i].Nombre + ' target=_blank>' + data[i].Nombre + '</a></td>' +
+                        '</tr>';
+                    $('#basic-datatables-archivos').append(row);
+                }
+            },
+            error: function (data) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            },
+        });
+    }
+
+    function Cerrar() {
+        swal({
+            title: '¿Está seguro de cambiar el estado de sus actividades?',
+            text: "Esto implicará un cierre y ya no se podrá escribir más para este Tema/Asunto",
+            type: 'warning',
+            buttons: {
+                cancel: {
+                    visible: true,
+                    text: 'No, cancelar',
+                    className: 'btn btn-danger'
+                },
+                confirm: {
+                    text: 'Sí, continuar',
+                    className: 'btn btn-success'
+                }
+            }
+        }).then((willDelete) => {
+            if (willDelete) {
+                swal("Se ha cambiado el estado del seguimiento de las actividades a sólo lectura", {
+                    icon: "success",
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                }).then(function () { location.href = '/Home/Index2'; });
+            } else {
+                swal("Se continúa agregando nueva información", {
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function ModificarBitacora() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ActualizarBitacora",
+            data: {
+                Notas: '', Estado: $('#Estado').val(), IdBitacora: $('#IdBitacora').val(),
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                location.href = '/Home/Index2';
+            },
+            error: function (data) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            },
+        });
+    }
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Actividades</h4>
+    </div>
+
+    <!--Menu-->
+
+    <ul class="nav nav-line nav-color-secondary">
+        <li class="nav-item">
+
+            <a href="/Home/Index2" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+                Volver
+            </a>
+
+        </li>
+
+        <li class="nav-item">
+
+            <a href="/Oportunidades/ContactoActividades?IdB=@Session["IdBitacora"].ToString()&IdO=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fas fa-clipboard-list"></i>
+                </span>
+                Actividades
+            </a>
+
+        </li>
+
+        <li class="nav-item">
+            <a href="/Oportunidades/AgregarArchivoResponsable?IdB=@Session["IdBitacora"].ToString()&IdO=@Session["IdOportunidad"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-file-upload"></i>
+                </span>
+                Subir Archivos/Documentos
+            </a>
+        </li>
+
+        <li class="nav-item">
+
+            <a href="#" onclick="ModalAsunto(@Session["IdOportunidad"].ToString());" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-clipboard-list"></i>
+                </span>
+                Detalle Asunto
+            </a>
+
+        </li>
+    </ul>
+
+
+    <!--Formulario-->
+    <div class="row">
+
+        <div id="Espera" style="display:none; width:69px;height:90px;position:fixed;top:20%;left:50%;padding:2px;z-index:1000">
+            <img src="../assets/img/spinner.gif" width="64" height="64" /><br />Cargando...
+        </div>
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-10">
+                            
+                            <div class="form-group form-inline">
+                                <strong>Objeto:&nbsp;@Session["NombreTema"].ToString()</strong>
+                            </div>
+
+                        </div>
+                    
+                        <div class="col-md-2">
+                    
+                            <div class="form-group form-inline">
+                                <label for="Estado" class="col-md-2 col-form-label">Estado:</label>
+                                <div class="col-md-6">
+                                    <select class="form-control form-control-sm input-solid" id="Estado" style="width: 100px" onchange="Cerrar();" >
+                                        <option value="">&nbsp;</option>
+                                        <option value="2" selected>En Proceso</option>
+                                        <option value="3">Terminado</option>
+                                        <option value="4">Cancelado</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    
+                    </div>
+
+                    <form method="post" action="ContactoActividadAgregarModificar">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label for="TipoActividad" class="col-md-3 col-form-label">Agregar Actividad:</label>
+                                        <div class="col-md-8">
+                                            <select id="TipoActividad" name="TipoActividad" required class="form-control form-control-sm input-solid" style="width: 180px">
+                                                <option value=""></option>
+                                                @foreach (var act in CRM.Utilerias.Funciones.TipoActividad().ToList())
+                                                {
+                                                    <option value="@act.Id">@act.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-2 col-form-label">Vencimiento:</label>
+                                        <div class="col-md-5">
+                                            <input type="date" id="Vencimiento" name="Vencimiento" required class="form-control form-control-sm input-solid" />
+                                        </div>
+                                    </div>
+                                }
+
+                                <input type="hidden" id="IdActividad" name="IdActividad" />
+                                <input type="hidden" id="IdBitacora" name="IdBitacora" value="@Session["IdBitacora"].ToString()" />
+                                <input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2 col-form-label">Descripción:</label>
+                                    <div class="col-md-12">
+                                        <textarea id="Descripcion" name="Descripcion" class="form-control input-solid" cols="70" rows="2"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <input type="submit" id="Submit" name="Submit" class="btn btn-success animated bounceInDown" value="Aceptar" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                    <div class="row">&nbsp;</div>
+                    <div class="row">&nbsp;</div>
+
+                    <div class="row">
+                        @if (ViewBag.Actividades != null)
+                        {
+
+                            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                                <thead class="header">
+                                    <tr>
+                                        @if (Session["IdConfiguracion"].ToString() == "2")
+                                        {
+                                            <th>Actividad</th>
+                                            <th>Vencimiento</th>
+                                        }
+                                        <th>Descripción</th>
+                                        <th>Modificar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var items in ViewBag.Actividades)
+                                    {
+                                    <tr>
+                                        @if (Session["IdConfiguracion"].ToString() == "2")
+                                        {
+                                            <td>@CRM.Utilerias.Funciones.TipoActividadNombre(@items.TipoActividad.ToString())</td>
+                                            <td>@items.Fecha.ToString("dd/MM/yyyy")</td>
+                                        }
+                                        <td>@items.Notas</td>                                        
+                                        <td align="center"><a href="#" onclick="ModificarActividad(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Modificar'></i></a></td>
+                                    </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAsunto" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Información General del Asunto al que se le da Seguimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+                <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Asunto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Actividades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Archivos</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <p style="width: 650px;"></p>
+
+                        <div class="row">
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Objeto:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Nombre:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Vencimiento:</label>
+                                    <label class="label" id="Cierre" name="Cierre"></label>
+                                </div>
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Contraparte:</label>
+                                        <label class="label" id="Contraparte" name="Contraparte"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Per. Atención:</label>
+                                        <label class="label" id="Atencion" name="Atencion"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Clasificación:</label>
+                                    <label class="label" id="Clasificacion" name="Clasificacion"></label>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Características:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Importe:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Aviso:</label>
+                                    <label class="label" id="Aviso" name="Aviso"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Escalación:</label>
+                                    <label class="label" id="Escalacion" name="Escalacion"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4 col-form-label">Sub-Clasificación:</label>
+                                    <label class="label" id="SubClasificacion" name="SubClasificacion"></label>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label class="col-md-3 col-form-label">Notas</label>
+                            <label class="label" id="Notas" name="Notas"></label>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+
+                        <table id="basic-datatables-actividades" class="display table table-striped table-hover"></table>
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                        <p style="width: 650px;"></p>
+
+                        <table id="basic-datatables-archivos" class="display table table-striped table-hover"></table>
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

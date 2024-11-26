@@ -1,0 +1,667 @@
+﻿
+@{
+    ViewBag.Title = "Listado";
+}
+
+<script>
+    
+    $(document).ready(function () {
+
+        $('#opcOport').addClass("nav-item active submenu");
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $('#basic-datatables-actividades-usuarios').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[2, "desc"]]
+        });
+        
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 20,            
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[6, 7, "desc"]]
+        });
+    
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+
+            // Get the column API object
+            var column = $('#basic-datatables-').DataTable().column($(this).attr('data-column'));
+
+            // Toggle the visibility
+            column.visible(!column.visible());
+        });
+
+        $('#pieChart').sparkline([20, 50, 30], {
+            type: 'pie',
+            height: '45',
+            width: '60'
+
+        });
+
+        $('#Espera').hide();
+
+        //$(window).load(function () {
+        //    $('#Espera').hide();
+        //});
+
+    });
+
+    function CargaInicial() {
+
+    }
+
+    function SeleccionarActividadesPorIdOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        ActividadesContactos(id);
+        ActividadesUsuarios(id);
+        $('#IdOport').append('Hola: ' + id);
+
+    }
+
+    function SeleccionarActividadesDeOportunidad(id) {
+        $('#ModalActividadesOportunidad').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesActividades/SeleccionarOportunidadesActividades/",
+            data: { Id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividadesoportunidad').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividadesoportunidad').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividadesoportunidad').dataTable().fnAddData([
+                            data[i].NombreUsuario,
+                            data[i].ActividadNombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+
+                }
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function ActividadesContactos(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarResponsablesActividades/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].ContactosActividades.Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].Contactos.Nombre,
+                            //data[i].ContactosActividades.TipoActividadNombre,
+                            //fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].ContactosActividades.Notas
+                        ]);
+                    }
+                }
+
+                //if (data.length > 0) {
+                //    $('#basic-datatables-actividades').empty();
+                //    var firstRow = '<thead><tr><th>Responsable</th><th>Actividad</th><th>Fecha</th><th>Notas</th></tr></thead><tbody>';
+                //    $('#basic-datatables-actividades').append(firstRow);
+                //    for (var i = 0; i < data.length; i++) {
+                //        var fecha = new Date(parseInt(data[i].ContactosActividades.Fecha.substr(6)));
+                //        var row = '<tr>' +
+                //            '<td>' + data[i].Contactos.Nombre + '</td>' +
+                //            '<td>' + data[i].ContactosActividades.TipoActividadNombre + '</td>' +
+                //            '<td>' + fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + '</td>' +
+                //            '<td>' + data[i].ContactosActividades.Notas + '</td>' +
+                //            '</tr>';
+                //        $('#basic-datatables-actividades').append(row);
+                //    }
+                //    var lastRow = '</tbody></table>';
+                //    $('#basic-datatables-actividades').append(lastRow);
+                //}
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function ActividadesUsuarios(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/BitacoraUsuarioSeleccionarPorOportunidad/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividades-usuarios').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades-usuarios').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades-usuarios').dataTable().fnAddData([
+                            data[i].Nombre,
+                            //data[i].TipoActividadNombre,
+                            //fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                }
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function UsuariosActividadesOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarActividadesPorIdOportunidad/",
+            data: { id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[1] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].NombreUsuario,
+                            data[i].ActividadNombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function UsuariosBitacoraOportunidad(id) {
+        $('#ModalBitacora').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/BitacoraUsuarioSeleccionarPorOportunidad/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-bitacora').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-bitacora').DataTable().clear();
+                    if ($('#IdConfiguracion').val() == 3) {
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].BitacoraUsuariosDetalle.Creado.substr(6)));
+                            var fechaM = fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear();
+                            var notas = data[i].BitacoraUsuariosDetalle.Notas;
+                            if (fechaM == '31/12/1899' || fechaM == '01/01/1900') {
+                                fechaM = '';
+                                notas = 'No ha escrito aún en la bitácora'
+                            }
+                            $('#basic-datatables-bitacora').dataTable().fnAddData([
+                                data[i].Usuarios.Nombre,
+                                fechaM,
+                                notas
+                            ]);
+                        }
+                    }
+                    else if ($('#IdConfiguracion').val() == 2) {
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].BitacoraUsuariosDetalle.Creado.substr(6)));
+                            var fechaM = fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear();
+                            var notas = data[i].BitacoraUsuariosDetalle.Notas;
+                            if (fechaM == '31/12/1899' || fechaM == '01/01/1900') {
+                                fechaM = '';
+                                notas = 'Creador/Responsable'
+                            }
+                            $('#basic-datatables-bitacora').dataTable().fnAddData([
+                                data[i].Usuarios.Nombre,
+                                //fechaM,
+                                notas
+                            ]);
+                        }
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function ArchivosOportunidad(id) {
+        $('#ModalArchivos').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ObtenerArchivos/",
+            data: { id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-archivos').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-archivos').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-archivos').dataTable().fnAddData([
+                            data[i].Nombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear()
+                        ], {
+                            "scrollX": true,
+                            "order": [[1, "desc"]]
+                        });
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function IrAlDetalle() {
+        if ($('#IdConfiguracion').val() == "2") {
+            location.href = 'Editar?Id=' + $('#idOport').val();
+        }
+        else if ($('#IdConfiguracion').val() == "3") {
+            location.href = 'Edicion?Id=' + $('#idOport').val();
+        }
+    }
+
+    function Envolvente() {
+        $('#basic-datatables-').toggleClass('nowrap');
+    }
+
+</script>
+
+<link href="~/assets/css/dataTables.min.css" rel="stylesheet" />
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Oportunidades</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <a href="/Oportunidades/Alta2" class="btn btn-primary animated bounceInDown">Agregar Nueva Oportunidad</a>
+                        </div>
+                    </div>
+
+                    <br />
+
+                    <div class="alert alert-info" role="alert">
+                        Dé click en el nombre de una columna y arrástrelo a la posición que desee
+                    </div>
+
+                </div>
+
+            </div>
+
+            @if (ViewBag.AsuntosUsuarios.Count > 0)
+            {
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <h3>Oportunidades que se le han asignado</h3>
+                            <table id="basic-datatables2" class="display compact table-bordered table-striped table-hover" style="width:100%;">
+
+                                <thead class="header2">
+                                    <tr>
+                                        <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                        <th>Médico</th>
+                                        <th>Oportunidad</th>
+                                        <th>Monto</th>
+                                        <th>Clasificación</th>
+                                        <th>SubClasificación</th>
+
+                                        @if (Session["IdUsuario"].ToString() == "2")
+                                        {
+                                            <th>Creador</th>
+                                        }
+                                        <th>Creado</th>
+                                        <th>Cierre</th>
+                                        <th>Detalle</th>
+                                        <th>Actividades</th>
+                                        <th>Bitácora</th>
+                                        <th>Archivos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @if (ViewBag.AsuntosUsuarios != null)
+                                    {
+                                        foreach (var items in ViewBag.AsuntosUsuarios)
+                                        {
+                                            <tr>
+                                                <td>@items.UDN.Nombre</td>
+                                                <td>@items.Empresas.Nombre</td>
+                                                <td class="text-nowrap"><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">@items.Oportunidades.Nombre</a></td>
+                                                <td align="right">@items.Oportunidades.Importe.ToString("c")</td>
+                                                <td>@items.Clasificacion.Nombre</td>
+                                                <td>@items.Subclasificacion.Nombre</td>
+
+                                                @if (Session["IdUsuario"].ToString() == "2")
+                                                {
+                                                    <td>@items.Usuarios.Nombre</td>
+                                                }
+                                                <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                                                <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                                @CRM.Utilerias.CustomHelpers.EstadosdeProceso(items.Bitacora.NombreEstado, items.Oportunidades.Id.ToString())
+                                                @CRM.Utilerias.CustomHelpers.ActividadesDeOportunidad(items.Oportunidades.Id.ToString())
+                                                @CRM.Utilerias.CustomHelpers.ResponsablesSiNoASAE(items.Oportunidades.Id.ToString())
+                                                @CRM.Utilerias.CustomHelpers.ArchivosDeOportunidad(items.Oportunidades.Id.ToString())
+                                            </tr>
+                                        }
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                </div>
+            }
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <!-- indicadores aquí, sólo rol 2 -->
+                    <div class="row">
+
+                        <div class="col-md-1">
+                            <a href="/Oportunidades/Graficos?udn=1&opc=1&ann=@DateTime.Now.Year" data-toggle="tooltip" data-placement="top" title="Medidores">
+                                <div id="pieChart"></div>
+                            </a>
+                        </div>
+
+                        @if ((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Usuarios.Id == 2)
+                        {
+
+                            <div class="col-md-11">
+                                
+                                <button id="aEnvolvente" href="#" onclick="Envolvente();" class="btn btn-link">Estirar las columnas</button><br />
+
+                                <div>
+                                    <strong>Mostrar/Ocultar columna:</strong>
+                                    <a class="toggle-vis" data-column="0" style="cursor: pointer">U de N</a> -
+                                    <a class="toggle-vis" data-column="1" style="cursor: pointer">Médico</a> -
+                                    <a class="toggle-vis" data-column="2" style="cursor: pointer">Oportunidad</a> -
+                                    <a class="toggle-vis" data-column="3" style="cursor: pointer">Monto</a> -
+                                    <a class="toggle-vis" data-column="4" style="cursor: pointer">Clasificación</a> -
+                                    <a class="toggle-vis" data-column="5" style="cursor: pointer">SubClasificación</a> -
+                                    <a class="toggle-vis" data-column="6" style="cursor: pointer">Creador</a> -
+                                    <a class="toggle-vis" data-column="7" style="cursor: pointer">Creado</a> -
+                                    <a class="toggle-vis" data-column="8" style="cursor: pointer">Cierre</a>
+                                </div>
+                                
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="table-responsive">
+                        <h3>Oportunidades Creadas</h3>
+
+                        <table id="basic-datatables-" class="display compact table-bordered table-striped table-hover header" style="width:100%;">
+                            <thead class="header">
+                                <tr>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Médico</th>
+                                    <th>Oportunidad</th>
+                                    <th>Monto</th>
+                                    <th>Clasificación</th>
+                                    <th>SubClasificación</th>
+
+                                    @if (Session["IdUsuario"].ToString() == "2")
+                                    {
+                                        <th>Creador</th>
+                                    }
+                                    <th>Creado</th>
+                                    <th>Cierre</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Dé click en el icono para ver el detalle">Detalle</th>
+                                    <th>Actividades</th>
+                                    <th>Bitácora</th>
+                                    <th>Archivos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (ViewBag.Asuntos != null)
+                                {
+                                    foreach (var items in ViewBag.Asuntos)
+                                    {
+                                        <tr>
+                                            <td>@items.UDN.Nombre</td>
+                                            <td>@items.Empresas.Nombre</td>
+                                            <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">@items.Oportunidades.Nombre</a></td>
+                                            <td align="right">@items.Oportunidades.Importe.ToString("c")</td>
+                                            <td>@items.Clasificacion.Nombre</td>
+                                            <td>@items.Subclasificacion.Nombre</td>
+
+                                            @if (Session["IdUsuario"].ToString() == "2")
+                                            {
+                                                <td>@items.Usuarios.Nombre</td>
+                                            }
+                                            <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                                            <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                            @CRM.Utilerias.CustomHelpers.EstadosdeProceso(items.Bitacora.NombreEstado, items.Oportunidades.Id.ToString())
+                                            @CRM.Utilerias.CustomHelpers.ActividadesDeOportunidad(items.Oportunidades.Id.ToString())
+                                            @CRM.Utilerias.CustomHelpers.ResponsablesSiNoASAE(items.Oportunidades.Id.ToString())
+                                            @CRM.Utilerias.CustomHelpers.ArchivosDeOportunidad(items.Oportunidades.Id.ToString())
+                                        </tr>
+                                    }
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActividades" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Actividades Asunto</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-actividades" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalBitacora" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Bitácora Responsables</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-bitacora" class="display table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <th>Fecha</th>
+                                }
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActividadesOportunidad" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Actividades de Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades para esta oportunidad -->
+
+
+                    <table id="basic-datatables-actividadesoportunidad" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalArchivos" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Archivos de Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-archivos" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Nombre</th><th>Fecha</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>

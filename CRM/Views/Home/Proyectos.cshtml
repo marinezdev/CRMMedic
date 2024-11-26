@@ -1,0 +1,368 @@
+﻿
+@{
+    ViewBag.Title = "Detalle Proyectos";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $('#Espera').hide();
+
+    });
+
+    function UsuariosActividadesOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarActividadesPorIdOportunidad/",
+            data: { id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[1] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].NombreUsuario,
+                            data[i].ActividadNombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function UsuariosBitacoraOportunidad(id) {
+        $('#ModalBitacora').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/BitacoraUsuarioSeleccionarPorOportunidad/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-bitacora').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-bitacora').DataTable().clear();
+                    if ($('#IdConfiguracion').val() == 3) {
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].BitacoraUsuariosDetalle.Creado.substr(6)));
+                            var fechaM = fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear();
+                            var notas = data[i].BitacoraUsuariosDetalle.Notas;
+                            if (fechaM == '31/12/1899' || fechaM == '01/01/1900') {
+                                fechaM = '';
+                                notas = 'No ha escrito aún en la bitácora'
+                            }
+                            $('#basic-datatables-bitacora').dataTable().fnAddData([
+                                data[i].Usuarios.Nombre,
+                                fechaM,
+                                notas
+                            ]);
+                        }
+                    }
+                    else if ($('#IdConfiguracion').val() == 2) {
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].BitacoraUsuariosDetalle.Creado.substr(6)));
+                            var fechaM = fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear();
+                            var notas = data[i].BitacoraUsuariosDetalle.Notas;
+                            if (fechaM == '31/12/1899' || fechaM == '01/01/1900') {
+                                fechaM = '';
+                                notas = 'Creador/Responsable'
+                            }
+                            $('#basic-datatables-bitacora').dataTable().fnAddData([
+                                data[i].Usuarios.Nombre,
+                                //fechaM,
+                                notas
+                            ]);
+                        }
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function ArchivosOportunidad(id) {
+        $('#ModalArchivos').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ObtenerArchivos/",
+            data: { id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-archivos').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-archivos').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-archivos').dataTable().fnAddData([
+                            data[i].Nombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear()
+                        ], {
+                            "scrollX": true,
+                            "order": [[1, "desc"]]
+                        });
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">@Html.Raw(ViewBag.Titulo)</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+
+                <thead class="header">
+                    <tr>
+                        <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                        <th>Empresa</th>
+                        <th>Oportunidad</th>
+                        <th>Monto</th>
+                        <th>Clasificación</th>
+                        <th>SubClasificación</th>
+                        <th>Creado</th>
+                        <th>Cierre</th>
+                        <th>Detalle</th>
+                        <th>Actividades</th>
+                        <th>Bitácora</th>
+                        <th>Archivos</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Proyectos != null)
+                    {
+                        foreach (var items in ViewBag.Proyectos)
+                        {
+                            <tr>
+                                <td>@items.UDN.Nombre</td>
+                                <td>@items.Empresas.Nombre</td>
+                                <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">@items.Oportunidades.Nombre</a></td>
+                                <td>@items.Oportunidades.Importe.ToString("c")</td>
+                                <td>@items.Clasificacion.Nombre</td>
+                                <td>@items.Subclasificacion.Nombre</td>
+                                <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                @CRM.Utilerias.CustomHelpers.EstadosdeProceso(items.Actividades.Nombre, items.Oportunidades.Id.ToString())
+                                @CRM.Utilerias.CustomHelpers.ActividadesDeOportunidad(items.Oportunidades.Id.ToString())
+                                @CRM.Utilerias.CustomHelpers.ResponsablesSiNo(items.Oportunidades.Id.ToString())
+                                @CRM.Utilerias.CustomHelpers.ArchivosDeOportunidad(items.Oportunidades.Id.ToString())
+                            </tr>
+                        }
+                    }
+
+
+
+                </tbody>
+                @*<tfoot>
+                    @if (ViewBag.Proyectos != null)
+                    {
+                        decimal Msuma = 0;
+                        foreach (var itemss in ViewBag.Proyectos)
+                        {
+                            Msuma = Msuma + itemss.Oportunidades.Importe;
+                        }
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td align="right">Total:</td>
+                            <td align="right"><strong>@Msuma.ToString("c")</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    }
+                </tfoot>*@
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="modal fade" id="ModalActividades" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Actividades Asunto</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-actividades" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalBitacora" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Bitácora Responsables</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-bitacora" class="display table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <th>Fecha</th>
+                                }
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActividadesOportunidad" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Actividades de Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades para esta oportunidad -->
+
+
+                    <table id="basic-datatables-actividadesoportunidad" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalArchivos" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Archivos de Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-archivos" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Nombre</th><th>Fecha</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>

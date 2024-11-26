@@ -1,0 +1,484 @@
+﻿@model  CRM.Models.Models.Marketing
+@{
+    ViewBag.Title = "Modificar Campaña";
+}
+
+<link href="~/assets/js/plugin/datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#m1').addClass('active');
+        $('#Espera').hide();
+
+        $('form').submit(function () {
+            $(this).find("button[type='submit']").addClass('is-loading').prop('disabled', true);
+        });
+
+    });
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Modificación de Detalle de Campaña</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    cargando...
+                </div>
+
+                <div class="card-body">
+
+                    @Html.Partial("_MenuMarketing")
+
+
+                    <br />
+                    <div class="alert alert-warning" role="alert">La campaña será modificable antes de la fecha de inicio; durante y después ya no será posible.</div>
+
+                    <form method="post" action="/Marketing/ModificarCampaña">
+
+                        <input type="hidden" name="IdCampaña" value="@Request["IdCampaña"]" />
+
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-8">
+
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <label class="form-radio-label ml-3">
+                                            <input class="form-radio-input" type="radio" name="NuevaAnterior" value="1" checked="@(1 == Model.NuevaAnterior)">
+                                            <span class="form-radio-sign">Nueva</span>
+                                        </label>
+                                        <label class="form-radio-label ml-3">
+                                            <input class="form-radio-input" type="radio" name="NuevaAnterior" value="2" checked="@(2 == Model.NuevaAnterior)">
+                                            <span class="form-radio-sign">Anterior</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-8">
+
+                                <div class="form-group form-inline">
+                                    <label for="Consecutivo" class="col-md-3 col-form-label">Clave Evento</label>
+                                    <div class="col-md-9 col-lg-9">
+
+                                        @if (Model.Estado != 1)
+                                        {
+                                            <!-- Deshabilitamos la opción de cambiar la clave de la campaña -->
+                                            <input type="text" class="form-control form-control-sm input-solid" name="Consecutivo" placeholder="" required autocomplete="off" value="@Model.Consecutivo" readonly>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" name="Consecutivo" placeholder="" required autocomplete="off" value="@Model.Consecutivo">
+                                        }
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4 col-lg-4">&nbsp;</div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-8">
+
+                                <div class="form-group form-inline">
+                                    <label for="Nombre" class="col-md-3 col-form-label">Nombre</label>
+                                    <div class="col-md-9 col-lg-9">
+                                        <input type="text" class="form-control form-control-sm input-solid" name="Nombre" placeholder="" required tabindex="1" autocomplete="off" style="width: 450px" value="@Model.Nombre">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-4 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Inicio" class="col-md-3 col-form-label">Inicio</label>
+                                    <div class="col-md-9 col-lg-9">
+                                        @if (Model.Inicio.ToString().Contains("1900"))
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Inicio" name="Inicio" placeholder="" maxlength="12" required autocomplete="off">
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Inicio" name="Inicio" placeholder="" maxlength="12" required autocomplete="off" value="@Model.Inicio.ToString("dd/MM/yy")">
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Fin" class="col-md-3 col-form-label">Fin</label>
+                                    <div class="col-md-9 col-lg-9">
+                                        @if (Model.Fin.ToString().Contains("1900"))
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Fin" name="Fin" placeholder="" maxlength="12" required autocomplete="off">
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Fin" name="Fin" placeholder="" maxlength="12" required autocomplete="off" value="@Model.Fin.ToString("dd/MM/yy")">
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Envios" class="col-md-3 col-form-label">Envío Correo</label>
+                                    <div class="col-md-9 col-lg-9">
+                                        @if (Model.Envios.ToString().Contains("1900"))
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Envios" name="Envios" placeholder="" maxlength="12" required autocomplete="off">
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Envios" name="Envios" placeholder="" maxlength="12" required autocomplete="off" value="@Model.Envios.ToString("dd/MM/yy")">
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-8">
+
+                                <div class="form-group form-inline">
+                                    <label for="Objetivo" class="col-md-3 col-form-label">Descripción</label>
+                                    <div class="col-md-9">
+                                        @Html.TextArea("Objetivo", Model.Objetivo, 7, 92, new { @class = "form-control form-control-sm input-solid" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="row">
+
+
+                            <div class="col-md-12 col-lg-12 text-left">
+
+
+                                <div class="form-group form-inline text-left">
+
+                                    <label class="col-md-3 col-form-label">Medio</label>
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="Correo" value="1" checked="@(1 == Model.Correo)">
+                                            <span class="form-check-sign">Correo</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="Facebook" value="1" checked="@(1 == Model.Facebook)">
+                                            <span class="form-check-sign">Facebook</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="Linkedin" value="1" checked="@(1 == Model.Linkedin)">
+                                            <span class="form-check-sign">Linkedin</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="Llamada" value="1" checked="@(1 == Model.Llamada)">
+                                            <span class="form-check-sign">Llamada Telefónica</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="ASAE" value="1" checked="@(1 == Model.ASAE)">
+                                            <span class="form-check-sign">Página ASAE</span>
+                                        </label>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-4 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Estado" class="col-md-3 col-form-label">Estado</label>
+                                    <select class="form-control form-control-sm input-solid" name="Estado" style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var item in CRM.Models.Catalogos.Seleccionar("MarketingEstado"))
+                                        {
+                                            if (Model.Estado == item.Id)
+                                            {
+                                                <option value="@item.Id" selected>@item.Nombre</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id">@item.Nombre</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="UDN" class="col-md-3 col-form-label">U. de N.</label>
+                                    <select class="form-control form-control-sm input-solid" name="UDN" style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var item in CRM.Models.Catalogos.Seleccionar("UDN"))
+                                        {
+                                            if (Model.IdUDN == item.Id)
+                                            {
+                                                <option value="@item.Id" selected>@item.Nombre</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id">@item.Nombre</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="card">
+
+                            <div class="card-header">
+                                <h4 class="card-title">Datos para la agenda del evento</h4>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="InicioEvento" class="col-md-3 col-form-label">Fecha Inicio</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                @if (Model.InicioEvento.ToString().Contains("1900"))
+                                                {
+                                                    <input type="text" class="form-control form-control-sm input-solid" id="InicioEvento" name="InicioEvento" placeholder="" maxlength="12">
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" class="form-control form-control-sm input-solid" id="InicioEvento" name="InicioEvento" placeholder="" maxlength="12" value="@Model.InicioEvento.ToString("dd/MM/yy")">
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="HoraInicio" class="col-md-3 col-form-label">Hora Inicio</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="HoraInicio" name="HoraInicio" placeholder="" maxlength="12" value="@Model.HoraInicio">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="FinEvento" class="col-md-3 col-form-label">Fecha Fin</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                @if (Model.FinEvento.ToString().Contains("1900"))
+                                                {
+                                                    <input type="text" class="form-control form-control-sm input-solid" id="FinEvento" name="FinEvento" placeholder="" maxlength="12">
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" class="form-control form-control-sm input-solid" id="FinEvento" name="FinEvento" placeholder="" maxlength="12" value="@Model.FinEvento.ToString("dd/MM/yy")">
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="HoraFin" class="col-md-3 col-form-label">Hora Fin</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="HoraFin" name="HoraFin" placeholder="" maxlength="12" value="@Model.HoraFin">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Ubicacion" class="col-md-3 col-form-label">Ubicación</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Ubicacion" name="Ubicacion" placeholder="CDMX" maxlength="12" value="@Model.Ubicacion">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-8 col-lg-8">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Descripcion" class="col-md-3 col-form-label">Descripción (breve)</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Descripcion" name="Descripcion" placeholder="" maxlength="150" required autocomplete="off" style="width:450px" value="@Model.Descripcion">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-8 col-lg-8">
+
+                                        <div class="form-group form-inline">
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                        @if (Model.Estado == 1)
+                        {
+                            <!-- Deshabilitamos la opción de cambiar la clave de la campaña -->
+                        }
+
+                        <div class="card-action label-align-center">
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<!--script src="../assets/js/plugin/datetimepicker/moment.js"></script-->
+<!--script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script-->
+<script src="../assets/js/plugin/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+
+<script>
+
+    $.datetimepicker.setLocale('es');
+
+    $('#Inicio').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#Fin').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#Envios').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#InicioEvento').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#FinEvento').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#HoraInicio').datetimepicker({
+        datepicker: false,
+        format: 'H:i',
+    });
+
+    $('#HoraFin').datetimepicker({
+        datepicker: false,
+        format: 'H:i',
+    });
+
+</script>
+

@@ -1,0 +1,191 @@
+﻿@model CRM.Models.Models.AsaeWebEventos
+@{
+    ViewBag.Title = "Estadisticas Campaña";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcExternas').addClass("active");
+        $('#Espera').hide();
+
+        $.ajax({
+            url: "/Marketing/AsaeWebExternasEstadisticasContactos",
+            data: { idevento: $('#IdEvento').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                Circles.create({
+                    id: 'circles-1',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Totales,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+
+                Circles.create({
+                    id: 'circles-2',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Activos,
+                    colors: ['#f1f1f1', '#2BB930'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+
+                Circles.create({
+                    id: 'circles-3',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Inactivos,
+                    colors: ['#f1f1f1', '#F25961'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+
+                Circles.create({
+                    id: 'circles-4',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Confirmados,
+                    colors: ['#f1f1f1', '#F25400'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+
+                Circles.create({
+                    id: 'circles-5',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Confirmados,
+                    colors: ['#f1f1f1', '#F37111'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                })
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                
+            }
+        });
+
+    });
+
+</script>
+
+<input type="hidden" id="IdEvento" value="@Request["Evento"]" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Estadísticas de Campaña</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    <a href="/Marketing/ExternasContactos?Evento=@Request["Evento"]">Contactos</a><br /><br /><br />
+
+                    <table>
+                        <tr><td align="right">Nombre de la campaña:</td><td><strong>@Model.Nombre</strong></td></tr>
+                        <tr><td align="right">Inicio:</td><td><strong>@Model.FechaInicio.ToString("dd/MMM/yy")</strong></td></tr>
+                        <tr><td align="right">Fin:</td><td><strong>@Model.FechaFin.ToString("dd/MMM/yy")</strong></td></tr>
+                        <tr><td align="right">Descripción:</td><td><strong>@Model.Descripcion</strong></td></tr>
+                        <tr><td align="right">Estado:</td><td><strong>@(Model.Activo ? "Activo" : "Inactivo")</strong></td></tr>
+                        <tr><td align="right">Fecha de Registro:</td><td><strong>@Model.FechaRegistro.ToString("dd/MMM/yy")</strong></td></tr>
+                    </table>
+
+                    <br /><br /><br />
+
+                    <div class="page-inner mt--5">
+
+                        <div class="row mt--2">
+                            <div class="col-md-12">
+                                <div class="card full-height">
+
+                                    <div class="card-body">
+                                        <div class="card-title">Titulo</div>
+                                        <div class="card-category">Subtitulo</div>
+                                        <div class="d-flex flex-wrap justify-content-around pb-3 pt-5">
+
+                                            <div class="px-2 pb-2 pb-md-0 text-center">
+                                                <div id="circles-1"></div>
+                                                Contactos Totales
+                                            </div>
+
+                                            <div class="px-2 pb-2 pb-md-0 text-center">
+                                                <div id="circles-2"></div>
+                                                Activos
+                                            </div>
+
+                                            <div class="px-2 pb-2 pb-md-0 text-center">
+                                                <div id="circles-3"></div>
+                                                Inactivos
+                                            </div>
+
+                                            <div class="px-2 pb-2 pb-md-0 text-center">
+                                                <div id="circles-4"></div>
+                                                Confirmados
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

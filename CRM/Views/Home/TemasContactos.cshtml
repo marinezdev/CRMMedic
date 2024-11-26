@@ -1,0 +1,243 @@
+﻿
+@{
+    ViewBag.Title = "TemasContactos";
+}
+
+<script>
+    $(document).ready(function () {
+
+        $("#basic-datatables").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Oportunidades/Edicion?Id=' + firstCellText;
+            }
+        });
+
+        $.ajax({
+            url: "/Home/DatosTablas",
+            data: { idconfiguracion: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                Circles.create({
+                    id: 'circles-1',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Contactos,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-2',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 1000,
+                    width: 7,
+                    text: data.Empresas,
+                    colors: ['#f1f1f1', '#2BB930'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-3',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Tareas,
+                    colors: ['#f1f1f1', '#F25961'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-4',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Oportunidades,
+                    colors: ['#f1f1f1', '#F25400'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-5',
+                    radius: 45,
+                    value: 5,
+                    maxValue: 10,
+                    width: 7,
+                    text: data.Comerciales,
+                    colors: ['#f1f1f1', '#F37111'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    });
+</script>
+
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">@CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "P") Asignados en Asuntos</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="d-flex flex-wrap around col-md-6 ml-auto mr-auto">
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-2"></div>
+                <a href="/Home/TemasEmpresas">
+                    <h6 class="fw-bold mt-3 mb-0">Empresas</h6>
+                </a>
+            </div>
+
+            @*<div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-1"></div>
+                <a href="/Home/TemasContactos">
+                    <h6 class="fw-bold mt-3 mb-0">Contactos</h6>
+                </a>
+            </div>*@
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-4"></div>
+                <a href="/Home/Temas">
+                    <h6 class="fw-bold mt-3 mb-0">Asuntos</h6>
+                </a>
+            </div>
+            <!--
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-3"></div>
+                <a href="?p=4">
+                    <h6 class="fw-bold mt-3 mb-0">Temas</h6>
+                </a>
+            </div>
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-5"></div>
+                <a href="?p=5">
+                    <h6 class="fw-bold mt-3 mb-0">Comerciales</h6>
+                </a>
+            </div>
+            -->
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+
+        @*<div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+
+                <thead>
+                    <tr><th>Contacto</th><th>Tema</th></tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Encontrado != null)
+                    {
+                        foreach (var items in ViewBag.Encontrado)
+                        {
+                            <tr>
+                                <td>@items.Contactos.Nombre</td>
+                                <td>@items.Oportunidades.Nombre</td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>*@
+
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%; cursor: pointer">
+
+                <thead class="header">
+                    <tr>
+                        <th></th>
+                        <th>@CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "S")</th>
+                        <th>@CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</th>
+                        <th>Empresa</th>
+                        <th>Clasificación</th>
+                        <th>SubClasificación</th>
+                        <th>Creado</th>
+                        <th>Cierre</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Encontrado != null)
+                    {
+                        foreach (var items in ViewBag.Encontrado)
+                        {
+                    <tr>
+                        <td style="color: transparent; width:0px">@items.Oportunidades.Id</td>
+                        <td>@items.Contactos.Nombre</td>
+                        <td>@items.Oportunidades.Nombre</td>
+                        <td>@items.Empresas.Nombre</td>
+                        <td>@items.Clasificacion.Nombre</td>
+                        <td>@items.Subclasificacion.Nombre</td>
+                        <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+
+                        @CRM.Utilerias.CustomHelpers.EstadosdeProcesoSABE(items.Bitacora.NombreEstado)
+
+                        <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">Editar </a></td>
+                    </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+    </div>
+
+</div>
+

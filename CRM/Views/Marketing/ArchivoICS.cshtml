@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewBag.Title = "ArchivoICS";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#m6').addClass('active');
+        $('#Espera').hide();
+
+    });
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Descargar archivo ICS para agregar al correo y agendar el evento</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    @Html.Partial("_MenuMarketing")
+
+
+                    <br />
+                    
+                    @CRM.Utilerias.CustomHelpers.NombreArchivoICS(Request["IdCampaña"])
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>

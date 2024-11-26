@@ -1,0 +1,504 @@
+﻿
+@{
+    ViewBag.Title = "Administradores de Asuntos";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcGerentes').addClass("nav-item active submenu");
+    });
+
+    function CargaInicial() {
+
+    }
+
+    function ModalAgregar() {
+        $('#ModalNuevo').modal('show');
+    }
+
+    function GuardarNuevo() {
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/AgregarGerente/",
+            data: {
+                aNombre: $('#aNombre').val(),
+                aClave: $('#aClave').val(),
+                aConfiguracion: $('#IdConfiguracion').val(), 
+                aTelefono: $('#aTelefono').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro.',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //Actualizar los datos y dar acceso a empresas
+                            location.href = '';
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha intentando guardar un usuario existente, revise el listado de usuarios y sus datos.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'No se procesaron los datos correctamente',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function ModalModificar(eId) {
+        $('#ModalModificar').modal('show');
+        SeleccionarPorId(eId);
+    }
+
+    function SeleccionarPorId(valor) {
+        $.ajax({
+            url: "/Administracion/SeleccionarGerentePorId/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $('#ModalModificar').modal('show');
+
+                $('#eNombre').val(data.Usuarios.Nombre);
+                $('#eClave').val(data.Usuarios.Clave);
+                if (data.Usuarios.Activo) {                          // Para un checkbox
+                    $("#eActivo").prop('checked', true);
+                }
+                else {
+                    $("#eActivo").prop('checked', false);
+                }
+                $('#eTelefono').val(data.Usuarios.Telefono)
+                $('#eId').val(data.Usuarios.Id);
+
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function GuardarModificado() {
+        var valorActivo;
+        if ($('#eActivo').is(":checked")) {
+            //alert('Si');
+            valorActivo = 1;
+        }
+        else {
+            //alert('no');
+            valorActivo = 0;
+        }
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/ModificarGerente",
+            data: {
+                eNombre: $('#eNombre').val(),
+                eClave: $('#eClave').val(),
+                eTelefono: $('#eTelefono').val(),
+                eActivo: valorActivo,
+                eId: $('#eId').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('body').removeClass('modal-open');
+                if (data === 1) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se modificó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se guardó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (errormessage) {
+                $.notify(errormessage.responseText, 'warning');
+            }
+        });
+    }
+
+    function MostrarEmpresas(id) {
+        $('#ModalModificarEmpresas').modal('show');
+        $.ajax({
+            url: "/Administracion/SeleccionarEmpresasPorGerente/" + id,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#IdUsuario').val(id);
+                $('#divEmpresas').empty();
+                for (var i = 0; i < len; i++) {
+                    if (data[i].Usuarios.Activo) {                          // Para un checkbox
+                        $('#divEmpresas').append('<input type=checkbox value=' + data[i].Empresas.Id + ' checked=true>&nbsp;' + data[i].Empresas.Nombre + '<br />');
+                    }
+                    else {
+                        $('#divEmpresas').append('<input type=checkbox value=' + data[i].Empresas.Id + '>&nbsp;' + data[i].Empresas.Nombre  + '<br />');
+                    }                    
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos (Seleccionar Sub Clasificación)',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function GuardarModificadoEmpresas() {
+        var array = [];
+        $("input:checked").each(function () {
+            array.push($(this).val());
+        }); 
+        console.log(array);
+
+        var arrayy = [];
+        $("input").each(function () {
+            arrayy.push($(this).val());
+        });
+        console.log(arrayy);
+
+        jQuery.ajaxSettings.traditional = true
+
+        $.ajax({
+            url: "/Administracion/ActualizarEmpresasPorGerente/",
+            data: { listado:array, listado2:arrayy, idusuario: $('#IdUsuario').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se guardaron los cambios',
+                    icon: 'success',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                }).then(
+                    function () {
+                        location.href = '';
+                    }
+                );
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos (Seleccionar Sub Clasificación)',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+
+    }
+
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+    <div class="page-inner">
+        <div class="page-header">
+            @if (Session["IdConfiguracion"].ToString() == "3")
+            {
+                <h4 class="page-title">Administrador Asuntos</h4>
+            }
+            else
+            { 
+                <h4 class="page-title">Operadores del Sistema</h4>
+            }
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="card">
+
+
+                    <div class="card-body">
+
+                        <button class="btn btn-primary animated bounceInDown" onclick="ModalAgregar();">Agregar Nuevo</button>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th align="center">Modificar</th>
+                                    <!--th align="center">Asignar Empresas</th-->
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (ViewBag.Gerentes == null)
+                                {
+                                    return;
+                                }
+                                @foreach (var items in ViewBag.Gerentes)
+                                {
+                                    <tr>
+                                        <td>@items.Nombre @items.ApellidoPaterno @items.ApellidoMaterno</td>
+                                        <td>@items.Correo</td>
+                                        <td>@items.Telefono</td>
+                                        <td align="center">
+                                            <a href="#" onclick="ModalModificar(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Modificar'></i></a>
+                                        </td>
+                                        <!--td align="center">
+                                            <a href="#" onclick="MostrarEmpresas(@items.Id);"><i class='fas fa-industry' data-toggle='tooltip' data-placement='top' title='Asignar Empresas'></i></a>
+                                        </td-->
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    @if (Session["IdConfiguracion"].ToString() == "3")
+                    {
+                        <h3 class="modal-title" id="ModalLabel">Agregar Nuevo</h3>
+                    }
+                    else
+                    { 
+                        <h3 class="modal-title" id="ModalLabel">Agregar Nuevo Operador</h3>
+                    }
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" name="aNombre" id="aNombre" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aClave" class="col-md-3 col-form-label">Correo E.</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" id="aClave" name="aClave" placeholder="" required tabindex="4">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aTelefono" class="col-md-3 col-form-label">Teléfono</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" id="aTelefono" name="aTelefono" placeholder="" required tabindex="5">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarNuevo();">Agregar Nuevo</button>
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    @if (Session["IdConfiguracion"].ToString() == "3")
+                    {
+                        <h3 class="modal-title" id="ModalLabel">Modificar los Datos</h3>
+                    }
+                    else
+                    { 
+                        <h3 class="modal-title" id="ModalLabel">Modificar los Datos del Operador</h3>
+                    }
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" id="eNombre" name="eNombre" placeholder="" tabindex="1">
+                                </div>
+                            </div>
+
+
+                            <div class="form-group form-inline">
+                                <label for="eClave" class="col-md-3 col-form-label">Correo</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" id="eClave" name="eClave" placeholder="" tabindex="4">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="eTelefono" class="col-md-3 col-form-label">Teléfono</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control input-solid" id="eTelefono" name="eTelefono" placeholder="" tabindex="5">
+                                </div>
+                            </div>
+
+
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" id="eActivo" name="eActivo" value="">
+                                    <span class="form-check-sign">Activo</span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="eId" name="eId" />
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalModificarEmpresas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    @if (Session["IdConfiguracion"].ToString() == "3")
+                    {
+                        <h3 class="modal-title" id="ModalLabel">Modificar Accesos a Empresas para el Gerente</h3> 
+                    }
+                    else
+                    {
+                        <h3 class="modal-title" id="ModalLabel">Modificar Accesos a Empresas para el Operador</h3>
+                    }
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div id="divEmpresas"></div>
+
+                            <input type="hidden" id="IdUsuario" name="IdUsuario" value="" />
+
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificadoEmpresas();">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>                    
+                </div>
+            </div>
+        </div>
+    </div>

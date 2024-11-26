@@ -1,0 +1,406 @@
+﻿@{
+    ViewBag.Title = "Detalle Actividades";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcMark').addClass("nav-item active submenu");
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[6, 7, "desc"]]
+        });
+
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+
+            // Get the column API object
+            var column = $('#basic-datatables-').DataTable().column($(this).attr('data-column'));
+
+            // Toggle the visibility
+            column.visible(!column.visible());
+        });
+
+        $('#Espera').hide();
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var idCampaña = obtenerParametrodeURL('id');
+        verGraficas1(idCampaña);
+    });
+    
+    function verGraficas1(idCampaña) {
+        // https://code.tutsplus.com/es/tutorials/getting-started-with-chartjs-line-and-bar-charts--cms-28384
+        // <canvas id="densityChart" style="width:100%; height:auto;"></canvas>
+
+        var obj = {}
+        obj['Id'] = idCampaña;
+        var jsonObject = {
+            "Marketing": obj
+        }
+
+        $.ajax({
+            url: "@Url.Action("DetalleActividadesBar", "Marketing")",
+            type: "POST",
+            data: JSON.stringify(jsonObject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                onSuccess(data);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+
+            }
+        });
+
+    }
+
+    function onSuccess(data) {
+        Chart.defaults.global.defaultFontFamily = "Lato";
+        Chart.defaults.global.defaultFontSize = 18;
+
+
+        var valormaximo = data.valorMaximo;
+        var radio = 50;
+        var ancho = 20;
+
+        // Actividad01
+        $("#Actividad01Text").html('Videoconferencias')
+        Circles.create({
+            id: 'Actividad01',
+            radius: radio,
+            value: data.Videoconferencia,
+            maxValue: valormaximo,
+            width: ancho,
+            colors: ['#F1F1F1', '#59d05d'],
+            duration: 200,
+            wrpClass: 'circles-wrp',
+            textClass: 'circles-text',
+            styleWrapper: true,
+            styleText: true
+        });
+
+        // Actividad02
+        $("#Actividad02Text").html('Llamadas')
+        Circles.create({
+            id: 'Actividad02',
+            radius: radio,
+            value: data.Llamada,
+            maxValue: valormaximo,
+            width: ancho,
+            colors: ['#F1F1F1', 'rgba(249, 241, 088, 1)'],
+            duration: 200,
+            wrpClass: 'circles-wrp',
+            textClass: 'circles-text',
+            styleWrapper: true,
+            styleText: true
+        });
+
+        // Actividad03
+        $("#Actividad03Text").html('Whatsapp')
+        Circles.create({
+            id: 'Actividad03',
+            radius: radio,
+            value: data.Whatsapp,
+            maxValue: valormaximo,
+            width: ancho,
+            colors: ['#F1F1F1', 'rgba(244, 113, 064, 1)'],
+            duration: 200,
+            wrpClass: 'circles-wrp',
+            textClass: 'circles-text',
+            styleWrapper: true,
+            styleText: true
+        });
+
+        // Actividad04
+        $("#Actividad04Text").html('EMail')
+        Circles.create({
+            id: 'Actividad04',
+            radius: radio,
+            value: data.EMail,
+            maxValue: valormaximo,
+            width: ancho,
+            colors: ['#F1F1F1', 'rgba(092, 120, 189, 1)'],
+            duration: 200,
+            wrpClass: 'circles-wrp',
+            textClass: 'circles-text',
+            styleWrapper: true,
+            styleText: true
+        });
+
+        // Gráficas
+        var densityCanvas = document.getElementById("densityChart");
+        var densityData = {
+            label: 'Detalle de Actividades',
+            data: [data.Tarea, data.Llamada, data.EMail, data.Reunion, data.Videoconferencia, data.Comentario, data.Whatsapp, data.EMailMarketing],
+            backgroundColor: [
+                'rgba(101, 076, 165, 0.5)',
+                'rgba(249, 241, 088, 0.5)',
+                'rgba(092, 120, 189, 0.5)',
+                'rgba(202, 041, 093, 0.5)',
+                'rgba(054, 168, 217, 0.5)',
+                'rgba(129, 193, 099, 0.5)',
+                'rgba(247, 205, 090, 0.5)',
+                'rgba(244, 113, 064, 0.5)',
+                'rgba(215, 228, 088, 0.5)'
+            ],
+            borderColor: [
+                'rgba(101, 076, 165, 1)',
+                'rgba(249, 241, 088, 1)',
+                'rgba(092, 120, 189, 1)',
+                'rgba(202, 041, 093, 1)',
+                'rgba(054, 168, 217, 1)',
+                'rgba(129, 193, 099, 1)',
+                'rgba(247, 205, 090, 1)',
+                'rgba(244, 113, 064, 1)',
+                'rgba(215, 228, 088, 1)'
+            ],
+            borderWidth: 2,
+            hoverBorderWidth: 0
+        };
+        var chartOptions = {
+            scales: {
+                yAxes: [{
+                    barPercentage: 0.5
+                }]
+            },
+            elements: {
+                rectangle: {
+                    borderSkipped: 'left',
+                }
+            }
+        };
+        var barChart = new Chart(densityCanvas, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Tarea', 'Llamada', 'EMail', 'Reunones', 'Videoconferencia', 'Comentario', 'Whatsapp', 'EMail Marketing'],
+                datasets: [densityData],
+            },
+            options: chartOptions
+        });
+
+        //var detailsCanvas = document.getElementById("DetailsChart");
+        //var detailsChart = new Chart(detailsCanvas, {
+        //    type: 'pie',
+        //    data: {
+        //        labels: ['Tarea', 'Llamada', 'EMail', 'Carta', 'Cita', 'Videoconferencia', 'Comentario', 'Whatsapp', 'Avisos'],
+        //        datasets: [densityData],
+        //    },
+        //    options: chartOptions
+        //});
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Detalle de Actividades</h4>
+    </div>
+    <div class="row">
+        <div class="col-sm-10">
+            <div class="card">
+                <h2>Total de Actividades: <strong id="actividadesTotales"></strong></h2>
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Cargando...</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2" style="text-align:center;">
+            <div class="card">
+                <a href="javascript:void(0);" onclick="history.go(-1);" data-toggle="tooltip" data-placement="top" title="Regresar">
+                    <img src="~/assets/img/regresar.png" style="max-width:50px;" />
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="row">
+                        <!-- Actividad 01 --->
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="Actividad01"></div>
+                                    <center id="Actividad01Text"></center>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actividad 02 --->
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="Actividad02"></div>
+                                    <center id="Actividad02Text"></center>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actividad 03 --->
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="Actividad03"></div>
+                                    <center id="Actividad03Text"></center>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actividad 04 --->
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="Actividad04"></div>
+                                    <center id="Actividad04Text"></center>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="display:none">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="DetailsChart" style="width:100%; height:auto; min-height:400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="densityChart" style="width:100%; height:auto; min-height:400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="display:none;">
+        <div class="col-md-12">
+            <div class="card">
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles01"></div>
+                                    <center>Tarea</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles02"></div>
+                                    <center>Llamada</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles03"></div>
+                                    <center>Correo Electrónico</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles04"></div>
+                                    <center>Carta</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles05"></div>
+                                    <center>Cita</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles06"></div>
+                                    <center>Videoconferencia</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles07"></div>
+                                    <center>Comentario</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles08"></div>
+                                    <center>Whatsapp</center>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-inline text-center">
+                            <div class="card card-round" style="margin-right: 10px; width:100%">
+                                <div class="body">
+                                    <div id="circles09"></div>
+                                    <center>Aviso con envío de correo</center>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

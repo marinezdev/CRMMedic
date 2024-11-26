@@ -1,0 +1,586 @@
+﻿
+@{
+    ViewBag.Title = "Responsables";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcOport').addClass("nav-item active submenu");
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var idd = obtenerParametrodeURL('Id');
+
+        $('input[name=optionsRadios]').change(function () {
+            //alert($(this).val());
+
+            if ($(this).val() == "2") {
+                $('#lContactos').text('Usuarios');
+                Usuarios();
+            }
+            else if ($(this).val() == "1") {
+                $('#lContactos').text('Contactos');
+                Contactos();
+
+            }
+        });
+
+        if (idd != null) {
+            $.ajax({
+                url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + idd,
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+
+                    if (data.Oportunidades.Estado === 2 || data.Oportunidades.Estado === 5 || data.Oportunidades.Estado === 6 || data.Oportunidades.Estado === 7) {
+                        $('#Submit').hide();
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                }
+            });
+        }
+    });
+
+    function CargaInicial() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarResponsablesActividades/",
+            data: { idoportunidad: $('#IdOportunidad').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('->' + data[1].Contactos.Nombre);
+                if (typeof data[1] === 'undefined') {
+                    $('#basic-datatables-contactos').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-contactos').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        $('#basic-datatables-contactos').dataTable().fnAddData([
+                            data[i].Contactos.Nombre,
+                            data[i].TipoPersona.Nombre,
+                            data[i].Contactos.Correo,
+                            data[i].Contactos.Telefono,
+                            data[i].Contactos.Celular,
+                            '<a href="#" onclick="SeguroEliminarArchivo(' + data[i].Contactos.Id + ');"><i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="Eliminar"></i></a>'
+                        ]);
+                    }
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function BitacoraSeleccionarPorId(id,idopo) {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarActividadesPorIdUsuario/",
+            data: { idusuario: id, idoportunidad: idopo },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('Datos de BitacoraSeleccionarPorId: ' + data);
+                $('#ModalBitacora').modal('show');
+
+                $('#contacto-actividades').empty();
+                var firstRow = '<thead><tr><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead><tbody>';
+                $('#contacto-actividades').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                    var row = '<tr>' +
+                        '<td>' + fecha.getDate() + '/' + mes + '/' + fecha.getFullYear() + '</td>' +
+                        '<td>' + data[i].Notas + '</td>' +
+                        '</tr>';
+                    $('#contacto-actividades').append(row);
+                }
+                var lastRow = '</tbody></table>';
+                $('#contacto-actividades').append(lastRow);
+
+                //ArchivosDeBitacora(idbic);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ArchivosDeBitacora(bi) {
+        $.ajax({
+            url: "/Oportunidades/ArchivosDeBitacora/" + bi,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ArchivosRelacionados').empty();
+                if (data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        var row = '<a href=/ArchivosBitacora/' + data[i].Nombre + ' target=_blank>' + data[i].Nombre + ' | ' + data[i].Fecha  + '</a><br />';
+                        $('#ArchivosRelacionados').append(row);
+                    }
+                }
+                else {
+                    var row = "<span class=text-warning>No hay archivos relacionados</span>";
+                    $('#ArchivosRelacionados').append(row);
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarSubClasificacion() {
+        var valor = $('#Clasificacion1').val();
+        $.ajax({
+            url: "/Oportunidades/SeleccionarContactoRol/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#Clasificacion2').empty();
+                $('#Clasificacion2').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#Clasificacion2').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Usuarios() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarUsuariosPorRol/",
+            data: {
+                idconfiguracion: $('#IdConfiguracion').val(),
+                idrol: $('#IdRol').val(),
+                idusuario: $('#IdUsuario').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#Contactos').empty();
+                $('#Contactos').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Usuarios.Id + '>' + data[i].Usuarios.Nombre + ' ' + data[i].Usuarios.ApellidoPaterno + ' ' + data[i].Usuarios.ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Contactos() {
+        $.ajax({
+            url: "/Contactos/SeleccionarContactosPorConfiguracion/" + $('#IdConfiguracion').val(),
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#Contactos').empty();
+                $('#Contactos').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Id + '>' + data[i].Nombre + ' ' + data[i].ApellidoPaterno + ' ' + data[i].ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function BitacoraUsuarioSeleccionarPorId(idusuario, idoportunidad) {
+        $.ajax({
+            url: "/Oportunidades/BitacoraUsuarioSeleccionar/",
+            data: { idusuario: idusuario, idoportunidad: idoportunidad },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('Datos de BitacoraSeleccionarPorId: ' + data);
+                $('#ModalBitacoraUsuario').modal('show');
+
+                $('#usuario-actividades').empty();
+                var firstRow = '<thead><tr><th>Responsable</th><th>Fecha</th><th>Notas</th></tr></thead><tbody>';
+                $('#usuario-actividades').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var fecha = new Date(parseInt(data[i].BitacoraUsuariosDetalle.Creado.substr(6)));
+                    var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                    var row = '<tr>' +
+                        '<td>' + data[i].Usuarios.Nombre + '</td>' +
+                        '<td>' + fecha.getDate() + '/' + mes + '/' + fecha.getFullYear() + '</td>' +
+                        '<td>' + data[i].BitacoraUsuariosDetalle.Notas + '</td>' +
+                        '</tr>';
+                    $('#usuario-actividades').append(row);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeguroEliminarArchivo(id) {
+        swal({
+            title: 'Eliminación de Responsable',
+            text: "¿Está seguro de querer eliminar este usuario?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                location.href = '/Oportunidades/EliminarResponsable?idresponsable=' + id + '&idoportunidad=' + $('#IdOportunidad').val();
+            }
+        });
+    }
+
+    function AgregarResponsable() {
+        $.ajax({
+            url: "/Oportunidades/AgregarResponsables/",
+            data: { IdOportunidad: '', Responsables: '', Clasificacion1: '', Clasificacion2: '' },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Responsables</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Html.Raw(Session["NombreTema"]) &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())</h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Menu -->
+                    <div class="row">
+
+                        @Html.Partial("_MenuEdicionOportunidades")
+
+                    </div>
+
+                    <form method="post" action="AgregarResponsable">
+
+                        <input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+                        <input type="hidden" id="Empresa" name="Empresa" value="@Session["IdEmpresa"].ToString()" />
+                        <input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+                        <input type="hidden" id="IdRol" name="IdRol" value="@Session["IdRol"].ToString()" />
+                        <input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+
+
+                        <div class="row">
+
+                            <div class="col-md-5 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label id="lContactos" for="Contactos" class="col-form-label" style="width: 90px">Responsables</label>
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsables(Session["IdConfiguracion"].ToString(), Session["IdEmpresa"].ToString(), Session["IdUsuario"].ToString(), Session["IdRol"].ToString())
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="col-md-5 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Clasificacion1" class="col-form-label">Clasificación&nbsp;&nbsp;</label>
+                                    <select class="form-control form-control-sm input-solid" id="Clasificacion1" name="Clasificacion1" required style="width: 200px" onchange="SeleccionarSubClasificacion();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var item in ViewBag.ClasificacionRolesContactos)
+                                        {
+                                            <option value="@item.Id">@item.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Clasificacion2" class="col-form-label">Sub Clasificación&nbsp;</label>
+                                    <select class="form-control form-control-sm input-solid" id="Clasificacion2" name="Clasificacion2" required style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4">
+                                <br /><br />
+                                <center>
+                                    <button type="submit" id="Submit" name="Submit" class="btn btn-success animated bounceInDown">Agregar Responsable</button>
+                                </center>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                    <div class="separator">&nbsp;</div>
+                    
+                    @Html.Raw(ViewBag.Procesado)
+
+                    @Html.Raw(ViewBag.Advertencia)
+
+                    @if (ViewBag.Advertencia != "")
+                    {
+                        <script>
+                            $('#Espera').hide();
+                        </script>
+                    }
+
+                    <!-- Tabla de responsables -->
+                    @if (ViewBag.Responsables.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <h3>Responsables Asignados</h3>
+                            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                                <thead class="header">
+                                    <tr>
+                                        <th>Responsable</th>
+                                        <th>Bitácora</th>
+                                        <th>Rol</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var items in ViewBag.Responsables)
+                                    {
+                                        <tr>
+
+                                            <td>@items.Usuarios.Nombre @items.Usuarios.ApellidoPaterno @items.Usuarios.ApellidoMaterno</td>
+                                            <td align="center">
+                                                @if (items.Bitacora.Id > 0)
+                                                {
+                                                    <a href="#" onclick="BitacoraUsuarioSeleccionarPorId(@items.Usuarios.Id,@items.Oportunidades.Id);" data-toggle="tooltip" data-placement="left" title="Ver las actividades que ha desarrollado el responsable en su asignación"><i class='fas fa-clipboard-list'></i></a>
+                                                }
+                                                else
+                                                { 
+                                                    <span></span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (items.UsuariosRoles.Roles.Id == 2 || items.UsuariosRoles.Roles.Id == 3)
+                                                {
+                                                    <span>Responsable</span>
+                                                }
+                                                else 
+                                                { 
+                                                    <span>Creador</span>
+                                                }
+                                            </td>
+                                        
+                                            @if (items.Bitacora.Id > 0)
+                                            {
+                                                <td align="center">
+
+                                                    <span class="stamp stamp-sm bg-danger">
+                                                        <a href="#" onclick="SeguroEliminarArchivo(@items.Usuarios.Id);" class="nav-lin"><i class='fas fa-trash' data-toggle='tooltip' data-placement='left' title='Eliminar'></i></a>
+                                                    </span>
+
+                                                </td>
+                                            }
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    }                    
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalBitacora" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Bitácora Seguimiento de Oportunidad/Asunto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="table-responsive">
+                        <table id="contacto-actividades" class="display compact" style="width:100%"></table>
+                    </div>
+
+                    <!-- Archivos -->
+                    @*<br /><br /><br />
+                    <label class="label">Archivos Relacionados</label>
+                    <div id="ArchivosRelacionados" name="ArchivosRelacionados"></div>*@
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalBitacoraUsuario" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Bitácora de Seguimiento de Asunto Asignado a Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="table-responsive">
+                        <table id="usuario-actividades" class="display compact" style="width:100%"></table>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

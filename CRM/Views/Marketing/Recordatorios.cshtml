@@ -1,0 +1,160 @@
+﻿@model List<CRM.Models.Models.MarketingRecordatorios>
+@{
+    ViewBag.Title = "Recordatorios";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#m4').addClass('active');
+        $('#Espera').hide();
+
+    });
+    
+</script>
+
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdCampaña" value="@Request["IdCampaña"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Agregar correos de recordatorio a los contactos sobre la próxima campaña a realizarse o en curso</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    @Html.Partial("_MenuMarketing")
+
+                    <br /><br /><button class="btn btn-primary" onclick="location.href='/Marketing/RecordatoriosAgregar?IdCampaña=@Request["IdCampaña"]'">Nuevo</button>
+                    <br /><br />
+                    <div class="row">
+
+                        @Html.Raw(TempData["Mensaje"])
+
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Asunto</th>
+                                <th>Envío</th>
+                                <th></th><!--Modificar-->
+                                <th></th><!--Enviar ahora-->
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Envio.ToString("dd/MMM/yy")</td>
+                                        <td>@item.Asunto</td>
+                                        <td>@CRM.Utilerias.CustomHelpers.EnviarANombre(item.EnviarA)</td>
+                                        <td><a href="/Marketing/RecordatoriosModificar?rec=@item.Id&idcamp=@Request["IdCampaña"]">Modificar</a></td>
+                                        <td><a href="/Marketing/RecordatoriosEnviar?IdCampaña=@Request["IdCampaña"]&rec=@item.Id">Enviar ahora</a></td>
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregarRecordatorio" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar un correo de recordatorio para los contactos de la campaña</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label id="fecha" class="col-md-2 col-form-label">Fecha</label>
+                                <div class="col-md-8 p-0"><input type="text" id="fecha1" name="fecha1" class="form-control" maxlength="12" required autocomplete="off" /></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label id="asunto" class="col-md-2 col-form-label">Asunto</label>
+                                <div class="col-md-8 p-0"><input type="text" name="asunto" class="form-control" style="width: 100%" /></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+                            <div class="form-group form-inline">
+                                <textarea id="editor" name="correo" class="form-control"></textarea>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+
+<script>
+
+    $('#fecha1').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#fecha2').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

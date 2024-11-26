@@ -1,0 +1,30 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+@{
+    ViewBag.Title = "Error";
+}
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title text-danger">Error de la aplicación</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+                <div class="card-body">
+
+                    <h4 class="text-warning">Ocurrió un error al intentar procesar su solicitud. Informe a sistemas para corregirlo de inmediato.</h4>
+                    <p>
+                        <strong>Detalle del error:</strong><br />
+                        La acción <strong> @Model.ActionName </strong> del controlador <strong> @Model.ControllerName </strong> 
+                        ha lanzado la excepción <strong> @Model.Exception.GetType().Name </strong>
+                        con el mensaje <strong>" @Model.Exception.Message "</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+

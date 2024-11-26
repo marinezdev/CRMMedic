@@ -1,0 +1,813 @@
+﻿
+@{
+    ViewBag.Title = "Alta";
+}
+
+@section ScriptsAdicionalesLocales
+{
+
+}
+
+
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Alta de @CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "P")</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Por favor, rellene los campos</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    @if (Session["IdConfiguracion"].ToString() == "3")
+                    {
+
+                        <div class="row">
+
+                            <div class="col-md-12 col-lg-12">
+
+                                <div class="form-group form-inline">
+                                    <label for="Nombre" class="col-md-2 col-form-label label-align-right">Nombre</label>
+                                    <div class="col-md-7 p-4">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="Nombre" placeholder="Apellido(s), Nombre(s)" required tabindex="1" autocomplete="off" style="width:400px">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="ApellidoPaterno" placeholder="" style="visibility: hidden; width:10px">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="ApellidoMaterno" placeholder="" style="visibility: hidden; width:10px">
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    }
+                    else if (Session["IdConfiguracion"].ToString() == "2")
+                    {
+                        <div class="row">
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="Nombre" class="col-md-3 col-form-label label-align-right">Nombre</label>
+                                    <div class="col-md-9 p-0">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="Nombre" placeholder="Nombre(s)" required tabindex="1" autocomplete="off">
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="ApellidoPaterno" class="col-md-3 col-form-label">Ap. Paterno</label>
+                                    <div class="col-md-9 p-0">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="ApellidoPaterno" placeholder="" required tabindex="2" autocomplete="off">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group form-inline">
+                                    <label for="ApellidoMaterno" class="col-md-4 col-form-label">Ap. Materno</label>
+                                    <div class="col-md-7 p-0">
+                                        <input type="text" class="form-control form-control-sm input-solid" id="ApellidoMaterno" placeholder="" required tabindex="3" autocomplete="off">
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                    }
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Correo" class="col-md-3 col-form-label label-align-right">Correo</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="email" class="form-control form-control-sm input-solid" id="Correo" placeholder="Correo Electrónico" required tabindex="4" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Telefono" class="col-md-3 col-form-label">Teléfono</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="Telefono" placeholder="" required tabindex="5" autocomplete="off" data-toggle="tooltip" data-placement="top" title="Sólo números con guiones">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Celular" class="col-md-4 col-form-label">Celular</label>
+                                <div class="col-md-7 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="Celular" placeholder="" required tabindex="6" autocomplete="off" data-toggle="tooltip" data-placement="top" title="Sólo números con guiones">
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+                            <center>
+                                @if (Session["IdRol"].ToString() == "2")
+                                {
+                                    <a href="#" onclick="AbrirlModalAgregarEmpresa();" class="nav-link" data-toggle="tooltip" data-placement="right" title="Agregar un médico rápidamente y cambiar su detalle después">Agregar Médico</a>
+                                }
+                            </center>
+                        </div>
+                        <div class="col-md-6 col-lg-4"></div>
+                        <div class="col-md-6 col-lg-4"></div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Empresa" class="col-md-3 col-form-label">Médico</label>
+
+                                @CRM.Utilerias.CustomHelpers.SelectEmpresas(Session["IdConfiguracion"].ToString(), Session["IdRol"].ToString(), Session["IdUsuario"].ToString())
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Direccion" class="col-md-3 col-form-label">Dirección</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid" tabindex="7">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Ciudad" class="col-md-4 col-form-label">Ciudad</label>
+                                <div class="col-md-7 p-0">
+                                    <input id="Ciudad" name="Ciudad" type="text" class="form-control form-control-sm input-solid" tabindex="8">
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-11 col-lg-9">
+
+                            <div class="form-group">
+                                <label for="Notas">Notas</label>
+                                <textarea id="Notas" name="Notas" class="form-control input-solid" cols="100" tabindex="14" onfocus="TextAreaGrande(this);" onblur="TextAreaNormal(this);"></textarea>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="Guardado1" class="card-action label-align-center">
+                    <button id="Btn01" class="btn btn-success animated" tabindex="15" onclick="PreGuardado();">Guardar</button>
+                    <!--button class="btn btn-primary animated" tabindex="16" onclick="AgregaryContinuar();">Guardar y Continuar</button-->
+                </div>
+
+                <div class="table-responsive">
+                    <div id="advertencia" class="alert alert-warning" role="alert" style="display: none"></div>
+
+
+                    <table id="basic-datatable" class="display conpact table-hover" style="width:100%"></table>
+
+                    <center>
+                        <button id="Btn02" class="btn btn-success animated" onclick="Agregar();" style="display: none">Guardar</button>
+                    </center>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregarEmpresa" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar @CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="empNombre" id="empNombre" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoPaterno" class="col-md-3 col-form-label fc-left">RFC</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-full" name="empRFC" id="empRFC" placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <label></label><br />
+                                    <label class="form-radio-label">
+                                        <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" checked>
+                                        <span class="form-radio-sign">Interna</span>
+                                    </label>
+                                    <label class="form-radio-label ml-3">
+                                        <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2">
+                                        <span class="form-radio-sign">Externa</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="GuardarNuevaEmpresa();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#opcContactos').addClass("nav-item active submenu");
+        $('#Nombre').select();
+        $('#Guardado2').hide();
+
+        $('.input-number').on('input', function () {
+            this.value = this.value.replace(/[^0-9\-]/g, '');
+        });
+
+    });
+
+    function PreGuardado() {
+        if (!validarCorreo($('#Correo').val())) {
+
+        }
+        else {
+            //Verifica si existe algun contacto con los datos que se intentan guardar
+            $.ajax({
+                url: "/Contactos/Preguardado1/",
+                data: {
+                    Nombre: $('#Nombre').val(), Correo: $('#Correo').val(), Correo: $('#Telefono').val(), Correo: $('#Celular').val(), IdConfiguracion: $('#IdConfiguracion').val()
+                },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    if (data.length > 0) {
+                        $('#Btn01').css('display', 'none');
+                        $('#Btn02').css('display', 'block');
+                        $('#advertencia').text('El nombre o correo tendría alguna coincidencia con los datos que se muestran, verifique.').css('display', 'block');
+                        $('#basic-datatable').empty();
+                        var firstRow = '<thead><tr><th>Nombre</th><th>Correo</th></tr></thead><tbody>';
+                        $('#basic-datatable').append(firstRow);
+                        for (var i = 0; i < data.length; i++) {
+                            var row = '<tr>' +
+                                '<td>' + data[i].Nombre + '</td>' +
+                                '<td>' + data[i].Correo + '</td>' +
+                                '</tr>';
+                            $('#basic-datatable').append(row);
+                        }
+                        var lastRow = '</tbody></table>';
+                        $('#basic-datatable').append(lastRow);
+                    }
+                    else {
+                        //swal({
+                        //    title: 'GESTION',
+                        //    text: 'Se guardó el registro exitosamente.',
+                        //    buttons: {
+                        //        confirm: {
+                        //            className: 'btn btn-success'
+                        //        }
+                        //    },
+                        //});
+                        //Guardar
+                        Agregar();
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (errormessage) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'Ha habido un error al intentar guardar los datos',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                }
+            });
+        }
+    }
+
+    function Agregar() {
+        if ($('#Correo').val() === "") {
+            swal({
+                title: 'CRM',
+                text: 'El campo de correo electrónico NO puede quedarse vacío',
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                }
+            });
+        }
+        $.ajax({
+            url: "/Contactos/Agregar1/",
+            data: {
+                Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(),
+                Empresa: $('#Empresa').val(), Direccion: $('#Direccion').val(), Ciudad: $('#Ciudad').val(), Notas: $('#Notas').val(),
+                IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El correo electrónico ya esta siendo usado en otro contacto, revise',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                    BuscarParecidos();
+                }
+                if (data >= 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El registro se agregó exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Contactos/Index';
+                        }
+                    );
+                }
+                //$('#Guardado1').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function AgregaryContinuar() {
+        $.ajax({
+            url: "/Contactos/Agregar1/",
+            data: {
+                Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(), IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data == 0) {
+                    swal({
+                        title: '¿Agregarlo?',
+                        text: "El contacto podría estar duplicado del apellido paterno y/o materno, revise sus datos.",
+                        type: 'warning',
+                        buttons: {
+                            confirm: {
+                                text: 'Sí, agregarlo',
+                                className: 'btn btn-success'
+                            },
+                            cancel: {
+                                text: 'Cancelar',
+                                visible: true,
+                                className: 'btn btn-danger'
+                            }
+                        }
+                    }).then((Delete) => {
+                        if (Delete) {
+                            AgregarDeTodasFormasYContinuar();
+                        } else {
+                            swal.close();
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function AgregarDeTodasFormas() {
+        $.ajax({
+            url: "/Contactos/BuscarParecido/",
+            data: {
+                Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(), IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                //console.log('Obtenido: ' + data);
+                if (data == 0) {
+                    $.ajax({
+                        url: "/Contactos/Agregar3/",
+                        data: {
+                            Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                            Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val()
+                        },
+                        type: "GET",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data > 0) {
+
+                                swal({
+                                    title: 'Agregado',
+                                    text: 'El contacto se ha agregado, revise sus datos.',
+                                    type: 'success',
+                                    buttons: {
+                                        confirm: {
+                                            className: 'btn btn-success'
+                                        }
+                                    }
+                                }).then(function () {
+                                    location.href = '/Contactos/Index';
+                                });
+                            }
+                        },
+                        error: function (errormessage) {
+                            //swal({
+                            //    title: 'CRM ASAE',
+                            //    text: 'Ha habido un error al intentar guardar los datos',
+                            //    icon: 'error',
+                            //    buttons: {
+                            //        confirm: {
+                            //            className: 'btn btn-error'
+                            //        }
+                            //    }
+                            //});
+                        }
+                    });
+                }
+                else {
+                    swal({
+                        title: 'Atención',
+                        text: 'El contacto ya existe, debe cambiar el nombre para agregarlo',
+                        type: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    }).then(function () {
+                        location.href = '/Contactos/Alta';
+                    });
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function AgregarDeTodasFormasYContinuar() {
+        $.ajax({
+            url: "/Contactos/BuscarParecido/",
+            data: {
+                Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(), IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                //console.log('Obtenido: ' + data);
+                if (data == 0) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/Contactos/Agregar2/",
+                        data: {
+                            Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                            Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val()
+                        },
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data > 0) {
+                                location.href = '/Contactos/Editar?Id=' + data;
+                            }
+                        },
+                        error: function (errormessage) {
+                            //swal({
+                            //    title: 'CRM ASAE',
+                            //    text: 'Ha habido un error al intentar procesar los datos',
+                            //    icon: 'error',
+                            //    buttons: {
+                            //        confirm: {
+                            //            className: 'btn btn-error'
+                            //        }
+                            //    }
+                            //});
+                        }
+                    });
+                }
+                else {
+                    swal({
+                        title: 'Atención',
+                        text: 'El contacto ya existe, debe cambiar el nombre para agregarlo',
+                        type: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    }).then(function () {
+                        location.href = '/Contactos/Alta';
+                    });
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function BuscarParecidos() {
+        $.ajax({
+            url: "/Contactos/BuscarParecidos/",
+            data: {
+                Nombre: $('#Nombre').val(), ApellidoPaterno: $('#ApellidoPaterno').val(), ApellidoMaterno: $('#ApellidoMaterno').val(),
+                Correo: $('#Correo').val(), Telefono: $('#Telefono').val(), Celular: $('#Celular').val(), IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                $('#basic-datatables').empty();
+                var firstRow = '<thead><tr><th>Nombre</th><th>Apellido Paterno</th><th>Apellido Materno</th><th></th></tr></thead><tbody>';
+                $('#basic-datatables').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Nombre + '</td>' +
+                        '<td>' + data[i].ApellidoPaterno + '</td>' +
+                        '<td>' + data[i].ApellidoMaterno + '</td>' +
+                        '<td><a href=/Contactos/Editar?Id=' + data[i].Id + '>Editar</a></td>' +
+                        '</tr>';
+                    $('#basic-datatables').append(row);
+                }
+                var lastRow = '</tbody></table>';
+                $('#basic-datatables').append(lastRow);
+                $('#basic-datatables').addClass('display compact table-striped table-hover');
+                $('#Guardado1').hide();
+                $('#Guardado2').show();
+
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar guardar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function AbrirlModalAgregarEmpresa() {
+        $('#ModalAgregarEmpresa').modal('show');
+    }
+
+    function GuardarNuevaEmpresa() {
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/Guardar/",
+            data: {
+                Nombre: $('#empNombre').val(),
+                RFC: $('#empRFC').val(),
+                TipoEmpresa: $("input[name='optionsRadios']:checked").val(),
+                IdConfiguracion: $('#IdConfiguracion').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el nuevo médico, ahora puede seleccionarla del listado.',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //Actualizar el select de las empresas
+                            CargarEmpresas();
+                            //location.reload();
+                        });
+
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha habido un error al intentar guardar el registro',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'No se procesaron los datos correctamente',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function CargarEmpresas() {
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/SeleccionarEmpresasPorIdConfiguracion/",
+            data: { id: $('#IdConfiguracion').val() },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#Empresa').empty();
+                for (var i = 0; i < data.length; i++) {
+                    $('#Empresa').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'No se procesaron los datos correctamente',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function validarCorreo(email) {
+        var regex = /[\w-\.]{2,}@@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+
+        if (!regex.test($('#Correo').val().trim())) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'El correo electrónico es inválido, revise',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                },
+            });
+            return false;
+        }
+        return true;
+    }
+
+</script>

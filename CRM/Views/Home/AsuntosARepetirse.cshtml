@@ -1,0 +1,67 @@
+﻿@model List<CRM.Models.Models.Modelos>
+@{
+
+}
+
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">Asuntos a Repetirse </h4>
+    </div>
+
+
+    <div class="row">
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%; cursor: pointer">
+
+                <thead class="header">
+                    <tr>
+                        <th></th>
+                        <th>Asunto</th>
+                        <th>Empresa</th>
+                        <th>Repetición</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (Model != null)
+                    {
+                        foreach (var items in Model)
+                        {
+                            <tr>
+                                <td style="color: transparent; width:0px">@items.Oportunidades.Id</td>
+                                <td>@items.Oportunidades.Nombre</td>
+                                <td>@items.Empresas.Nombre</td>
+                                <td>
+                                    @if (items.Oportunidades.RepetirProximoAño == 1)
+                                    {
+                                        <span>En 6 Meses</span>
+                                    }
+                                    else if (items.Oportunidades.RepetirProximoAño == 2)
+                                    {
+                                        <span>En 1 año</span>
+                                    }
+                                    else if (items.Oportunidades.RepetirProximoAño == 3)
+                                    {
+                                        <span>En 2 años</span>
+                                    }
+                                </td>
+                                    <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">Editar </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+    </div>
+
+</div>
+

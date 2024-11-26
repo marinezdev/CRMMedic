@@ -1,0 +1,262 @@
+﻿
+@{
+    ViewBag.Title = "Sub Clasificaciones";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcCatal').addClass("active");
+
+    });
+
+    function Modificar(id) {
+        $.ajax({
+            url: "/Administracion/SeleccionarDocumentosASAESubClasificacionPorId/",
+            data: { id : id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalEditar').modal('show');
+                $('#aNombre').val(data.Nombre);
+                $('#aClasificacion').val(data.IdClasificacion);
+                $('#aId').val(data.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificacion() {
+        $.ajax({
+            url: "/Administracion/GuardarDocumentosASAEModificacionSubClasificacion/",
+            data: { nombre: $('#aNombre').val(), clasificacion: $('#aClasificacion').val(), id: $('#aId').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el cambio al registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Eliminar(id) {
+        $.ajax({
+            url: "/Administracion/EliminarDocumentosASAESubClasificacion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se eliminó el registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Si hay registros relacionados NO se borrará, revise bien la tabla de documentos.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Documentos ASAE Sub Clasificaciones</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-body">
+                    <form method="post" action="/Administracion/DocsSubClasGuardar">
+                        <div class="row form-inline">
+
+                            <div class="col-md-2">Nombre</div>
+                            <div class="col-md-3"><input type="text" name="nombre" class="form-control" /></div>
+                            <div class="col-md-2">Clasificación</div>
+                            <div class="col-md-3">
+                                <select name="clasificacion" class="form-control">
+                                    @foreach (var clas in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                                    {
+                                        <option value="@clas.Id">@clas.Nombre</option>
+                                    }
+                                </select>
+
+                            </div>
+                            <div class="col-md-2"><button class="btn btn-success">Guardar</button></div>
+
+                        </div>
+                    </form>
+
+
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                            <table class="display compact table-striped table-hover" style="width:100%">
+                                <thead class="header">
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Nombre</th>
+                                        <th>Clasificación</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var items in ViewBag.SubClas)
+                                    { 
+                                        <tr>
+                                            <td>@items.Id</td>
+                                            <td>@items.Nombre</td>
+                                            <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.IdClasificacion.ToString(),"DocumentosASAEClasificacion")</td>
+                                            <td><a href="#" onclick="Modificar(@items.Id)">Modificar</a></td>
+                                            <td><a href="#" onclick="Eliminar(@items.Id)">Eliminar</a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalEditar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar Registro</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control form-control-sm input-solid" name="aNombre" id="aNombre" placeholder="" required tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aClasificacion" class="col-md-3 col-form-label fc-left">Clasificación</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control form-control-sm input-solid" id="aClasificacion" name="aClasificacion" style="width: 180px" required tabindex="2">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var itm in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                                    {
+                                        <option value="@itm.Id">@itm.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="aId" value="" />
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarModificacion();">Guardar</button>
+                <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

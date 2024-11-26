@@ -1,0 +1,471 @@
+﻿
+@{
+    ViewBag.Title = "AgregarArchivo";
+}
+
+    <script>
+    $(document).ready(function () {
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var idd = obtenerParametrodeURL('Id');
+
+        $('#opcOport').addClass("nav-item active submenu");
+        //$('#oport').addClass("collapse show");
+        //$('#sopcBusq').addClass("active");
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        /*
+        $('#basic-datatables-').DataTable({
+            colReorder: true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[1, "desc"]]
+        });
+        */
+
+        //Inicialización de la tabla
+        $('#example').append('<caption style="caption-side: top"><h3>Archivos Agregados</h3></caption>');
+        $('#example').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            columns: [
+                { data: 'Nombre' },
+                { data: 'Fecha' },
+                { data: 'Version' },
+                { data: 'Notas' }
+            ],
+            columnDefs: [
+                {
+                    targets: [0],
+                    data: "Nombre",
+                    render: function (data) {
+                        return '<a href="/Archivos/' + data + '" target="_blank">' + data + '</a>';
+                        //return '<a href="#" onclick=AbrirPopUp("' + data + '");>' + data + '</a>';
+                    }
+                }, {
+                    targets: [1],
+                    render: function (data) {
+                        var fecha = new Date(parseInt(data.substr(6)));
+                        var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                        var fecha = fecha.getDate() + '/' + mes + '/' + fecha.getFullYear();
+                        return fecha;
+                    }
+                }, {
+                    targets: [4],
+                    data: "Id",
+                    className: "text-center",
+                    render: function (data) {
+                        return '<a href="#" onclick="SeleccionarPorId(' + data + ');" class=text-primary><i class="fas fa-clipboard-list" data-toggle="tooltip" data-placement="left" title="Modificar"></i></a>';
+                    }
+                }, {
+                    targets: [5],
+                    data: "Id",
+                    className: "text-center",
+                    render: function (data) {
+                        data = '<a href="#" onclick="SeguroEliminarArchivo(' + data + ');" class="text-danger"><i class="fas fa-trash" data-toggle="tooltip" data-placement="left" title="Eliminar"></i></a>';
+                        return data;
+                    }
+                }
+            ]
+        });
+
+
+        CargaInicial(idd);
+
+        
+        
+    });
+
+    function AbrirPopUp(archivo) {
+        window.open('../Archivos/' + archivo, '', 'height=600,width=800');
+    }
+
+    function CargaInicial(idoportunidad) {
+        $.ajax({
+            type: "GET",
+            url: '/Oportunidades/CargaInicialArchivos',
+            data: { idoportunidad: idoportunidad },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#example').DataTable().clear().rows.add(data).draw();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarPorId(id) {
+        $.ajax({
+            url: "/Oportunidades/ArchivosSeleccionarPorId/" + id,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalNotas').modal('show');
+                $('#Notas').val(data.Notas);
+                $('#Version').val(data.Version);
+                $('#IdArchivo').val(data.Id);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarNotas() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarNotas",
+            data: {
+                Notas: $("#Notas").val(),
+                Version: $("#Version").val(),
+                Id: $("#IdArchivo").val(),
+                idoportunidad: $('#IdOportunidad').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data.length > 0) {
+                    $.notify('Se agregaron las notas exitosamente.', {
+                        autohide: true, type: 'success', placement: {
+                            from: 'bottom',
+                            align: 'right'
+                        }
+                    });
+
+                    //Rellenar tabla de archivos
+                    $('#example').DataTable().clear().rows.add(data).draw();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha ocurrido un error, revíselo en la consola para más información.',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                }).then(
+                    function () {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    });
+            }
+        });
+        }
+
+    function SeguroEliminarArchivo(id) {
+        swal({
+            title: 'Eliminación de Archivos',
+            text: "¿Está seguro de querer eliminar este archivo?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: '¡Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                SeguroEliminarArchivo2(id);
+            }
+        });
+    }
+
+    function SeguroEliminarArchivo2(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/QuitarArchivo",
+            data: {
+                idarchivo: id,
+                idoportunidad: $('#IdOportunidad').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                console.log(data.length);
+                if (data.length > 0 || data == '') {
+
+                    $.notify('Se eliminó el archivo exitosamente.', {
+                        autohide: true, type: 'success', placement: {
+                            from: 'bottom',
+                            align: 'right'
+                        }
+                    });
+
+                    //Rellenar tabla de archivos
+                    $('#example').DataTable().clear().rows.add(data).draw();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+        /*
+        swal({
+            title: 'Eliminación de Archivo',
+            text: "¿Está seguro de querer eliminar este archivo?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                location.href = '/Oportunidades/EliminarArchivo?id=' + id;
+            }
+        });
+        */
+    }
+
+    function SubirArchivo() {
+        if (window.FormData == undefined) {
+            $.notify('Navegador no soportado para subir archivos.', {
+                autohide: true, type: 'warning', placement: {
+                    from: 'bottom',
+                    align: 'right'
+                }
+            });
+        }
+        else {
+            var fileUpload = $("#ArchivoASubir").get(0);
+            var files = fileUpload.files;
+
+            if (files.length == 0) {
+                $.notify('Seleccione un archivo para subir.', {
+                    autohide: true, type: 'danger', placement: {
+                        from: 'bottom',
+                        align: 'right'
+                    }
+                });
+                return;
+            }
+
+            var fileData = new FormData();
+
+            fileData.append('IdOpor', $('#OportunidadId').val());
+            fileData.append(files[0].name, files[0]);
+
+            $.ajax({
+                url: '/Oportunidades/SubirArchivo',
+                type: 'post',
+                datatype: 'json',
+                contentType: false,
+                processData: false,
+                async: false,
+                data: fileData,
+                success: function (data) {
+                    //console.log('Datos de la subida' + data.length);
+                    if (data.length == 1) {
+                        //Carga por primera vez
+                        $('#ArchivoASubir').val('');
+
+                        $.notify('Se agregó el archivo exitosamente.', {
+                            autohide: true, type: 'success', placement: {
+                                from: 'bottom',
+                                align: 'right'
+                            }
+                        });
+
+                        //Rellenar tabla de archivos
+                        $('#example').DataTable().clear().rows.add(data).draw();
+                    }
+                    else if (data.length > 1) {
+                        //Carga más a los existentes
+                        $('#ArchivoASubir').val('');
+
+                        $.notify('Se agregó el archivo exitosamente.', {
+                            autohide: true, type: 'success', placement: {
+                                from: 'bottom',
+                                align: 'right'
+                            }
+                        });
+
+                        $('#example').DataTable().clear().rows.add(data).draw();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+    }
+
+    </script>
+
+<input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Archivos/Documentos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Html.Raw(Session["NombreTema"]) &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())</h4>
+                </div>
+
+                <div id="Espera" class="is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!--Menu-->
+                        @Html.Partial("_MenuEdicionOportunidades")
+   
+                    </div>
+                                        
+                    <div class="row">
+
+                        <div class="row form-inline col-md-12">
+                            <div class="form-group col-sm-12">
+
+                                <div class="input-group">
+                                    <input type="file" id="ArchivoASubir" class="form-control" /> <br />
+                                    <input type="hidden" id="OportunidadId" value="@Session["IdOportunidad"].ToString()" />
+                                    <button id="SubirArchivo" class="btn btn-success" onclick="SubirArchivo();">Subir Archivo</button>
+                                </div>
+
+                                <br /><br /><br />                                
+                                <div class="table-responsive">
+                                    <table id="example" class="display compact table-striped table-hover" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Fecha</th>
+                                                <th>Version</th>
+                                                <th>Notas</th>
+                                                <th>Modificar</th>
+                                                <th>Eliminar</th>
+                                            </tr>
+                                        </thead>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNotas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Notas</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="Version" class="col-md-3 col-form-label fc-left">Versión</label>
+                        <div class="col-md-8 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" id="Version" name="Version" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label for="Notas" class="col-md-3 col-form-label fc-left">Notas</label>
+                        <div class="col-md-9 p-0">
+                            <textarea class="form-control form-control-sm input-solid" name="Notas" id="Notas" cols="35" rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="IdArchivo" name="IdArchivo" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="AgregarNotas();">Aceptar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

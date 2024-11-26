@@ -1,0 +1,358 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM-ASAE-@ViewBag.Title</title>
+
+    <!-- Fonts and icons -->
+    <script src="../assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { "families": ["Lato:300,400,700,900"] },
+            custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['../assets/css/fonts.min.css'] },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+
+    </script>
+
+    <!--   Core JS Files   -->
+    <script src="../assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="../assets/js/core/popper.min.js"></script>
+    <script src="../assets/js/core/bootstrap.min.js"></script>
+
+
+    <!-- Angular -->
+    <script src="../assets/js/angular.min.js"></script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/css/atlantis.css">
+    <link href="~/assets/css/colReorder.dataTables.min.css" rel="stylesheet" />
+    <link href="~/assets/css/select.dataTables.min.css" rel="stylesheet" />
+
+
+    @RenderSection("ScriptsAdicionalesLocales", required:false)
+
+<style>
+
+
+    table.dataTable thead tr {
+        background-color: #1572E8;
+        color: white
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: cadetblue;
+        color: white
+    }
+
+    /*.header th {
+        height: 25px;
+        line-height: 2px;
+    }*/
+
+    .header2 th {
+        height: 25px;
+        line-height: 2px;
+        background-color: yellowgreen
+    }
+
+    .popover {
+        background: orange;
+    }
+
+    .sidebar, .sidebar[data-background-color="white"] {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 250px;
+        margin-top: 62px;
+        display: block;
+        z-index: 1000;
+        color: #ffffff;
+        font-weight: 200;
+        background: #ffffff;
+        -webkit-box-shadow: 4px 4px 10px rgb(69 65 78 / 6%);
+        -moz-box-shadow: 4px 4px 10px rgba(69, 65, 78, 0.06);
+        box-shadow: 4px 4px 10px rgb(69 65 78 / 17%);
+        transition: all .3s;
+    }
+
+    .card, .card-light {
+        border-radius: 5px;
+        background-color: #ffffff;
+        margin-bottom: 30px;
+        -webkit-box-shadow: 2px 6px 15px 0px rgb(69 65 78 / 10%);
+        -moz-box-shadow: 2px 6px 15px 0px rgba(69, 65, 78, 0.1);
+        box-shadow: 2px 6px 15px 0px rgb(69 65 78 / 25%);
+        border: 0px;
+    }
+
+    .form-control {
+        font-size: 14px;
+        border-color: #b5c3e7;
+        padding: 0.6rem 1rem;
+        height: inherit !important;
+    }
+    [data-notify] {
+        z-index: 9999 !important;
+    }
+</style>
+
+</head>
+<body data-background-color="bg1">
+
+    <input type="hidden" id="ContraCamb" name="ContraCamb" value="@Session["ContraseñaCambiada"].ToString()" />
+
+    <!-- wrapper-->
+    <div id="divPrincipal" class="wrapper">
+
+        <div class="main-header">
+
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.ClaseLogo)">
+
+                <a href="#" class="logo">
+                    <img src="../assets/img/@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Logo)" height="60" alt="navbar brand" class="navbar-brand" title="Logo">
+                </a>
+
+                <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon">
+                        <i class="icon-menu"></i>
+                    </span>
+                </button>
+                <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+                <div class="nav-toggle">
+                    <button class="btn btn-toggle toggle-sidebar">
+                        <i class="icon-menu"></i>
+                    </button>
+                </div>
+
+            </div>
+            <!-- End Logo Header -->
+            <!-- Navbar Header -->
+            <nav class="navbar navbar-header navbar-expand-lg" data-background-color="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.ClaseLogo)">
+                <div class="container-fluid">
+
+
+                    <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+
+                        <!-- Notificaciones -->
+
+                        @if (Session["IdRol"] != null && Session["IdRol"].ToString() == "5")
+                        {
+                            <li class="nav-item dropdown hidden-caret">
+                                @if (Session["Pendientes"].ToString() != "0")
+                                {
+                                    <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-bell"></i>
+                                        <span class="notification">@Session["Pendientes"].ToString()</span>
+                                    </a>
+                                }
+                                <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                                    <li>
+                                        <div class="dropdown-title">Hay @Session["Pendientes"].ToString() nuevos asuntos para seguimiento</div>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        <li class="nav-item dropdown hidden-caret">
+                            <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                                <h3><i class="fas fa-user-alt text-info"></i></h3>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                <div class="dropdown-user-scroll scrollbar-outer">
+                                    <li>
+                                        <div class="user-box">
+                                            <div class="u-text">
+                                                <h4>@Session["NombreUsuario"].ToString()</h4>
+                                                @if (Session["NombreUsuario"].ToString().Contains("ALEJANDRO ROJAS") || Session["NombreUsuario"].ToString().Contains("MARISELA SAVIÑON"))
+                                                {
+                                                    <p class="text-muted">Dirección General</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="text-muted">@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Roles.Nombre)</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Home/CambiarContraseña">Cambiar Contraseña</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="/Home/Salir">Salir</a>
+                                    </li>
+                                </div>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- End Navbar -->
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar sidebar-style-2" data-background-color="custom" custom-color="#1f1e2e">
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <div class="user">
+                        <div class="text-center">
+
+                            <span class="text-dark font-weight-bold">
+                                @Session["NombreUsuario"].ToString()<br />
+
+                                @if (Session["NombreUsuario"].ToString().Contains("ALEJANDRO ROJAS") || Session["NombreUsuario"].ToString().Contains("MARISELA SAVIÑON"))
+                                {
+                                    <span class="user-level text-center">Dirección General</span>
+                                }
+                                else
+                                {
+                                    <span class="user-level text-center">@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Roles.Nombre)</span>
+                                }
+
+                            </span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-primary">
+
+                        @Html.Partial("_MenuLateral") <!--Menú estático-->
+                        @*@Html.Raw(Session["Menu"].ToString());*@ <!--Menú dinámico-->
+                        <!--Menú del administrador exclusivamente-->
+                        @if (Session["IdRol"] != null && Session["IdRol"].ToString() == "1")
+                        {
+                            @Html.Partial("_MenuAdministrador")
+                        }
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- End Sidebar -->
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="content">
+
+                @RenderBody()
+
+            </div>
+            <footer class="footer">
+                <div class="container-fluid">
+
+                    <div class="copyright ml-auto">
+                        @@2020 ASAE Consultores
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <!-- End Main Panel -->
+
+    </div>
+    <!-- end wrapper-->
+    <!-- jQuery UI -->
+    <script src="../assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="../assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Chart JS -->
+    <script src="../assets/js/plugin/chart.js/chart.min.js"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="../assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+
+    <!-- Chart Circle -->
+    <script src="../assets/js/plugin/chart-circle/circles.min.js"></script>
+
+    <!-- Datatables -->
+    <script src="../assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="../assets/js/plugin/datatables/dataTables.colReorder.min.js"></script>
+    <script src="../assets/js/plugin/datatables/dataTables.select.min.js"></script>
+
+    @RenderSection("scriptsTables", false)
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script src="http://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+
+    <!-- jQuery Vector Maps -->
+    <script src="../assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
+    <script src="../assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="../assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Atlantis JS -->
+    <script src="../assets/js/atlantis.min.js"></script>
+
+    <input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+    <input type="hidden" id="NomPag" value="@ViewBag.Title" />
+
+    <script>
+
+        $(document).ready(function () {
+
+            //Alerta para cambiar la contraseña asignada por el sistema a personal
+            if ($('#ContraCamb').val() === '0') {
+                $.notify('Modifique su contraseña. Detrás de este mensaje se encuentra el acceso para modificarla', { autohide: true, });
+            }
+
+            //Alerta para cambio de cotraseña a 12 dígitos
+            //$.notify({ icon: 'flaticon-alarm-1', message: 'A partir del 1o. de Octubre las contraseñas deberán cambiar a 12 dígitos.' }, {type: 'warning'}, { autohide: true, placement: { from: 'top', align: 'center' } });
+
+            //console.log('->' + $('#IdConfiguracion').val() + ' -> ' + $('#NomPag').val());
+            //Agrandar la página y disminuir el menú lateral
+            if ($('#IdConfiguracion').val() === '2' && $('#NomPag').val() === 'Listado' || $('#NomPag').val() === 'Medidores') {
+                $('#divPrincipal').addClass('wrapper sidebar_minimize');
+            }
+
+            $('#basic-datatables').DataTable({
+                colReorder: true,
+                "pageLength": 50,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }
+            });
+
+            $('#basic-datatables-compartidos').DataTable({
+                colReorder: true,
+                "pageLength": 50,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }
+            });
+
+            $('#basic-datatables2').DataTable({
+                "pageLength": 50,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }
+            });
+
+            $('#basic-datatables3').DataTable({
+                "pageLength": 20,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }
+            });
+
+            $('#basic-datatables-actividades').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }
+            });
+
+        });
+
+    </script>
+</body>
+</html>

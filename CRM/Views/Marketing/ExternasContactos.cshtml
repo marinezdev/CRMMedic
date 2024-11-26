@@ -1,0 +1,79 @@
+﻿@model List<CRM.Models.Models.AsaeWebUsuariosEventos>
+@{
+    ViewBag.Title = "Contactos de Campaña";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcExternas').addClass("active");
+        $('#Espera').hide();
+
+    });
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Contactos de la Campaña</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    <a href="/Marketing/ExternasEstadisticas?Evento=@Request["Evento"]">Estadísticas</a>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
+                                <th>Correo Empresa</th>
+                                <th>Correo Personal</th>
+                                <th>Teléfono Móvil</th><!--Modificar-->
+                                <th>Teléfono Local</th><!--Modificar-->
+                                <th>Confirmado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model != null)
+                            {
+
+                                foreach (var item in Model)
+                                {
+                                    var confirmed = item.Confirmado == true ? "Sí" : "No";
+                                    <tr>
+                                        <td>@item.Nombre @item.ApellidoPaterno @item.ApellidoMaterno</td>
+                                        <td>@item.NombreEmpresa</td>
+                                        <td>@item.CorreoEmpresa</td>
+                                        <td>@item.CorreoPersonal</td>
+                                        <td>@item.TelefonoMovil</td>
+                                        <td>@item.TelefonoLocal</td>
+                                        <td>@confirmed</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

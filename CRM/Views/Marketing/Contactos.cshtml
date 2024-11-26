@@ -1,0 +1,297 @@
+﻿@{
+    ViewBag.Title = "Contactos";
+}
+
+<link href="../assets/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="../assets/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+
+        $('#tableA').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 10,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            dom: 'Bfrtip',
+            buttons: [
+                'excel'
+            ]
+        });
+
+
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 5,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+        });
+    });
+
+    function SeguroEliminarRegistro(idcontacto,idcampaña) {
+        swal({
+            title: 'Eliminación de Contacto',
+            text: "¿Está seguro de querer eliminar este contacto?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: '¡Sí, eliminarlo!',
+                    className: 'btn btn-danger'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                $.ajax({
+                    type: 'GET',
+                    url: "/Marketing/MarketingContactoEliminar/",
+                    data: {
+                        idcontacto: idcontacto,
+                        idcampaña: idcampaña
+                    },
+                    contentType: "application/json",
+                    dataType: 'json',
+                    beforeSend: function () {
+                        $('#Espera').show();
+                    },
+                    success: function (data) {
+
+                        $.notify('Se eliminó el contacto seleccionado.', {
+                            autohide: true, type: 'success', placement: {
+                                from: 'bottom',
+                                align: 'right'
+                            }
+                        });
+
+                        location.href = '';
+                    },
+                    complete: function () {
+                        $('#Espera').hide();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    },
+                });
+            }
+        });
+    }
+
+    function AgregarContacto(idcontactoagregar) {
+        $.ajax({
+            type: 'GET',
+            url: "/Marketing/MarketingContactoAgregarACampaña/",
+            data: {
+                idcampaña: $('#IdCampaña').val(),
+                idcontacto: idcontactoagregar
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdCampaña" value="@Session["IdCampaña"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Contactos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <p><a href="/Marketing/Index">Campañas</a> | <a href="/Marketing/Alta">Agregar Campaña</a></p>
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="table-responsive">
+                                <h4>Contactos seleccionados para esta campaña</h4>
+                                <table id="tableA" class="display table-striped table-hover" style="width:100%">
+                                    <thead class="header2">
+                                        <tr>
+                                            <th class="text-center">Nombre</th>
+                                            <th>Empresa</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @if (ViewBag.MarketingContactos != null)
+                                        {
+                                            foreach (var itm in ViewBag.MarketingContactos)
+                                            {
+                                                <tr>
+                                                    <td>@itm.Contactos.Nombre @itm.Contactos.ApellidoPaterno @itm.Contactos.ApellidoMaterno</td>
+                                                    <td>@itm.Empresas.Nombre</td>
+                                                    <td align="center"><a href="#" onclick="SeguroEliminarRegistro(@itm.MarketingContactos.IdContacto,@itm.MarketingContactos.IdCampaña);"><i class='fas fa-trash text-danger' data-toggle='tooltip' data-placement='top' title='Eliminar'></i></a></td>
+                                                </tr>
+                                            }
+                                        }
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <br /><br />
+                    <hr />
+
+                    <div class="row">
+
+                        <div class="col-md-4 col-lg-4 bg-grey2">
+
+                            <div class="form-group">
+                                <label for="Nombre" class="col-md-3 col-form-label"></label><br />
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4 bg-grey2">
+
+                            <div class="form-group form-inline">
+                                <label for="Inicio" class="col-md-3 col-form-label"></label>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4 bg-grey2">
+                            <!--Agregar un nuevo contacto si no existe actualmente-->
+                            <div class="form-group form-inline">
+                                <!--label for="Fin" class="col-md-3 col-form-label"><a href="/Contactos/Alta3?IdCampaña=@Session["IdCampaña"]" class="btn btn-primary">Agregar Nuevo Contacto</a></label-->
+                                <label for="Fin" class="col-md-3 col-form-label"><a href="/Contactos/Alta2">Agregar Nuevo Contacto</a></label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                        <div class="row">
+
+                            <div class="col-md-12 col-lg-12">
+
+                                @if (ViewBag.Contactos != null)
+                                {
+                                    <div class="table-responsive">
+                                        <h4>Ver todos los contactos para seleccionar y agregar</h4>
+                                        <table id="basic-datatables-" class="display table-striped table-hover" style="width:100%">
+                                            <thead class="header">
+                                                <tr>
+                                                    <th class="text-center">Nombre</th>
+                                                    <th class="text-center">A. Paterno</th>
+                                                    <th class="text-center">A. Materno</th>
+                                                    <th class="text-center">Empresa</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                @foreach (var item in ViewBag.Contactos)
+                                                {
+                                                    <tr>
+                                                        <td>@item.Contactos.Nombre</td>
+                                                        <td>@item.Contactos.ApellidoPaterno</td>
+                                                        <td>@item.Contactos.ApellidoMaterno</td>
+                                                        <td>@item.Empresas.Nombre</td>
+                                                        <td align="center">
+                                                            <input type="checkbox" value="@item.Contactos.Id" name="contacto" onclick="AgregarContacto(@item.Contactos.Id);" />
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                                                
+                        <div class="card-action label-align-center">
+                            <button name="Boton1" type="submit" class="btn btn-success" onclick="location.href='';">Agregar Contactos Seleccionados</button>
+                            &nbsp;
+                            <button name="Boton2" type="submit" class="btn btn-warning">Agregar Todos</button>
+                        </div>
+                        
+
+                    <div class="card-action label-align-center">
+                        <button class="btn btn-info" onclick="location.href='/Marketing/Correo'">Agregar Correo</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scriptsTables{
+
+    <script src="../assets/js/plugin/datatables/dataTables.buttons.min.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.flash.min.js"></script>
+    <script src="../assets/js/plugin/datatables/jszip.min.js"></script>
+    <script src="../assets/js/plugin/datatables/pdfmake.min.js"></script>
+    <script src="../assets/js/plugin/datatables/vfs_fonts.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.html5.min.js"></script>
+    <script src="../assets/js/plugin/datatables/buttons.print.min.js"></script>
+
+}
+

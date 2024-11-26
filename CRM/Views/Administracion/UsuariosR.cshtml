@@ -1,0 +1,101 @@
+﻿
+@{
+    ViewBag.Title = "UsuariosR";
+}
+
+    <script>
+        $(document).ready(function () {
+            $('#opcContactos').addClass("nav-item active submenu");
+            $('#provs').addClass("collapse show");
+            $('#op1').addClass("active");
+
+        });
+    </script>
+
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">@CRM.Utilerias.Titulos.Contacto(Session["IdConfiguracion"].ToString(), "P")</h4>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="card">
+
+                    <div class="card-body">
+
+                        @if (Session["IdConfiguracion"].ToString() == "3")
+                        {
+                            <a href="/Administracion/UsuariosRAlta" class="btn btn-primary animated bounceInDown">Agregar Nuevo Proveedor</a>
+                        }
+                        <br /><br />
+                        <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <!--th>Empresa</th-->
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Celular</th>
+                                    <th>Persona</th>
+                                    <th>Procedencia</th>
+                                    <th>Modificar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var items in ViewBag.Usuarios)
+                                {
+                                    <tr>
+                                        <td>@items.Nombre</td>
+                                        <!--td>@items.EmpresaNombre</td-->
+                                        <td>@items.Correo</td>
+                                        <td>@items.Telefono</td>
+                                        <td>@items.Celular</td>
+                                        <td>
+                                            @if (items.FisicaMoral == 1)
+                                            {
+                                                <span>Física</span>
+                                            }
+                                            else if (items.FisicaMoral == 2)
+                                            {
+                                                <span>Moral</span>
+                                            }
+                                            else
+                                            {
+                                                <span>No definido</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (items.InternoExterno == 1)
+                                            {
+                                                <span>Interno</span>
+                                            }
+                                            else if (items.InternoExterno == 2)
+                                            {
+                                                <span>Externo</span>
+                                            }
+                                            else
+                                            {
+                                                <span>No definido</span>
+                                            }
+                                        </td>
+                                        <td align="center">
+                                            @Html.ActionLink(" ", // <-- Link text
+                                            "UsuariosREdicion", // <-- Action Method Name
+                                            new { IdUsuario = items.Id }, // <-- Route value
+                                            new { @class = "fas fa-clipboard-list", title = "Modificar" }
+                                                            )
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>

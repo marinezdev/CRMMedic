@@ -1,0 +1,624 @@
+﻿
+@{
+    ViewBag.Title = "AgregarArchivoResponsable2";
+}
+
+    <script>
+        $(document).ready(function () {
+
+            var obtenerParametrodeURL = function getUrlParameter(sParam) {
+                var sPageURL = window.location.search.substring(1),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName,
+                    i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+            };
+
+            var idd = obtenerParametrodeURL('Id');
+
+            $('#opcOport').addClass("nav-item active submenu");
+            //$('#oport').addClass("collapse show");
+            //$('#sopcBusq').addClass("active");
+
+            //Para ver el archivo en una ventana popup
+            $('#Popup').click(function () {
+                var NWin = window.open($(this).prop('href'), '', 'height=800,width=800');
+                if (window.focus) {
+                    NWin.focus();
+                }
+                return false;
+            });
+
+            $.ajax({
+                url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + $('#IdOportunidad').val(),
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+
+                    if (data.Oportunidades.Estado === 2 || data.Oportunidades.Estado === 5 || data.Oportunidades.Estado === 6 || data.Oportunidades.Estado === 7) {
+                        $('#Submit').hide();
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (errormessage) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'Ha habido un error al intentar procesar los datos (Seleccionar Por Id)',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                }
+            });
+
+        });
+
+        function SeleccionarPorId(id) {
+            $.ajax({
+                url: "/Oportunidades/ArchivosSeleccionarPorId/" + id,
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    $('#ModalNotas').modal('show');
+                    $('#Notas').val(data.Notas);
+                    $('#Version').val(data.Version);
+                    $('#IdArchivo').val(data.Id);
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (data) {
+                    //if (mensajesErrorActivados) {
+                    //    swal({
+                    //        title: 'CRM ASAE',
+                    //        text: 'Ha habido un error al intentar procesar los datos (Seleccionar Por Id)',
+                    //        icon: 'error',
+                    //        buttons: {
+                    //            confirm: {
+                    //                className: 'btn btn-error'
+                    //            }
+                    //        }
+                    //    });
+                    //}
+                }
+            });
+        }
+
+        function AgregarNotas() {
+            $.ajax({
+                type: 'GET',
+                url: "/Oportunidades/AgregarNotas",
+                data: {
+                    Notas: $("#Notas").val(),
+                    Version: $("#Version").val(),
+                    Id: $("#IdArchivo").val()
+                },
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    if (data === 1) {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardó el registro',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        }).then(
+                            function () {
+                                location.href = '/Oportunidades/AgregarArchivo?Id=' + $('#IdOportunidad').val();
+                            });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha ocurrido un error, revíselo en la consola para más información.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            console.log('jqXHR:');
+                            console.log(jqXHR);
+                            console.log('textStatus:');
+                            console.log(textStatus);
+                            console.log('errorThrown:');
+                            console.log(errorThrown);
+                        });
+                }
+            });
+        }
+
+        function SeguroEliminarArchivo(id) {
+            swal({
+                title: 'Eliminación de Archivo',
+                text: "¿Está seguro de querer eliminar este archivo?",
+                type: 'warning',
+                buttons: {
+                    confirm: {
+                        text: 'Si, eliminarlo!',
+                        className: 'btn btn-success'
+                    },
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-warning',
+                        text: 'Cancelar'
+                    }
+                }
+            }).then((Delete) => {
+                if (Delete) {
+                    location.href = '/Oportunidades/EliminarArchivo?id=' + id;
+                }
+            });
+        }
+
+        function ModalAsunto(idoportunidad) {
+            //Cargar el detalle del asunto
+            $('#ModalAsunto').modal('show');
+            SeleccionarOportunidadPorId(idoportunidad);
+        }
+
+        function SeleccionarOportunidadPorId(id) {
+            $.ajax({
+                type: 'GET',
+                url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + id,
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    //console.log(data);
+                    //Cargar el detalle del asunto
+                    $('#NombreAsunto').text(data.Oportunidades.Nombre);
+                    $('#Importe').text(data.Oportunidades.Importe);
+
+                    var fechaCierre = new Date(parseInt(data.Oportunidades.Cierre.substr(6)));
+                    var mes = (fechaCierre.getMonth() + 1) < 10 ? '0' + (fechaCierre.getMonth() + 1) : (fechaCierre.getMonth() + 1);
+                    $('#Cierre').text(fechaCierre.getFullYear() + '-' + mes + '-' + fechaCierre.getDate());
+                    $('#Atencion').text(data.Oportunidades.PeriodoAtencionNombre);
+
+                    $('#Contraparte').text(data.Oportunidades.Contraparte);
+
+                    var fechaAviso = new Date(parseInt(data.Oportunidades.Aviso.substr(6)));
+                    var mes = (fechaAviso.getMonth() + 1) < 10 ? '0' + (fechaAviso.getMonth() + 1) : (fechaAviso.getMonth() + 1);
+                    $('#Aviso').text(fechaAviso.getFullYear() + '-' + mes + '-' + fechaAviso.getDate());
+
+                    var ultimafechaescalacion = new Date(parseInt(data.Escalacion.Fecha.substr(6)));
+                    var mes = (ultimafechaescalacion.getMonth() + 1) < 10 ? '0' + (ultimafechaescalacion.getMonth() + 1) : (ultimafechaescalacion.getMonth() + 1);
+                    $('#Escalacion').text(ultimafechaescalacion.getFullYear() + '-' + mes + '-' + ultimafechaescalacion.getDate());
+
+                    $('#Clasificacion').text(data.Clasificacion.Nombre);
+                    $('#SubClasificacion').text(data.SubClasificacion.Nombre);
+
+                    $('#Notas').text(data.Oportunidades.Notas);
+
+                    SeleccionarActividadesPorId(id);
+
+                    //SeleccionarArchivosPorId(id);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+            });
+        }
+
+        function SeleccionarActividadesPorId(id) {
+            $.ajax({
+                type: 'GET',
+                url: "/Oportunidades/SeleccionarActividadesPorIdOportunidad/" + id,
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    //Cargar las actividades
+                    //console.log(data);
+                    if (typeof data[0] === 'undefined') {
+                        $('#basic-datatables-actividades').dataTable().fnClearTable();
+                    }
+                    else {
+                        $('#basic-datatables-actividades').DataTable().clear();
+                        for (var i = 0; i < data.length; i++) {
+                            var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                            $('#basic-datatables-actividades').dataTable().fnAddData([
+                                data[i].NombreUsuario,
+                                data[i].ActividadNombre,
+                                fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                                data[i].Notas
+                            ]);
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+            });
+        }
+
+        function SeleccionarArchivosPorId(id) {
+            $.ajax({
+                type: 'GET',
+                url: "/Oportunidades/ObtenerArchivos/" + id,
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+                    //Cargar los archivos
+                    var len = data.length;
+                    $('#basic-datatables-archivos').empty();
+                    var firstRow = '<tr><th>Nombre</th><th></th></tr>';
+                    $('#basic-datatables-archivos').append(firstRow);
+                    for (var i = 0; i < data.length; i++) {
+                        var row = '<tr>' +
+                            '<td>' + data[i].Nombre + '</td>' +
+                            '<td><a href=/Archivos/' + data[i].Nombre + ' target=_blank>' + data[i].Nombre + '</a></td>' +
+                            '</tr>';
+                        $('#basic-datatables-archivos').append(row);
+                    }
+                },
+                error: function (data) {
+                    //swal({
+                    //    title: 'CRM ASAE',
+                    //    text: 'Ha habido un error al intentar procesar los datos',
+                    //    icon: 'error',
+                    //    buttons: {
+                    //        confirm: {
+                    //            className: 'btn btn-error'
+                    //        }
+                    //    }
+                    //});
+                },
+            });
+        }
+
+    </script>
+
+<input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Archivos/Documentos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Session["NombreTema"]</h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!--Menu-->
+                        <ul class="nav nav-line nav-color-secondary">
+                            <li class="nav-item">
+
+                                <a href="/Home/Index2" class="nav-link">
+                                    <span class="btn-label">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    Volver
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a href="/Oportunidades/ResponsableActividades?Id=@Session["IdOportunidad"].ToString()" class="nav-link">
+                                    <span class="btn-label">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </span>
+                                    Bitácora
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/Oportunidades/AgregarArchivoResponsable2?Id=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                                    <span class="btn-label">
+                                        <i class="fas fa-file-upload"></i>
+                                    </span>
+                                    Subir Archivos/Documentos
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a href="#" onclick="ModalAsunto(@Session["IdOportunidad"].ToString());" class="nav-link">
+                                    <span class="btn-label">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </span>
+                                    Detalle Asunto
+                                </a>
+
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="row form-inline col-md-12">
+
+                            <div class="form-group">
+
+                                <form method="post" action="AgregarArchivoRes2" enctype="multipart/form-data" class="input-group animated bounceInDown">
+                                    <input type="file" id="archivo" name="archivo" />&nbsp;
+                                    <input type="hidden" id="IdOportunidad2" name="IdOportunidad2" value="@Session["IdOportunidad"].ToString()" />
+                                    <input type="submit" id="Submitx" name="Submitx" value="Subir" data-dismiss="modal" style="height:25px; background-color: limegreen; color: white" />
+                                </form>
+
+                            </div>
+
+                            <div class="border"></div>
+
+                            @Html.Raw(ViewBag.Procesado)
+
+                            @if (ViewBag.Archivos.Count > 0)
+                            {
+
+                                <div class="table-responsive">
+                                    <br /><br />
+                                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                                        <thead class="header">
+                                            <tr>
+                                                <th style="width:200px">Nombre del Archivo</th>
+                                                <th>Fecha</th>
+                                                <th>Versión</th>
+                                                <th>Notas</th>
+                                                <th>Modificar</th>
+                                                <th>Eliminar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var items in ViewBag.Archivos)
+                                            {
+                                                <tr>
+                                                    <td><a href="~/Archivos/@items.Nombre" id="Popup">@items.Nombre</a></td>
+                                                    <td>@items.Fecha.ToString("dd/MM/yyyy")</td>
+                                                    <td>@items.Version</td>
+                                                    <td>@items.Notas</td>
+                                                    <td align="center"><a href="#" onclick="SeleccionarPorId(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Modificar'></i></a></td>
+                                                    <td align="center">
+                                                        <span class="stamp stamp-sm bg-danger">
+                                                            <a href="#" onclick="SeguroEliminarArchivo(@items.Id);"><i class='fas fa-trash' data-toggle='tooltip' data-placement='top' title='Eliminar'></i></a>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAsunto" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Información General del Asunto al que se le da Seguimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+                <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Asunto</a>
+                    </li>
+                   <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Actividades</a>
+                    </li>
+                        @*<li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Archivos</a>
+                    </li>*@
+                </ul>
+                <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <p style="width: 650px;"></p>
+
+                        <div class="row">
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Objeto:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Nombre:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Vencimiento:</label>
+                                    <label class="label" id="Cierre" name="Cierre"></label>
+                                </div>
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Contraparte:</label>
+                                        <label class="label" id="Contraparte" name="Contraparte"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Per. Atención:</label>
+                                        <label class="label" id="Atencion" name="Atencion"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Clasificación:</label>
+                                    <label class="label" id="Clasificacion" name="Clasificacion"></label>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Características:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Importe:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Aviso:</label>
+                                    <label class="label" id="Aviso" name="Aviso"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Escalación:</label>
+                                    <label class="label" id="Escalacion" name="Escalacion"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4 col-form-label">Sub-Clasificación:</label>
+                                    <label class="label" id="SubClasificacion" name="SubClasificacion"></label>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label class="col-md-3 col-form-label">Notas</label>
+                            <label class="label" id="Notas" name="Notas"></label>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+
+                        <table id="basic-datatables-actividades" class="display table table-striped table-hover">
+                            <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                        @*<div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                            <p style="width: 650px;"></p>
+
+                            <table id="basic-datatables-archivos" class="display table table-striped table-hover"></table>
+
+                        </div>*@
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNotas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Notas</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="Version" class="col-md-3 col-form-label fc-left">Versión</label>
+                        <div class="col-md-8 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" id="Version" name="Version" placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label for="Notas" class="col-md-3 col-form-label fc-left">Notas</label>
+                        <div class="col-md-9 p-0">
+                            <textarea class="form-control form-control-sm input-solid" name="Notas" id="Notas" cols="35" rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="IdArchivo" name="IdArchivo" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="AgregarNotas();">Aceptar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,703 @@
+USE [master]
+GO
+/****** Object:  Database [CRM]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+CREATE DATABASE [CRM]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'CRM', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLEXPRESS\MSSQL\DATA\CRM.mdf' , SIZE = 5120KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'CRM_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLEXPRESS\MSSQL\DATA\CRM_log.ldf' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [CRM] SET COMPATIBILITY_LEVEL = 120
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [CRM].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [CRM] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [CRM] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [CRM] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [CRM] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [CRM] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [CRM] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [CRM] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [CRM] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [CRM] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [CRM] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [CRM] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [CRM] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [CRM] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [CRM] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [CRM] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [CRM] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [CRM] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [CRM] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [CRM] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [CRM] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [CRM] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [CRM] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [CRM] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [CRM] SET  MULTI_USER 
+GO
+ALTER DATABASE [CRM] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [CRM] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [CRM] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [CRM] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+GO
+ALTER DATABASE [CRM] SET DELAYED_DURABILITY = DISABLED 
+GO
+USE [CRM]
+GO
+/****** Object:  Synonym [dbo].[OECU]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+CREATE SYNONYM [dbo].[OECU] FOR [CRM].[dbo].[OportunidadesEmpresasContactosUsuarios]
+GO
+/****** Object:  Synonym [dbo].[TUCE]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+CREATE SYNONYM [dbo].[TUCE] FOR [CRM].[dbo].[TareasUsuariosContactosEmpresas]
+GO
+/****** Object:  Table [dbo].[Actividades]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Actividades](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+ CONSTRAINT [PK_Actividades] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Archivos]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Archivos](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[IdOportunidad] [int] NULL,
+ CONSTRAINT [PK_Archivos] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ArchivosBitacora]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ArchivosBitacora](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](150) NULL,
+	[IdBitacora] [int] NULL,
+ CONSTRAINT [PK_ArchivosBitacora] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Bitacora]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Bitacora](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Notas] [nvarchar](max) NULL,
+	[Fecha] [datetime] NULL,
+	[Estado] [int] NULL,
+	[IdResponsable] [int] NULL,
+	[IdOportunidad] [int] NULL,
+	[IdClasificacionResponsable] [int] NULL,
+	[IdSubClasificacionResponsable] [int] NULL,
+ CONSTRAINT [PK_Bitacora] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Clasificacion]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Clasificacion](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+ CONSTRAINT [PK_Clasificacion] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ClasificacionRolesContactos]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ClasificacionRolesContactos](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+ CONSTRAINT [PK_ClasificacionRolesContactos] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ClassSubClass]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ClassSubClass](
+	[IdOportunidad] [int] NULL,
+	[Campo1] [nvarchar](max) NULL,
+	[Campo2] [nvarchar](max) NULL,
+	[Campo3] [nvarchar](max) NULL,
+	[Campo4] [nvarchar](max) NULL,
+	[IdClasificacion] [int] NULL,
+	[IdSubClasificacion] [int] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ContactoRol]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ContactoRol](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[IdClasificacionRolesContactos] [int] NULL,
+ CONSTRAINT [PK_ContactoRol] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Contactos]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Contactos](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[ApellidoPaterno] [nvarchar](50) NULL,
+	[ApellidoMaterno] [nvarchar](50) NULL,
+	[Correo] [nvarchar](150) NULL,
+	[Telefono] [nvarchar](50) NULL,
+	[Celular] [nvarchar](50) NULL,
+	[Direccion] [nvarchar](50) NULL,
+	[Ciudad] [nvarchar](50) NULL,
+	[Estado] [int] NULL,
+	[Cargo] [nvarchar](50) NULL,
+	[FechaCumpleaños] [nvarchar](50) NULL,
+	[TipoContacto] [int] NULL,
+	[Notas] [nvarchar](max) NULL,
+	[Alta] [datetime] NULL,
+	[UsuarioAlta] [int] NULL,
+	[ContactoUsuario] [int] NULL,
+	[IdUsuarioResponsable] [int] NULL,
+ CONSTRAINT [PK_Contactos] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ContactosEmpresas]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ContactosEmpresas](
+	[IdContacto] [int] NULL,
+	[IdEmpresa] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Empresas]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Empresas](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[Telefono] [nvarchar](50) NULL,
+	[Correo] [nvarchar](150) NULL,
+	[PaginaWeb] [nvarchar](150) NULL,
+	[Direccion] [nvarchar](250) NULL,
+	[Ciudad] [nvarchar](50) NULL,
+	[Estado] [int] NULL,
+	[Prospecto] [bit] NULL,
+	[Cliente] [bit] NULL,
+	[Competidor] [bit] NULL,
+	[Sector] [int] NULL,
+	[Alta] [datetime] NULL,
+	[IdUsuario] [int] NULL,
+	[RFC] [nvarchar](50) NULL,
+ CONSTRAINT [PK_Empresas] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EmpresasUsuarios]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EmpresasUsuarios](
+	[IdEmpresa] [int] NULL,
+	[IdUsuario] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Escalacion]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Escalacion](
+	[IdOportunidad] [int] NULL,
+	[Fecha] [date] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EtapasBitacora]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EtapasBitacora](
+	[IdBitacora] [int] NULL,
+	[Estado] [int] NULL,
+	[Fecha] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EtapasOportunidad]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EtapasOportunidad](
+	[IdOportunidad] [int] NULL,
+	[Etapa] [int] NULL,
+	[Fecha] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Oportunidades]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Oportunidades](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[Importe] [nvarchar](50) NULL,
+	[Cierre] [date] NULL,
+	[Asignado] [int] NULL,
+	[Probabilidad] [int] NULL,
+	[Etapa] [int] NULL,
+	[Avance] [int] NULL,
+	[Notas] [nvarchar](250) NULL,
+	[Fecha] [datetime] NULL,
+	[IdUsuario] [int] NULL,
+	[IdClasificacion] [int] NULL,
+	[IdSubClasificacion] [int] NULL,
+	[PeriodoAtencion] [int] NULL,
+	[Aviso] [datetime] NULL,
+	[Estado] [int] NULL,
+ CONSTRAINT [PK_Oportunidades] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[OportunidadesActividades]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OportunidadesActividades](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[TipoActividad] [int] NULL,
+	[Fecha] [date] NULL,
+	[Notas] [nvarchar](250) NULL,
+	[IdOportunidad] [int] NULL,
+	[Agregado] [datetime] NULL,
+	[IdUsuario] [int] NULL,
+ CONSTRAINT [PK_OportunidadesActividades] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[OportunidadesEmpresasContactosUsuarios]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OportunidadesEmpresasContactosUsuarios](
+	[IdOportunidad] [int] NULL,
+	[IdEmpresa] [int] NULL,
+	[IdContacto] [int] NULL,
+	[IdUsuario] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[OportunidadesResponsables]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[OportunidadesResponsables](
+	[IdOportunidad] [int] NULL,
+	[IdAsignado] [int] NULL,
+	[IdClasificacionResponsable] [int] NULL,
+	[IdSubClasificacionResponsable] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Roles]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Roles](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[Observaciones] [nvarchar](max) NULL,
+	[Activo] [bit] NULL,
+ CONSTRAINT [PK_Roles] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[SubClasificacion]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SubClasificacion](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[IdClasificacion] [int] NULL,
+ CONSTRAINT [PK_SubClasificacion] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Tareas]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tareas](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Asunto] [nvarchar](50) NULL,
+	[Inicio] [date] NULL,
+	[Fin] [date] NULL,
+	[HoraInicio] [time](7) NULL,
+	[HoraFin] [time](7) NULL,
+	[Actividad] [int] NULL,
+	[Estado] [int] NULL,
+	[Notas] [nvarchar](150) NULL,
+	[Avance] [int] NULL,
+	[Prioridad] [int] NULL,
+	[Alta] [datetime] NULL,
+ CONSTRAINT [PK_Tareas] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TareasUsuariosContactosEmpresas]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TareasUsuariosContactosEmpresas](
+	[IdTarea] [int] NULL,
+	[IdUsuario] [int] NULL,
+	[IdContacto] [int] NULL,
+	[IdEmpresa] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Usuarios]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Usuarios](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](250) NULL,
+	[ApellidoPaterno] [nvarchar](150) NULL,
+	[ApellidoMaterno] [nvarchar](150) NULL,
+	[Correo] [nvarchar](150) NULL,
+	[Clave] [nvarchar](50) NULL,
+	[Contraseña] [nvarchar](50) NULL,
+	[Activo] [bit] NULL,
+	[Conectado] [bit] NULL,
+	[Alta] [datetime] NULL,
+ CONSTRAINT [PK_Usuarios] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[UsuariosEmpresasOportunidades]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuariosEmpresasOportunidades](
+	[IdUsuario] [int] NULL,
+	[IdEmpresa] [int] NULL,
+	[IdOportunidad] [int] NULL,
+	[IdBitacora] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[UsuariosRoles]    Script Date: 21/03/2020 08:14:08 p.m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsuariosRoles](
+	[IdUsuario] [int] NULL,
+	[IdRol] [int] NULL
+) ON [PRIMARY]
+
+GO
+ALTER TABLE [dbo].[Bitacora] ADD  CONSTRAINT [DF_Bitacora_Fecha]  DEFAULT (getdate()) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[Bitacora] ADD  CONSTRAINT [DF_Bitacora_Estado]  DEFAULT ((1)) FOR [Estado]
+GO
+ALTER TABLE [dbo].[Contactos] ADD  CONSTRAINT [DF_Contactos_Alta]  DEFAULT (getdate()) FOR [Alta]
+GO
+ALTER TABLE [dbo].[Contactos] ADD  CONSTRAINT [DF_Contactos_ContactoUsuario]  DEFAULT ((0)) FOR [ContactoUsuario]
+GO
+ALTER TABLE [dbo].[Empresas] ADD  CONSTRAINT [DF_Empresas_Alta]  DEFAULT (getdate()) FOR [Alta]
+GO
+ALTER TABLE [dbo].[EtapasBitacora] ADD  CONSTRAINT [DF_EtapasBitacora_Fecha]  DEFAULT (getdate()) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[EtapasOportunidad] ADD  CONSTRAINT [DF_Etapas_Fecha]  DEFAULT (getdate()) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Asignado]  DEFAULT ((0)) FOR [Asignado]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Probabilidad]  DEFAULT ((0)) FOR [Probabilidad]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Etapa]  DEFAULT ((0)) FOR [Etapa]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Avance]  DEFAULT ((0)) FOR [Avance]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Fecha]  DEFAULT (getdate()) FOR [Fecha]
+GO
+ALTER TABLE [dbo].[Oportunidades] ADD  CONSTRAINT [DF_Oportunidades_Estado]  DEFAULT ((1)) FOR [Estado]
+GO
+ALTER TABLE [dbo].[OportunidadesActividades] ADD  CONSTRAINT [DF_OportunidadesActividades_Agregado]  DEFAULT (getdate()) FOR [Agregado]
+GO
+ALTER TABLE [dbo].[Tareas] ADD  CONSTRAINT [DF_Tareas_Alta]  DEFAULT (getdate()) FOR [Alta]
+GO
+ALTER TABLE [dbo].[Usuarios] ADD  CONSTRAINT [DF_Usuarios_Alta]  DEFAULT (getdate()) FOR [Alta]
+GO
+ALTER TABLE [dbo].[Archivos]  WITH CHECK ADD  CONSTRAINT [FK_Archivos_Oportunidades] FOREIGN KEY([IdOportunidad])
+REFERENCES [dbo].[Oportunidades] ([Id])
+GO
+ALTER TABLE [dbo].[Archivos] CHECK CONSTRAINT [FK_Archivos_Oportunidades]
+GO
+ALTER TABLE [dbo].[ArchivosBitacora]  WITH CHECK ADD  CONSTRAINT [FK_ArchivosBitacora_Bitacora] FOREIGN KEY([IdBitacora])
+REFERENCES [dbo].[Bitacora] ([Id])
+GO
+ALTER TABLE [dbo].[ArchivosBitacora] CHECK CONSTRAINT [FK_ArchivosBitacora_Bitacora]
+GO
+ALTER TABLE [dbo].[Bitacora]  WITH CHECK ADD  CONSTRAINT [FK_Bitacora_Usuarios] FOREIGN KEY([IdResponsable])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[Bitacora] CHECK CONSTRAINT [FK_Bitacora_Usuarios]
+GO
+ALTER TABLE [dbo].[ContactoRol]  WITH CHECK ADD  CONSTRAINT [FK_ContactoRol_ClasificacionRolesContactos] FOREIGN KEY([IdClasificacionRolesContactos])
+REFERENCES [dbo].[ClasificacionRolesContactos] ([Id])
+GO
+ALTER TABLE [dbo].[ContactoRol] CHECK CONSTRAINT [FK_ContactoRol_ClasificacionRolesContactos]
+GO
+ALTER TABLE [dbo].[ContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_ContactosEmpresas_Contactos] FOREIGN KEY([IdContacto])
+REFERENCES [dbo].[Contactos] ([Id])
+GO
+ALTER TABLE [dbo].[ContactosEmpresas] CHECK CONSTRAINT [FK_ContactosEmpresas_Contactos]
+GO
+ALTER TABLE [dbo].[ContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_ContactosEmpresas_Empresas] FOREIGN KEY([IdEmpresa])
+REFERENCES [dbo].[Empresas] ([Id])
+GO
+ALTER TABLE [dbo].[ContactosEmpresas] CHECK CONSTRAINT [FK_ContactosEmpresas_Empresas]
+GO
+ALTER TABLE [dbo].[EmpresasUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_EmpresasUsuarios_Empresas] FOREIGN KEY([IdEmpresa])
+REFERENCES [dbo].[Empresas] ([Id])
+GO
+ALTER TABLE [dbo].[EmpresasUsuarios] CHECK CONSTRAINT [FK_EmpresasUsuarios_Empresas]
+GO
+ALTER TABLE [dbo].[EmpresasUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_EmpresasUsuarios_Usuarios] FOREIGN KEY([IdUsuario])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[EmpresasUsuarios] CHECK CONSTRAINT [FK_EmpresasUsuarios_Usuarios]
+GO
+ALTER TABLE [dbo].[EtapasBitacora]  WITH CHECK ADD  CONSTRAINT [FK_EtapasBitacora_Bitacora] FOREIGN KEY([IdBitacora])
+REFERENCES [dbo].[Bitacora] ([Id])
+GO
+ALTER TABLE [dbo].[EtapasBitacora] CHECK CONSTRAINT [FK_EtapasBitacora_Bitacora]
+GO
+ALTER TABLE [dbo].[EtapasOportunidad]  WITH CHECK ADD  CONSTRAINT [FK_Etapas_Oportunidades] FOREIGN KEY([IdOportunidad])
+REFERENCES [dbo].[Oportunidades] ([Id])
+GO
+ALTER TABLE [dbo].[EtapasOportunidad] CHECK CONSTRAINT [FK_Etapas_Oportunidades]
+GO
+ALTER TABLE [dbo].[Oportunidades]  WITH CHECK ADD  CONSTRAINT [FK_Oportunidades_Clasificacion] FOREIGN KEY([IdClasificacion])
+REFERENCES [dbo].[Clasificacion] ([Id])
+GO
+ALTER TABLE [dbo].[Oportunidades] CHECK CONSTRAINT [FK_Oportunidades_Clasificacion]
+GO
+ALTER TABLE [dbo].[Oportunidades]  WITH CHECK ADD  CONSTRAINT [FK_Oportunidades_SubClasificacion] FOREIGN KEY([IdSubClasificacion])
+REFERENCES [dbo].[SubClasificacion] ([Id])
+GO
+ALTER TABLE [dbo].[Oportunidades] CHECK CONSTRAINT [FK_Oportunidades_SubClasificacion]
+GO
+ALTER TABLE [dbo].[OportunidadesActividades]  WITH CHECK ADD  CONSTRAINT [FK_OportunidadesActividades_Oportunidades] FOREIGN KEY([IdOportunidad])
+REFERENCES [dbo].[Oportunidades] ([Id])
+GO
+ALTER TABLE [dbo].[OportunidadesActividades] CHECK CONSTRAINT [FK_OportunidadesActividades_Oportunidades]
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Contactos] FOREIGN KEY([IdContacto])
+REFERENCES [dbo].[Contactos] ([Id])
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios] CHECK CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Contactos]
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Empresas] FOREIGN KEY([IdEmpresa])
+REFERENCES [dbo].[Empresas] ([Id])
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios] CHECK CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Empresas]
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Oportunidades] FOREIGN KEY([IdOportunidad])
+REFERENCES [dbo].[Oportunidades] ([Id])
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios] CHECK CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Oportunidades]
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios]  WITH CHECK ADD  CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Usuarios] FOREIGN KEY([IdUsuario])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[OportunidadesEmpresasContactosUsuarios] CHECK CONSTRAINT [FK_OportunidadesActividadesEmpresasContactosUsuarios_Usuarios]
+GO
+ALTER TABLE [dbo].[SubClasificacion]  WITH CHECK ADD  CONSTRAINT [FK_SubClasificacion_Clasificacion] FOREIGN KEY([IdClasificacion])
+REFERENCES [dbo].[Clasificacion] ([Id])
+GO
+ALTER TABLE [dbo].[SubClasificacion] CHECK CONSTRAINT [FK_SubClasificacion_Clasificacion]
+GO
+ALTER TABLE [dbo].[Tareas]  WITH CHECK ADD  CONSTRAINT [FK_Tareas_Actividades] FOREIGN KEY([Actividad])
+REFERENCES [dbo].[Actividades] ([Id])
+GO
+ALTER TABLE [dbo].[Tareas] CHECK CONSTRAINT [FK_Tareas_Actividades]
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Contactos] FOREIGN KEY([IdContacto])
+REFERENCES [dbo].[Contactos] ([Id])
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas] CHECK CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Contactos]
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Empresas] FOREIGN KEY([IdEmpresa])
+REFERENCES [dbo].[Empresas] ([Id])
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas] CHECK CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Empresas]
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Tareas] FOREIGN KEY([IdTarea])
+REFERENCES [dbo].[Tareas] ([Id])
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas] CHECK CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Tareas]
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas]  WITH CHECK ADD  CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Usuarios] FOREIGN KEY([IdUsuario])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[TareasUsuariosContactosEmpresas] CHECK CONSTRAINT [FK_TareasUsuariosContactosEmpresas_Usuarios]
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosEmpresasOportunidades_Bitacora] FOREIGN KEY([IdBitacora])
+REFERENCES [dbo].[Bitacora] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades] CHECK CONSTRAINT [FK_UsuariosEmpresasOportunidades_Bitacora]
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosEmpresasOportunidades_Empresas] FOREIGN KEY([IdEmpresa])
+REFERENCES [dbo].[Empresas] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades] CHECK CONSTRAINT [FK_UsuariosEmpresasOportunidades_Empresas]
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosEmpresasOportunidades_Oportunidades] FOREIGN KEY([IdOportunidad])
+REFERENCES [dbo].[Oportunidades] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades] CHECK CONSTRAINT [FK_UsuariosEmpresasOportunidades_Oportunidades]
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosEmpresasOportunidades_Usuarios] FOREIGN KEY([IdUsuario])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosEmpresasOportunidades] CHECK CONSTRAINT [FK_UsuariosEmpresasOportunidades_Usuarios]
+GO
+ALTER TABLE [dbo].[UsuariosRoles]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosRoles_Roles] FOREIGN KEY([IdRol])
+REFERENCES [dbo].[Roles] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosRoles] CHECK CONSTRAINT [FK_UsuariosRoles_Roles]
+GO
+ALTER TABLE [dbo].[UsuariosRoles]  WITH CHECK ADD  CONSTRAINT [FK_UsuariosRoles_Usuarios] FOREIGN KEY([IdUsuario])
+REFERENCES [dbo].[Usuarios] ([Id])
+GO
+ALTER TABLE [dbo].[UsuariosRoles] CHECK CONSTRAINT [FK_UsuariosRoles_Usuarios]
+GO
+USE [master]
+GO
+ALTER DATABASE [CRM] SET  READ_WRITE 
+GO

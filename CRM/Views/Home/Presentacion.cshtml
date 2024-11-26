@@ -1,0 +1,429 @@
+﻿
+@{
+    ViewBag.Title = "Presentacion";
+}
+
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/Home/DatosTablas"
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+
+                Circles.create({
+                    id: 'circles-1',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Contactos,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-2',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 1000,
+                    width: 7,
+                    text: data.Empresas,
+                    colors: ['#f1f1f1', '#2BB930'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-3',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Tareas,
+                    colors: ['#f1f1f1', '#F25961'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-4',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Oportunidades,
+                    colors: ['#f1f1f1', '#F25400'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-5',
+                    radius: 45,
+                    value: 5,
+                    maxValue: 10,
+                    width: 7,
+                    text: data.Comerciales,
+                    colors: ['#f1f1f1', '#F37111'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var par = obtenerParametrodeURL('p');
+
+
+    });
+    function Empresas() {
+        $.ajax({
+            type: "GET",
+            url: "/Home/SeleccionarEmpresasConexiones",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                var len = data.length;
+                // Cargar los datos
+                $('#Titulo').text("Empresas");
+                $('#basic-datatables').empty();
+                var firstRow = '<tr><th>Empresa</th><th>Contactos</th><th>Oportunidades</th><th>Tareas</th></tr>';
+                $('#basic-datatables').append(firstRow);
+
+                for (var i = 0; i < len; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Empresas.Nombre + '</td>' +
+                        '<td>' + data[i].Contactos.Nombre + '</td>' +
+                        '<td>' + data[i].Oportunidades.Nombre + '</td>' +
+                        '<td>' + data[i].Tareas.Asunto + '</td>' +
+                        '</tr>';
+                    $('#basic-datatables').append(row);
+                }
+            },
+            error: function (errormessage) {
+                //$.notify(errormessage.responseText, 'warning');
+            }
+        });
+    }
+    function Contactos() {
+        $('#Titulo').text("Contactos");
+        $.ajax({
+            type: "GET",
+            url: "/Home/SeleccionarContactosConexiones",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                var len = data.length;
+                // Cargar los datos
+                $('#basic-datatables').empty();
+                var firstRow = '<tr><th>Contactos</th><th>Empresa</th><th>Oportunidades</th><th>Tareas</th></tr>';
+                $('#basic-datatables').append(firstRow);
+
+                for (var i = 0; i < len; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Contactos.Nombre + '</td>' +
+                        '<td>' + data[i].Empresas.Nombre + '</td>' +
+                        '<td>' + data[i].Oportunidades.Nombre + '</td>' +
+                        '<td>' + data[i].Tareas.Asunto + '</td>' +
+                        '</tr > ';
+                    $('#basic-datatables').append(row);
+                }
+            },
+            error: function (errormessage) {
+                //$.notify(errormessage.responseText, 'warning');
+            }
+        });
+    }
+    function Oportunidades() {
+        $('#Titulo').text("Oportunidades");
+        $.ajax({
+            type: "GET",
+            url: "/Home/SeleccionarOportunidadesConexiones",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                var len = data.length;
+                // Cargar los datos
+                $('#basic-datatables').empty();
+                var firstRow = '<tr><th>Empresa</th><th>Contactos</th><th>Oportunidades</th><th></th></tr>';
+                $('#basic-datatables').append(firstRow);
+
+                for (var i = 0; i < len; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Contactos.Nombre + '</td>' +
+                        '<td>' + data[i].Empresas.Nombre + '</td>' +
+                        '<td>' + data[i].Oportunidades.Nombre + '</td>' +
+                        '<td></td>' +
+                        '</tr > ';
+                    $('#basic-datatables').append(row);
+                }
+            },
+            error: function (errormessage) {
+                //$.notify(errormessage.responseText, 'warning');
+            }
+        });
+    }
+    function Tareas() {
+        $('#Titulo').text("Tareas");
+        $.ajax({
+            type: "GET",
+            url: "/Home/SeleccionarTareasConexiones",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                var len = data.length;
+                // Cargar los datos
+                $('#basic-datatables').empty();
+                var firstRow = '<tr><th>Empresa</th><th>Contactos</th><th>Tareas</th><th></th></tr>';
+                $('#basic-datatables').append(firstRow);
+
+                for (var i = 0; i < data.length; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Contactos.Nombre + '</td>' +
+                        '<td>' + data[i].Empresas.Nombre + '</td>' +
+                        '<td>' + data[i].Tareas.Asunto + '</td>' +
+                        '<td></td>' +
+                        '</tr > ';
+                    $('#basic-datatables').append(row);
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+    function Comerciales() {
+        $('#Titulo').text("Comerciales");
+        $.ajax({
+            type: "GET",
+            url: "/Home/SeleccionarUsuariosConexiones",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                var len = data.length;
+                // Cargar los datos
+                $('#basic-datatables').empty();
+                var firstRow = '<tr><th>Usuario</th><th>Operaciones</th><th>Tareas</th><th></th></tr>';
+                $('#basic-datatables').append(firstRow);
+
+                for (var i = 0; i < len; i++) {
+                    var row = '<tr>' +
+                        '<td>' + data[i].Usuarios.Nombre + '</td>' +
+                        '<td>' + data[i].Oportunidades.Importe + '</td>' +
+                        '<td>' + data[i].Tareas.Asunto + '</td>' +
+                        '<td></td>' +
+                        '</tr > ';
+                    $('#basic-datatables').append(row);
+                }
+            },
+            error: function (errormessage) {
+                //$.notify(errormessage.responseText, 'warning');
+            }
+        });
+    }
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo"></h4>
+    </div>
+
+    <div class="row">
+
+        <div class="d-flex flex-wrap around col-md-6 ml-auto mr-auto">
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-2"></div>
+                <a href="?p=1">
+                    <h6 class="fw-bold mt-3 mb-0">Empresas</h6>
+                </a>
+            </div>
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-1"></div>
+                <a href="?p=2">
+                    <h6 class="fw-bold mt-3 mb-0">Contactos</h6>
+                </a>
+            </div>
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-4"></div>
+                <a href="?p=3">
+                    <h6 class="fw-bold mt-3 mb-0">Asuntos</h6>
+                </a>
+            </div>
+            <!--
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-3"></div>
+                <a href="?p=4">
+                    <h6 class="fw-bold mt-3 mb-0">Temas</h6>
+                </a>
+            </div>
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-5"></div>
+                <a href="?p=5">
+                    <h6 class="fw-bold mt-3 mb-0">Comerciales</h6>
+                </a>
+            </div>
+            -->
+        </div>
+
+    </div>
+
+    <div class="row">&nbsp;</div>
+    <div class="row">&nbsp;</div>
+    <div class="row">&nbsp;</div>
+
+
+    <div class="table-responsive">
+        <table id="basic-datatables" class="table table-striped table-hover">
+             
+            <thead>
+                @if (ViewBag.Empresas != null)
+                {
+                    <tr><th>Empresa</th><th>Contactos</th><th>Asuntos</th><th>Tareas</th></tr>
+                }
+                else if (ViewBag.Contactos != null)
+                {
+                    <tr><th>Contactos</th><th>Empresa</th><th>Asuntos</th><th>Tareas</th></tr>
+                }
+                else if (ViewBag.Oportunidades != null)
+                {
+                    <tr><th>Empresa</th><th>Contactos</th><th>Asuntos</th><th></th></tr>
+                }
+                else if (ViewBag.Tareas != null)
+                {
+                    <tr><th>Empresa</th><th>Contactos</th><th>Temas</th><th></th></tr>
+                }
+                else if (ViewBag.Comerciales != null)
+                {
+                    <tr><th>Usuario</th><th>Operaciones</th><th>Temas</th><th></th></tr>
+                }
+            </thead>
+            <tbody>
+
+                @if (ViewBag.Empresas != null)
+                {
+                    foreach (var items in ViewBag.Empresas)
+                    {
+                        <tr>
+                            <td>@items.Empresas.Nombre</td>
+                            <td>@items.Contactos.Nombre</td>
+                            <td>@items.Oportunidades.Nombre</td>
+                            <td>@items.Tareas.Asunto</td>
+                        </tr>
+                    }
+                }
+                @if (ViewBag.Contactos != null)
+                {
+                    foreach (var items in ViewBag.Contactos)
+                    { 
+                        <tr>
+                            <td>@items.Contactos.Nombre</td>
+                            <td>@items.Empresas.Nombre</td>
+                            <td>@items.Oportunidades.Nombre</td>
+                            <td>@items.Tareas.Asunto</td>
+                        </tr>
+                    }
+                }
+                @if (ViewBag.Oportunidades != null)
+                {
+                    foreach (var items in ViewBag.Oportunidades)
+                    {
+                        <tr>
+                            <td>@items.Contactos.Nombre</td>
+                            <td>@items.Empresas.Nombre</td>
+                            <td>@items.Oportunidades.Nombre</td>
+                            <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">Detalle</a></td>
+                        </tr>
+                    }
+                }
+                @if (ViewBag.Tareas != null)
+                {
+                    foreach (var items in ViewBag.Tareas)
+                    {
+                        <tr>
+                            <td>@items.Contactos.Nombre</td>
+                            <td>@items.Empresas.Nombre</td>
+                            <td>@items.Tareas.Asunto</td>
+                            <td></td>
+                        </tr>
+                    }
+                }
+                @if (ViewBag.Comerciales != null)
+                {
+                    foreach (var items in ViewBag.Comerciales)
+                    {
+                        <tr>
+                            <td>@items.Usuarios.Nombre</td>
+                            <td>@items.Oportunidades.Importe</td>
+                            <td>@items.Tareas.Asunto</td>
+                            <td></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+
+
+</div>

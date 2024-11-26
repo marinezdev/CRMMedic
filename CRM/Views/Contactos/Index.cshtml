@@ -1,0 +1,356 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcContactos').addClass("nav-item active submenu");
+
+        if ($("#checado").val() === '1') {
+            $('input:radio[class=form-radio-input][id=tipocontacto1]').prop('checked', true);
+        }
+        else {
+                $('input:radio[class=form-radio-input][id=tipocontacto1]').prop('checked', false);
+        }
+        if ($("#checado").val() === '2') {
+            $('input:radio[class=form-radio-input][id=tipocontacto2]').prop('checked', true);
+        }
+        else {
+            $('input:radio[class=form-radio-input][id=tipocontacto2]').prop('checked', false);
+        }
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $("#multi-filter-select").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Contactos/Editar?Id=' + firstCellText;
+            }
+        });
+
+        $("#multi-filter-select2").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Contactos/Editar?Id=' + firstCellText;
+            }
+        });
+
+        $('#multi-filter-select').DataTable({
+            columnDefs: [
+                {
+                    "orderable": false,
+                    "targets": [0,8,10,11],
+                    "width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 20,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        $('#multi-filter-select2').DataTable({
+            columnDefs: [
+                {
+                    "orderable": false,
+                    "targets": [0,8,10,11],
+                    "width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 5,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        $(document).on('change', 'input[name="tipocontacto"]:radio', function () {
+            //alert($(this).val());
+            $('#formulariotipocontacto').submit();
+        });
+
+        $('#pieChart').sparkline([20, 50, 30], {
+            type: 'pie',
+            height: '100',
+            width: '60'
+
+        });
+
+        $('#Espera').hide();
+        
+    });
+</script>
+
+<input type="hidden" id="checado" value="@TempData["Checado"]" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Pacientes</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-1">
+                            <a href="/Contactos/Graficos?opc=1" data-toggle="tooltip" data-placement="top" title="Medidores">
+                                <div id="pieChart"></div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <form id="formulariotipocontacto" method="post" action="Index">
+
+                                <div class="form-group">
+                                    <div class="form-check" style="background-color: lightgray;">
+                                        <label class="form-radio-label">
+                                            <input class="form-radio-input" type="radio" id="tipocontacto1" name="tipocontacto" value="1">
+                                            <span class="form-radio-sign">Clientes</span>
+                                        </label>
+                                        <label class="form-radio-label">
+                                            <input class="form-radio-input" type="radio" id="tipocontacto2" name="tipocontacto" value="2">
+                                            <span class="form-radio-sign">Prospectos</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                        <div class="col-md-7 text-right">
+                            <a href="/Contactos/Alta2" class="btn btn-primary animated bounceInDown">Agregar Nuevo Contacto</a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="multi-filter-select" class="display compact table-striped table-hover" style="width:100%; cursor: pointer">
+                            <thead class="header">
+                                <tr>
+                                    <th style="width:0px"></th>
+                                    <th>Nombre</th>
+                                    <th>Empresa</th>
+                                    <th>Correo</th>
+                                    <th>Celular</th>
+                                    <th>Teléfono</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Alta</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th style="width:0px"></th>
+                                    <th>Nombre</th>
+                                    <th>Empresa</th>
+                                    <th>Correo</th>
+                                    <th>Celular</th>
+                                    <th>Teléfono</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Alta</th>
+                                    <th>Edad</th>
+                                    <th>Sexo</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+
+                                @if (ViewBag.Contactos != null)
+                                {
+                                    foreach (var items in ViewBag.Contactos)
+                                    {
+                                        var tipocontacto = items.Contactos.TipoContacto == 1 ? "Cliente" : "Prospecto";
+
+                                        <tr>
+                                            <td style="color: transparent; width:0px">@items.Contactos.Id</td>
+                                            <td class="text-nowrap"><a href=/Contactos/Editar?Id=@items.Contactos.Id>@items.Contactos.Nombre @items.Contactos.ApellidoPaterno @items.Contactos.ApellidoMaterno</a></td>
+                                            <td>@items.Empresas.Nombre</td>
+                                            <td>@items.Contactos.Correo</td>
+                                            <td>@items.Contactos.Celular</td>
+                                            <td>@items.Contactos.Telefono</td>
+                                            <td>@items.UDN.Nombre</td>
+                                            <td>@tipocontacto</td>
+                                            <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.Contactos.Ingreso.ToString(), "MarketingMedio")</td>
+                                            <th>@items.Contactos.Alta.ToString("dd/MM/yyyy")</th>
+                                            <td>@items.Contactos.Edad</td>
+                                            <td align="center">
+                                                @if (items.Contactos.Sexo == "H")
+                                                {
+                                                    <i class='fas fa-male text-info'></i>
+                                                }
+                                                else if (items.Contactos.Sexo == "M")
+                                                {
+                                                    <i class='fas fa-female text-pink'></i>
+                                                }
+                                            </td>
+                                            
+                                            <td align="center"><a href=/Contactos/Editar?Id=@items.Contactos.Id><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Detalle'></i></a></td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!--Contactos compartidos -->
+            @if (ViewBag.ContactosCompartidos != null)
+            {
+                if (ViewBag.ContactosCompartidos.Count > 0)
+                {
+
+                    <div class="card">
+
+                        <div class="card-body">
+
+                            <h4>Contactos Compartidos</h4>
+                            <div class="table-responsive">
+                                <table id="multi-filter-select2" class="display compact table-striped table-hover" style="width:100%; cursor:pointer">
+                                    <thead class="header2">
+                                        <tr>
+                                            <th style="width:0px"></th>
+                                            <th>Nombre</th>
+                                            <th>Empresa</th>
+                                            <th>Correo</th>
+                                            <th>Celular</th>
+                                            <th>Teléfono</th>
+                                            <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                            <th>Tipo</th>
+                                            <th>Origen</th>
+                                            <th>Alta</th>
+                                            <th>Edad</th>
+                                            <th>Sexo</th>
+                                            <th>Detalle</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th style="width:0px"></th>
+                                            <th>Nombre</th>
+                                            <th>Empresa</th>
+                                            <th>Correo</th>
+                                            <th>Celular</th>
+                                            <th>Teléfono</th>
+                                            <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                            <th>Tipo</th>
+                                            <th>Origen</th>
+                                            <th>Alta</th>
+                                            <th>Edad</th>
+                                            <th>Sexo</th>
+                                            <th>Detalle</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+
+                                        @foreach (var items in ViewBag.ContactosCompartidos)
+                                        {
+                                            var tipodecontacto = items.Contactos.TipoContacto == 1 ? "Cliente" : "Prospecto";
+                                            <tr>
+                                                <td style="color: transparent; width:0px">@items.Contactos.Id</td>                                                
+                                                <td class="text-nowrap">@items.Contactos.Nombre @items.Contactos.ApellidoPaterno @items.Contactos.ApellidoMaterno</td>
+                                                <td>@items.Empresas.Nombre</td>
+                                                <td>@items.Contactos.Correo</td>
+                                                <td>@items.Contactos.Celular</td>
+                                                <td>@items.Contactos.Telefono</td>
+                                                <td>@items.UDN.Nombre</td>
+                                                <td>@tipodecontacto</td>
+                                                <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.Contactos.Ingreso.ToString(), "MarketingMedio")</td>
+                                                <td>@items.Contactos.Alta.ToString("dd/MM/yyyy")</td>
+                                                <td>@items.Contactos.Edad</td>
+                                                <td align="center">
+                                                    @if (items.Contactos.Sexo == "H")
+                                                    {
+                                                        <i class='fas fa-male text-info'></i>
+                                                    }
+                                                    else if (items.Contactos.Sexo == "M")
+                                                    {
+                                                        <i class='fas fa-female' style="color:#FF14DB"></i>
+                                                    }
+                                                </td>
+                                                <td align="center"><a href=/Contactos/Editar?Id=@items.Contactos.Id><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Detalle'></i></a></td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        
+                        </div>
+                    </div>
+
+                }
+            }
+
+        </div>
+    </div>
+</div>
+
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>

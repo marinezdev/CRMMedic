@@ -1,0 +1,683 @@
+﻿
+@{
+    ViewBag.Title = "Actividades";
+}
+
+<script>
+    $(document).ready(function () {
+
+        $('#opcOport').addClass("nav-item active submenu");
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var idd = obtenerParametrodeURL('Id');
+        if (idd === null) {
+            idd = $('#IdOportunidad').val();
+        }
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $('#basic-datatables-').DataTable({
+            colReorder: true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[2, "desc"]]
+        });
+
+        //console.log('Valor: ' + idd);
+        $.ajax({
+            url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/",
+            data: { id: $('#IdUsuario').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data.Oportunidades.Estado === 2 || data.Oportunidades.Estado === 5 || data.Oportunidades.Estado === 6 || data.Oportunidades.Estado === 7) {
+                    $('#Submit').hide();
+                    $('#Acepto').hide();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    });
+
+    function ModificarActividad(id) {
+        $('#ModalActividadModificar').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarActividadPorId/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data);
+                $('#eTipoActividad').val(data.TipoActividad);
+                var fechaM = new Date(parseInt(data.Fecha.substr(6)));
+                var mes = (fechaM.getMonth() + 1) < 10 ? '0' + (fechaM.getMonth() + 1) : (fechaM.getMonth() + 1);
+                var dia = fechaM.getDate() < 10 ? '0' + fechaM.getDate() : fechaM.getDate();
+                $('#eVencido').val(dia + '/' + mes + '/' + fechaM.getFullYear());
+                $('#eDescripcion').val(data.Notas);
+                $('#eIdActividad').val(data.Id);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function EliminarActividad(id) {
+
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/EliminarActividad/",
+            data: { IdActividad: id, IdUsuario: $('#IdUsuario').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sin permiso para eliminar la actividad.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+                else if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se eliminó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                    location.href = '';
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function SeguroEliminarActividad(id) {
+        swal({
+            title: 'Eliminación de Actividad',
+            text: "¿Está seguro de querer eliminar este registro?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                EliminarActividad(id);
+            }
+        });
+    }
+
+    function GuardarModificado() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/GuardarActividadModificada",
+            data: {
+                TipoActividad: $('#eTipoActividad').val(),
+                Fecha: $('#eVencido').val(),
+                Notas: $('#eDescripcion').val(),
+                Id: $('#eIdActividad').val(),
+                IdUsuario: $('#IdUsuario').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sin permiso para modificar la actividad.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+                else if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                    location.href = '';
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function TextAreaGrande(element) {
+        zIndex: 10003,
+            $(element).attr('rows', '3');
+    }
+
+    function TextAreaNormal(element) {
+        $(element).attr('rows', '1');
+    }
+
+    function AgregarNuevoTipoActividad() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarTipoActividad",
+            data: {
+                nombre: $('#aTipoActividad').val(),
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                    location.href = '';
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function EnvioDeCorreo() {
+        //Mostrar los responsables para elegir a cual se le enviará un correo.
+        if ($('#TipoActividad').val() == '9') {
+            $('#divEnvioCorreo').show();
+            ResponsablesAsignadosAOportunidad();
+        }
+        else {
+            $('#divEnvioCorreo').hide();
+        }
+    }
+
+    function ResponsablesAsignadosAOportunidad() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarResponsablesAsignados",
+            data: { idoportunidad: $('#IdOportunidad').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#Responsables').empty();
+                $('#Responsables').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#Responsables').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Actividades</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Session["NombreTema"] &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())</h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Menu -->
+                    <div class="row">@Html.Partial("_MenuEdicionOportunidades")</div>
+
+                    <form method="post" action="ActividadesAgregar">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <center>
+                                    <a href="#" data-toggle="modal" data-target="#ModalNuevoTipoActividad">Agregar nuevo Tipo de Actividad</a>
+                                </center>
+                            </div>
+
+                            <div class="col-md-6">
+                                @if (Session["IdUsuario"].ToString() == "2")
+                                {
+                                    <center><a href="Calendario">Calendario</a></center>
+                                }
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                <div class="form-group form-inline">
+                                    <label for="TipoActividad" class="col-md-2 col-form-label">Actividad:</label>
+                                    <div class="col-md-10">
+                                        <select id="TipoActividad" name="TipoActividad" required class="form-control form-control-sm input-solid" style="width: 250px" onchange="EnvioDeCorreo();">
+                                            <option value=""></option>
+                                            @foreach (var itm in CRM.Models.Catalogos.Seleccionar("TipoActividad"))
+                                            {
+                                                <option value="@itm.Id">@itm.Nombre</option>
+                                            }
+                                        </select>
+                                        @if (Session["IdUsuario"].ToString() == "1000")
+                                        {
+                                            <div>
+                                                <!-- Pruebas de menú con iconos-->
+
+                                                <div class="selectgroup selectgroup-secondary selectgroup-pills">
+                                                    <label class="selectgroup-item selectgroup-danger" data-toggle="tooltip" data-placement="top" title="Videoconferencia">
+                                                        <input type="radio" name="icon-input" value="1" class="selectgroup-input selectgroup-danger">
+                                                        <span class="selectgroup-button selectgroup-button-icon selectgroup-danger"><i class="fas fa-video"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Aviso con envío de correo">
+                                                        <input type="radio" name="icon-input" value="2" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-at"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Carta">
+                                                        <input type="radio" name="icon-input" value="3" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-envelope"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Cita">
+                                                        <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="far fa-hourglass"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Comentario">
+                                                        <input type="radio" name="icon-input" value="5" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-comment"></i></span>
+                                                    </label>
+                                                </div><br />
+                                                <div class="selectgroup selectgroup-secondary selectgroup-pills">
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Correo">
+                                                        <input type="radio" name="icon-input" value="6" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-envelope-square"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Encuesta">
+                                                        <input type="radio" name="icon-input" value="7" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="far fa-check-circle"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Llamada">
+                                                        <input type="radio" name="icon-input" value="8" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-phone"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Tarea">
+                                                        <input type="radio" name="icon-input" value="9" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-clipboard-list"></i></span>
+                                                    </label>
+                                                    <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Whatsapp">
+                                                        <input type="radio" name="icon-input" value="10" class="selectgroup-input">
+                                                        <span class="selectgroup-button selectgroup-button-icon"><i class="fab fa-whatsapp"></i></span>
+                                                    </label>
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2 col-form-label">Vencimiento:</label>
+                                    <div class="col-md-5">
+                                        <input type="text" id="Vencimiento" name="Vencimiento" required class="form-control form-control-sm input-solid" />
+                                    </div>
+                                </div>
+
+                                <input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+                                <input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+
+                            </div>
+
+                        </div>
+
+                        <!-- Envío de correo desde aquí -->
+                        <div id="divEnvioCorreo" class="row" style="display:none">
+
+                            <div class="col-md-6">
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2 col-form-label">Responsable:</label>
+                                    <div class="col-md-5">
+
+                                        <select id="Responsables" name="Responsables" class="form-control form-control-sm input-solid" style="width: 250px">
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="alert alert-primary" role="alert">
+                                    Con esta opción se podrá enviar un correo al responsable que se elija con la descripción agregada.
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group form-inline">
+                                <label class="col-md-2 col-form-label">Descripción:</label>
+                                <div class="col-md-12">
+                                    <textarea id="Descripcion" name="Descripcion" class="form-control form-control-sm input-solid" cols="70" rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <input type="submit" id="Submit" name="Submit" class="btn btn-success animated bounceInDown" value="Agregar Actividad" />
+                            </div>
+                        </div>
+
+
+
+
+                    </form>
+
+                    <div class="row">&nbsp;</div>
+                    <div class="row">&nbsp;</div>
+
+                    <div class="row">
+                        @if (ViewBag.Actividades.Count > 0)
+                        {
+
+                            <table id="basic-datatables-" class="display compact table-striped table-hover" style="width:100%">
+                                <thead class="header">
+                                    <tr>
+                                        <th style="width:120px">Creado Por</th>
+                                        <th style="width:180px">Tipo Actividad</th>
+                                        <th>Vencimiento</th>
+                                        <th>Descripción</th>
+                                        <th>Responsable</th>
+                                        <th>Modificar</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var items in ViewBag.Actividades)
+                                    {
+                                    <tr>
+                                        <td data-toggle='tooltip' data-placement='top' title='@items.NombreUsuario'>@items.NombreUsuario.Substring(0, 9)...</td>
+                                        <td>@items.ActividadNombre</td>
+                                        <td>@items.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td>@items.Notas</td>
+                                        <td>@CRM.Utilerias.CustomHelpers.NombreUsuario(items.IdUsuarioAsignado.ToString())</td>
+                                        <td align="center"><a href="#" onclick="ModificarActividad(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='left' title='Modificar'></i></a></td>
+                                        <td align="center"><a href="#" onclick="SeguroEliminarActividad(@items.Id);"><i class='fas fa-trash' data-toggle='tooltip' data-placement='left' title='Eliminar'></i></a></td>
+                                    </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActividadModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Modificar Actividad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+
+
+                        <label for="eTipoActividad" class="col-md-2 col-form-label">Crear Actividad:</label>
+                        <div class="col-md-10">
+                            <select id="eTipoActividad" name="eTipoActividad" class="form-control form-control-sm input-solid" style="width: 250px">
+                                <option value=""></option>
+                                @foreach (var itm in CRM.Models.Catalogos.Seleccionar("TipoActividad"))
+                                {
+                                    <option value="@itm.Id">@itm.Nombre</option>
+                                }
+                            </select>
+                            @if (Session["IdUsuario"].ToString() == "2")
+                            {
+                                <div>
+                                    <!-- Pruebas de menú con iconos-->
+
+                                    <div class="selectgroup selectgroup-secondary selectgroup-pills">
+                                        <label class="selectgroup-item selectgroup-danger" data-toggle="tooltip" data-placement="top" title="Videoconferencia">
+                                            <input type="radio" name="icon-input" value="1" class="selectgroup-input selectgroup-danger">
+                                            <span class="selectgroup-button selectgroup-button-icon selectgroup-danger"><i class="fas fa-video"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Aviso con envío de correo">
+                                            <input type="radio" name="icon-input" value="2" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-at"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Carta">
+                                            <input type="radio" name="icon-input" value="3" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-envelope"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Cita">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="far fa-hourglass"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Comentario">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-comment"></i></span>
+                                        </label>
+                                    </div><br />
+                                    <div class="selectgroup selectgroup-secondary selectgroup-pills">
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Correo">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-envelope-square"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Encuesta">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="far fa-check-circle"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Llamada">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-phone"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Tarea">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-clipboard-list"></i></span>
+                                        </label>
+                                        <label class="selectgroup-item" data-toggle="tooltip" data-placement="top" title="Whatsapp">
+                                            <input type="radio" name="icon-input" value="4" class="selectgroup-input">
+                                            <span class="selectgroup-button selectgroup-button-icon"><i class="fab fa-whatsapp"></i></span>
+                                        </label>
+                                    </div>
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label class="col-md-2 col-form-label">Vencimiento:</label>
+                        <div class="col-md-2">
+                            <input type="text" id="eVencido" name="eVencido" class="form-control form-control-sm input-solid" style="width:100px" />
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label class="col-md-2 col-form-label">Descripción:</label>
+                        <div class="col-md-12">
+                            <textarea id="eDescripcion" name="eDescripcion" class="form-control input-solid" cols="50" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="eIdActividad" name="eIdActividad" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="Acepto" name="Acepto" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNuevoTipoActividad" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Agregar Tipo Actividad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+
+
+                        <label for="aTipoActividad" class="col-md-2 col-form-label">Nombre:</label>
+                        <div class="col-md-10">
+                            <input type="text" id="aTipoActividad" name="aTipoActividad" class="form-control form-control-sm input-solid" />
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="Acepto" name="Acepto" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarNuevoTipoActividad();">Guardar</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+<script>
+
+    $('#Vencimiento').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#eVencido').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

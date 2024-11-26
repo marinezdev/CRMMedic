@@ -1,0 +1,240 @@
+﻿@{
+    ViewBag.Title = "BitacoraUsuario";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        $('#basic-datatables2-').DataTable({
+            colReorder: true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            "order": [[1, "desc"]]
+        });
+
+
+    });
+
+    function AgregarNuevoTipoActividad() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarTipoActividad",
+            data: {
+                nombre: $('#aTipoActividad').val(),
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                    location.href = '';
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+</script>
+
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Bitácora de Actividades</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Html.Raw(Session["NombreTema"]) &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Menu -->
+                    <div class="row">
+                        @Html.Partial("_MenuEdicionOportunidades")
+                    </div>
+
+                    <form method="post" action="ActividadesUsuariosAgregar">
+
+                        <input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+                        <input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+
+                        <div>
+
+                            <div class="col-md-6">
+                                @*<center>
+                            <a href="#" data-toggle="modal" data-target="#ModalNuevoTipoActividad">Agregar nuevo Tipo de Actividad</a>
+                        </center>*@
+                            </div>
+
+                            <div class="col-md-6"></div>
+
+                        </div>
+
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                @*<div class="form-group form-inline">
+                            <label for="TipoActividad" class="col-md-2 col-form-label">Actividad:</label>
+                            <div class="col-md-10">
+                                <select id="TipoActividad" name="TipoActividad" required class="form-control form-control-sm input-solid" style="width: 250px">
+                                    <option value=""></option>
+                                    @foreach (var itm in CRM.Models.Catalogos.Seleccionar("TipoActividad"))
+                                    {
+                                        <option value="@itm.Id">@itm.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>*@
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                @*<div class="form-group form-inline">
+                            <label class="col-md-2 col-form-label">Vencimiento:</label>
+                            <div class="col-md-5">
+                                <input type="date" id="Vencimiento" name="Vencimiento" required class="form-control form-control-sm input-solid" />
+                            </div>
+                        </div>*@
+
+                            </div>
+
+
+                            <div class="row">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2 col-form-label">Descripción:</label>
+                                    <div class="col-md-12">
+                                        <textarea id="Descripcion" name="Descripcion" class="form-control form-control-sm input-solid" cols="70" rows="4"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <input type="submit" id="Submit" name="Submit" class="btn btn-success animated bounceInDown" value="Aceptar" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                    <div class="row">&nbsp;</div>
+                    <div class="row">&nbsp;</div>
+
+                    <div class="row">
+                        <!-- tabla -->
+
+                        @if (ViewBag.Bitacora.Count > 0)
+                        {
+
+                            <table id="basic-datatables2-" class="display compact table-striped table-hover" style="width:100%">
+                                <thead class="header">
+                                    <tr>
+                                        <th>Responsable</th>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var items in ViewBag.Bitacora)
+                                    {
+                                        <tr>
+                                            <td>@items.Nombre</td>
+                                            <td>
+
+                                                @if (items.Fecha.ToString("dd/MM/yyyy") != "01/01/1900")
+                                                {
+                                                    <span>@items.Fecha.ToString("dd/MM/yyyy")</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (items.Fecha.ToString("dd/MM/yyyy") != "01/01/1900")
+                                                {
+                                                    <span>@items.Notas</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>No ha escrito en bitácora aún</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNuevoTipoActividad" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Agregar Tipo Actividad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+
+
+                        <label for="aTipoActividad" class="col-md-2 col-form-label">Nombre:</label>
+                        <div class="col-md-10">
+                            <input type="text" id="aTipoActividad" name="aTipoActividad" class="form-control form-control-sm input-solid" />
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="Acepto" name="Acepto" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarNuevoTipoActividad();">Guardar</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+

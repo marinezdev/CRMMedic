@@ -1,0 +1,2473 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+    <script>
+    $(document).ready(function () {
+
+        $('#IndexHome').addClass("nav-item active submenu");
+
+            ProyectosXUDNMesEnCurso();
+
+            ProyectosXUDNAcumuladosAlMesEnCurso();
+
+            ImportesXUDNMesEnCurso();
+
+            ImportesXUDNAcumuladosAlMesEnCurso();
+
+            //Proyectos cerrados ganados perdidos
+
+            ProyectosXUDNAcumuladosAlMesEnCursoCerradosGanados();
+
+            ProyectosXUDNMesEnCursoCerradosGanados();
+
+            ImportesXUDNAcumuladosAlMesEnCursoCerradosGanados();
+
+            ImportesXUDNMesEnCursoCerradosGanados();
+
+            ProyectosXUDNAcumuladosAlMesEnCursoCerradosPerdidos();
+
+            ProyectosXUDNMesEnCursoCerradosPerdidos();
+            
+            ImportesXUDNAcumuladosAlMesEnCursoCerradosPerdidos();
+
+            ImportesXUDNMesEnCursoCerradosPerdidos();
+
+
+            //Fin proyectos cerrados
+
+            //ProyectosPorUDNPorMes();
+
+            //ImportesPorUDNPorMes();
+
+            //Pie();
+
+            //Doughnut();
+
+            MultipleLinechartProyectos();
+
+            MultipleLinechartImportes();
+
+    });
+
+    //***********************************************************************
+
+    //Aplicación de etiquetas a nivel general
+    var coloresetiquetas = ['#59d05d', '#fdaf4b', '#177dff', '#ff1aaa', '#aaa321', '#d0486f', '#d04eef'];
+    var etiquetasUDNs = ['Servicios Especializados', 'Servicios Mantenimiento', 'Soluciones Empresariales', 'Tecnología', 'Comisionistas', 'Redes Sociales', 'Sistemas'];
+
+    function ProyectosXUDNAcumuladosAlMesEnCurso() {
+        $.ajax({
+            url: "/Home/ProyectosAcumuladosAlMes/",
+            data: { estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                var myPieChart = new Chart(pieChart_ProyectosActivosAlMes, {
+                    type: 'pie',
+                    data: {
+                        datasets: [{
+                            data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                            backgroundColor: coloresetiquetas,
+                            borderWidth: 0,
+                            label: 'DataSet 1'
+                        }],
+                        labels: etiquetasUDNs
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Oportunidades en Proceso (' + sumaConteo + ')' 
+                        },
+
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                fontColor: 'rgb(154, 154, 154)',
+                                fontSize: 11,
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        pieceLabel: {
+                            render: 'value',
+                            fontColor: 'white',
+                            fontSize: 14,
+                        },
+                        tooltips: true,
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                                bottom: 20
+                            }
+                        },
+                        //onClick: function (event, item) {
+                        //    alert(event);
+                        //}
+                    }
+                })
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ProyectosXUDNMesEnCurso() {
+        $.ajax({
+            url: "/Home/ProyectosEnElMes/",
+            data: { estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+                //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+
+                var d = new Date();
+                var month = new Array();
+                month[0] = "Enero";
+                month[1] = "Febrero";
+                month[2] = "Marzo";
+                month[3] = "Abril";
+                month[4] = "Mayo";
+                month[5] = "Junio";
+                month[6] = "Julio";
+                month[7] = "Agosto";
+                month[8] = "Septiembre";
+                month[9] = "Octubre";
+                month[10] = "Noviembre";
+                month[11] = "Diciembre";
+                var n = month[d.getMonth()];
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+                
+                var myPieChart = new Chart(pieChart_ProyectosActivosEnElMes, {
+                    type: 'pie',
+                    data: {
+                        datasets: [{
+                            data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                            backgroundColor: coloresetiquetas,
+                            borderWidth: 0,
+                            label: 'DataSet 1'
+                        }],
+                        labels: etiquetasUDNs
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Oportunidades Abiertas en ' + [n] + ' (' + sumaConteo + ')'
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                fontColor: 'rgb(154, 154, 154)',
+                                fontSize: 11,
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        pieceLabel: {
+                            render: 'value',
+                            fontColor: 'white',
+                            fontSize: 14,
+                        },
+                        tooltips: true,
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                                bottom: 20
+                            }
+                        }
+                    }
+                })
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ImportesXUDNMesEnCurso() {
+        $.ajax({
+            url: "/Home/ImportesEnElMes/",
+            data: {estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+                //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                var d = new Date();
+                var month = new Array();
+                month[0] = "Enero";
+                month[1] = "Febrero";
+                month[2] = "Marzo";
+                month[3] = "Abril";
+                month[4] = "Mayo";
+                month[5] = "Junio";
+                month[6] = "Julio";
+                month[7] = "Agosto";
+                month[8] = "Septiembre";
+                month[9] = "Octubre";
+                month[10] = "Noviembre";
+                month[11] = "Diciembre";
+                var n = month[d.getMonth()];
+
+                var enCurso = document.getElementById('EnCurso03').getContext('2d');
+
+                var encurso = new Chart(enCurso, {
+                    type: 'bar',
+                    data: {
+                        labels: [n],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            backgroundColor: [coloresetiquetas[0]],
+                            borderColor: '#59d05d',
+                            data: [Conteo[0]],
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            backgroundColor: [coloresetiquetas[1]],
+                            borderColor: '#fdaf4b',
+                            data: [Conteo[1]],
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            backgroundColor: [coloresetiquetas[2]],
+                            borderColor: '#177dff',
+                            data: [Conteo[2]],
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            backgroundColor: [coloresetiquetas[3]],
+                            borderColor: '#ff1aaa',
+                            data: [Conteo[3]],
+                        }, {
+                            label: [etiquetasUDNs[4]],
+                            backgroundColor: [coloresetiquetas[4]],
+                            borderColor: '#aaa321',
+                            data: [Conteo[4]],
+                            }, {
+                            label: [etiquetasUDNs[5]],
+                            backgroundColor: [coloresetiquetas[5]],
+                            borderColor: '#d0486f',
+                            data: [Conteo[5]],
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            backgroundColor: [coloresetiquetas[6]],
+                            borderColor: '#d04eef',
+                            data: [Conteo[6]],
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Oportunidades Abiertas en ' + [n] + ' Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                            }]
+                        },
+
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+        
+    }
+
+    function ImportesXUDNAcumuladosAlMesEnCurso() {
+        $.ajax({
+            url: "/Home/ImportesAcumuladosAlMes/",
+            data: { estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+
+                var enCurso = document.getElementById('EnCurso04').getContext('2d');
+
+                var d = new Date();
+                var month = new Array();
+                month[0] = "Enero";
+                month[1] = "Febrero";
+                month[2] = "Marzo";
+                month[3] = "Abril";
+                month[4] = "Mayo";
+                month[5] = "Junio";
+                month[6] = "Julio";
+                month[7] = "Agosto";
+                month[8] = "Septiembre";
+                month[9] = "Octubre";
+                month[10] = "Noviembre";
+                month[11] = "Diciembre";
+                var n = month[d.getMonth()];
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                var encurso = new Chart(enCurso, {
+                    type: 'bar',
+                    data: {
+                        //labels: [n],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            backgroundColor: [coloresetiquetas[0]],
+                            borderColor: '#59d05d',
+                            data: [Conteo[0]],
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            backgroundColor: [coloresetiquetas[1]],
+                            borderColor: '#fdaf4b',
+                            data: [Conteo[1]],
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            backgroundColor: [coloresetiquetas[2]],
+                            borderColor: '#177dff',
+                            data: [Conteo[2]],
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            backgroundColor: [coloresetiquetas[3]],
+                            borderColor: '#ff1aaa',
+                            data: [Conteo[3]],
+                        }, {
+                            label: [etiquetasUDNs[4]],
+                            backgroundColor: [coloresetiquetas[4]],
+                            borderColor: '#aaa321',
+                            data: [Conteo[4]],
+                        }, {
+                            label: [etiquetasUDNs[5]],
+                            backgroundColor: [coloresetiquetas[5]],
+                            borderColor: '#d0486f',
+                            data: [Conteo[5]],
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            backgroundColor: [coloresetiquetas[6]],
+                            borderColor: '#d04eef',
+                            data: [Conteo[6]],
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Oportunidades en Proceso Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                            }]
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    //Proyectos acumulados al mes encurso Cerrados Ganados
+
+    function ProyectosXUDNAcumuladosAlMesEnCursoCerradosGanados() {
+            $.ajax({
+                url: "/Home/SeleccionarCerradosGanadosAcumuladosAlMes/",
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }                    
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                    var myPieChart = new Chart(pieChart_ProyectosCerradosGanadosAlMes, {
+                        type: 'pie',
+                        data: {
+                            datasets: [{
+                                data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                                backgroundColor: coloresetiquetas,
+                                borderWidth: 0,
+                                label: 'DataSet 1'
+                            }],
+                            labels: etiquetasUDNs
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Ganadas Acumuladas (' + sumaConteo + ')'
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    fontColor: 'rgb(154, 154, 154)',
+                                    fontSize: 11,
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            pieceLabel: {
+                                render: 'value',
+                                fontColor: 'white',
+                                fontSize: 14,
+                            },
+                            tooltips: true,
+                            layout: {
+                                padding: {
+                                    left: 20,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 20
+                                }
+                            }
+                        }
+                    })
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+    function ProyectosXUDNMesEnCursoCerradosGanados() {
+            $.ajax({
+                url: "/Home/ProyectosEnElMes34/",
+                data: { estado: 4 },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }
+                    //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+                    
+                    var d = new Date();
+                    var month = new Array();
+                    month[0] = "Enero";
+                    month[1] = "Febrero";
+                    month[2] = "Marzo";
+                    month[3] = "Abril";
+                    month[4] = "Mayo";
+                    month[5] = "Junio";
+                    month[6] = "Julio";
+                    month[7] = "Agosto";
+                    month[8] = "Septiembre";
+                    month[9] = "Octubre";
+                    month[10] = "Noviembre";
+                    month[11] = "Diciembre";
+                    var n = month[d.getMonth()];
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+                    
+                    var myPieChart = new Chart(pieChart_ProyectosCerradosGanadosEnElMes, {
+                        type: 'pie',
+                        data: {
+                            datasets: [{
+                                data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                                backgroundColor: coloresetiquetas,
+                                borderWidth: 0,
+                                label: 'DataSet 1'
+                            }],
+                            labels: etiquetasUDNs
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Ganadas en ' + [n] + ' (' + sumaConteo + ')'
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    fontColor: 'rgb(154, 154, 154)',
+                                    fontSize: 11,
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            pieceLabel: {
+                                render: 'value',
+                                fontColor: 'white',
+                                fontSize: 14,
+                            },
+                            tooltips: true,
+                            layout: {
+                                padding: {
+                                    left: 20,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 20
+                                }
+                            }
+                        }
+                    })
+                    
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+    //Importes acumulados al mes en curso Cerrados Ganados
+
+    function ImportesXUDNAcumuladosAlMesEnCursoCerradosGanados() {
+        $.ajax({
+            url: "/Home/SeleccionarImportesCerradosGanadosAcumuladosAlMes/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+
+                var enCurso = document.getElementById('ImportesCerradosGanadosAlMes').getContext('2d');
+
+                var d = new Date();
+                var month = new Array();
+                month[0] = "Enero";
+                month[1] = "Febrero";
+                month[2] = "Marzo";
+                month[3] = "Abril";
+                month[4] = "Mayo";
+                month[5] = "Junio";
+                month[6] = "Julio";
+                month[7] = "Agosto";
+                month[8] = "Septiembre";
+                month[9] = "Octubre";
+                month[10] = "Noviembre";
+                month[11] = "Diciembre";
+                var n = 'De Enero a ' + month[d.getMonth()];
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                var encurso = new Chart(enCurso, {
+                    type: 'bar',
+                    data: {
+                        //labels: [n],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            backgroundColor: [coloresetiquetas[0]],
+                            borderColor: '#59d05d',
+                            data: [Conteo[0]],
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            backgroundColor: [coloresetiquetas[1]],
+                            borderColor: '#fdaf4b',
+                            data: [Conteo[1]],
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            backgroundColor: [coloresetiquetas[2]],
+                            borderColor: '#177dff',
+                            data: [Conteo[2]],
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            backgroundColor: [coloresetiquetas[3]],
+                            borderColor: '#ff1aaa',
+                            data: [Conteo[3]],
+                        },{
+                            label: [etiquetasUDNs[4]],
+                            backgroundColor: [coloresetiquetas[4]],
+                            borderColor: '#aaa321',
+                            data: [Conteo[4]],
+                        }, {
+                            label: [etiquetasUDNs[5]],
+                            backgroundColor: [coloresetiquetas[5]],
+                            borderColor: '#d0486f',
+                            data: [Conteo[5]],
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            backgroundColor: [coloresetiquetas[6]],
+                            borderColor: '#d04eef',
+                            data: [Conteo[6]],
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Oportunidades Ganadas Acumuladas Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                            }]
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ImportesXUDNMesEnCursoCerradosGanados() {
+        $.ajax({
+            url: "/Home/ImportesEnElMes34/",
+            data: { estado: 4 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+                //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+
+                var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                var d = new Date();
+                var month = new Array();
+                month[0] = "Enero";
+                month[1] = "Febrero";
+                month[2] = "Marzo";
+                month[3] = "Abril";
+                month[4] = "Mayo";
+                month[5] = "Junio";
+                month[6] = "Julio";
+                month[7] = "Agosto";
+                month[8] = "Septiembre";
+                month[9] = "Octubre";
+                month[10] = "Noviembre";
+                month[11] = "Diciembre";
+                var n = month[d.getMonth()];
+
+                var enCurso = document.getElementById('ImportesCerradosGanadosEnElMes').getContext('2d');
+
+                var encurso = new Chart(enCurso, {
+                    type: 'bar',
+                    data: {
+                        labels: [n],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            backgroundColor: [coloresetiquetas[0]],
+                            borderColor: '#59d05d',
+                            data: [Conteo[0]],
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            backgroundColor: [coloresetiquetas[1]],
+                            borderColor: '#fdaf4b',
+                            data: [Conteo[1]],
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            backgroundColor: [coloresetiquetas[2]],
+                            borderColor: '#177dff',
+                            data: [Conteo[2]],
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            backgroundColor: [coloresetiquetas[3]],
+                            borderColor: '#ff1aaa',
+                            data: [Conteo[3]],
+                        }, {
+                            label: [etiquetasUDNs[4]],
+                            backgroundColor: [coloresetiquetas[4]],
+                            borderColor: '#aaa321',
+                            data: [Conteo[4]],
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            backgroundColor: [coloresetiquetas[5]],
+                            borderColor: '#d0486f',
+                            data: [Conteo[5]],
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            backgroundColor: [coloresetiquetas[6]],
+                            borderColor: '#d04eef',
+                            data: [Conteo[6]],
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Oportunidades Ganadas en ' + [n] + ' Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                            }]
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }   
+        
+    //Proyectos acumulados al mes en curso Cerrados Perdidos
+
+    function ProyectosXUDNAcumuladosAlMesEnCursoCerradosPerdidos() {
+            $.ajax({
+                url: "/Home/SeleccionarCerradosPerdidosAcumuladosAlMes/",
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                    var myPieChart = new Chart(pieChart_ProyectosCerradosPerdidosAlMes, {
+                        type: 'pie',
+                        data: {
+                            datasets: [{
+                                data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                                backgroundColor: coloresetiquetas,
+                                borderWidth: 0,
+                                label: 'DataSet 1'
+                            }],
+                            labels: etiquetasUDNs
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Perdidas Acumuladas (' + sumaConteo + ')'
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    fontColor: 'rgb(154, 154, 154)',
+                                    fontSize: 11,
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            pieceLabel: {
+                                render: 'value',
+                                fontColor: 'white',
+                                fontSize: 14,
+                            },
+                            tooltips: true,
+                            layout: {
+                                padding: {
+                                    left: 20,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 20
+                                }
+                            }
+                        }
+                    })
+
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+    function ProyectosXUDNMesEnCursoCerradosPerdidos() {
+            $.ajax({
+                url: "/Home/ProyectosEnElMes34/",
+                data: { estado: 3 },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                    //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+                    
+                    var d = new Date();
+                    var month = new Array();
+                    month[0] = "Enero";
+                    month[1] = "Febrero";
+                    month[2] = "Marzo";
+                    month[3] = "Abril";
+                    month[4] = "Mayo";
+                    month[5] = "Junio";
+                    month[6] = "Julio";
+                    month[7] = "Agosto";
+                    month[8] = "Septiembre";
+                    month[9] = "Octubre";
+                    month[10] = "Noviembre";
+                    month[11] = "Diciembre";
+                    var n = month[d.getMonth()];
+
+                    
+                    var myPieChart = new Chart(pieChart_ProyectosCerradosPerdidosEnElMes, {
+                        type: 'pie',
+                        data: {
+                            datasets: [{
+                                data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6]],
+                                backgroundColor: coloresetiquetas,
+                                borderWidth: 0,
+                                label: 'DataSet 1'
+                            }],
+                            labels: etiquetasUDNs
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Perdidas en ' + [n] + ' (' + sumaConteo + ')'
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    fontColor: 'rgb(154, 154, 154)',
+                                    fontSize: 11,
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            pieceLabel: {
+                                render: 'value',
+                                fontColor: 'white',
+                                fontSize: 14,
+                            },
+                            tooltips: true,
+                            layout: {
+                                padding: {
+                                    left: 20,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 20
+                                }
+                            }
+                        }
+                    })
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+
+    //Importes en el mes en curso Cerrados Perdidos
+
+    function ImportesXUDNAcumuladosAlMesEnCursoCerradosPerdidos() {
+            $.ajax({
+                url: "/Home/SeleccionarImportesCerradosPerdidosAcumuladosAlMes/",
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }
+
+                    var enCurso = document.getElementById('ImportesCerradosPerdidosAlMes').getContext('2d');
+
+                    var d = new Date();
+                    var month = new Array();
+                    month[0] = "Enero";
+                    month[1] = "Febrero";
+                    month[2] = "Marzo";
+                    month[3] = "Abril";
+                    month[4] = "Mayo";
+                    month[5] = "Junio";
+                    month[6] = "Julio";
+                    month[7] = "Agosto";
+                    month[8] = "Septiembre";
+                    month[9] = "Octubre";
+                    month[10] = "Noviembre";
+                    month[11] = "Diciembre";
+                    var n = 'De Enero a ' + month[d.getMonth()];
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                    var encurso = new Chart(enCurso, {
+                        type: 'bar',
+                        data: {
+                            //labels: [n],
+                            datasets: [{
+                                label: [etiquetasUDNs[0]],
+                                backgroundColor: [coloresetiquetas[0]],
+                                borderColor: '#59d05d',
+                                data: [Conteo[0]],
+                            }, {
+                                label: [etiquetasUDNs[1]],
+                                backgroundColor: [coloresetiquetas[1]],
+                                borderColor: '#fdaf4b',
+                                data: [Conteo[1]],
+                            }, {
+                                label: [etiquetasUDNs[2]],
+                                backgroundColor: [coloresetiquetas[2]],
+                                borderColor: '#177dff',
+                                data: [Conteo[2]],
+                            }, {
+                                label: [etiquetasUDNs[3]],
+                                backgroundColor: [coloresetiquetas[3]],
+                                borderColor: '#ff1aaa',
+                                data: [Conteo[3]],
+                            },{
+                                label: [etiquetasUDNs[4]],
+                                backgroundColor: [coloresetiquetas[4]],
+                                borderColor: '#aaa321',
+                                data: [Conteo[4]],
+                            }, {
+                                label: [etiquetasUDNs[5]],
+                                backgroundColor: [coloresetiquetas[5]],
+                                borderColor: '#d0486f',
+                                data: [Conteo[5]],
+                            }, {
+                                label: [etiquetasUDNs[6]],
+                                backgroundColor: [coloresetiquetas[6]],
+                                borderColor: '#d04eef',
+                                data: [Conteo[6]],
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Perdidas Acumuladas Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                            },
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function (t, d) {
+                                        var xLabel = d.datasets[t.datasetIndex].label;
+                                        var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                        return xLabel + ': ' + yLabel;
+                                    }
+                                }
+                            },
+                            responsive: true,
+                            scales: {
+                                xAxes: [{
+                                    stacked: false,
+                                }],
+                                yAxes: [{
+                                    stacked: false,
+                                    ticks: {
+                                        callback: function (value, index, values) {
+                                            if (parseInt(value) >= 1000) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                            } else {
+                                                return '$' + value;
+                                            }
+                                        }
+                                    },
+                                }]
+                            }
+                        }
+                    });
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }   
+
+    function ImportesXUDNMesEnCursoCerradosPerdidos() {
+        $.ajax({
+            url: "/Home/ImportesEnElMes34/",
+            data: { estado: 3 },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    //$('#EsperaGrafico10').show();
+                },
+                success: function (data) {
+
+                    var Conteo = [];
+                    for (var i = 0; i < data.length; i++) {
+                        Conteo.push(data[i].Proyectos);
+                    }
+                    //console.log(Conteo[0] + '|' + Conteo[1] + '|' + Conteo[2] + '|' + Conteo[3]);
+
+                    var d = new Date();
+                    var month = new Array();
+                    month[0] = "Enero";
+                    month[1] = "Febrero";
+                    month[2] = "Marzo";
+                    month[3] = "Abril";
+                    month[4] = "Mayo";
+                    month[5] = "Junio";
+                    month[6] = "Julio";
+                    month[7] = "Agosto";
+                    month[8] = "Septiembre";
+                    month[9] = "Octubre";
+                    month[10] = "Noviembre";
+                    month[11] = "Diciembre";
+                    var n = month[d.getMonth()];
+
+                    var sumaConteo = Conteo[0] + Conteo[1] + Conteo[2] + Conteo[3] + Conteo[4] + Conteo[5] + Conteo[6];
+
+                    var enCurso = document.getElementById('ImportesCerradosPerdidosEnElMes').getContext('2d');
+
+                    var encurso = new Chart(enCurso, {
+                        type: 'bar',
+                        data: {
+                            labels: [n],
+                            datasets: [{
+                                label: [etiquetasUDNs[0]],
+                                backgroundColor: [coloresetiquetas[0]],
+                                borderColor: '#59d05d',
+                                data: [Conteo[0]],
+                            }, {
+                                label: [etiquetasUDNs[1]],
+                                backgroundColor: [coloresetiquetas[1]],
+                                borderColor: '#fdaf4b',
+                                data: [Conteo[1]],
+                            }, {
+                                label: [etiquetasUDNs[2]],
+                                backgroundColor: [coloresetiquetas[2]],
+                                borderColor: '#177dff',
+                                data: [Conteo[2]],
+                            }, {
+                                label: [etiquetasUDNs[3]],
+                                backgroundColor: [coloresetiquetas[3]],
+                                borderColor: '#ff1aaa',
+                                data: [Conteo[3]],
+                            }, {
+                                label: [etiquetasUDNs[4]],
+                                backgroundColor: [coloresetiquetas[4]],
+                                borderColor: '#aaa321',
+                                data: [Conteo[4]],
+                            }, {
+                                label: [etiquetasUDNs[5]],
+                                backgroundColor: [coloresetiquetas[5]],
+                                borderColor: '#d0486f',
+                                data: [Conteo[5]],
+                            }, {
+                                label: [etiquetasUDNs[6]],
+                                backgroundColor: [coloresetiquetas[6]],
+                                borderColor: '#d04eef',
+                                data: [Conteo[6]],
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: {
+                                position: 'bottom'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Oportunidades Perdidas en ' + [n] + ' Montos ($' + String(sumaConteo).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ')'
+                            },
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function (t, d) {
+                                        var xLabel = d.datasets[t.datasetIndex].label;
+                                        var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                        return xLabel + ': ' + yLabel;
+                                    }
+                                }
+                            },
+                            responsive: true,
+                            scales: {
+                                xAxes: [{
+                                    stacked: false,
+                                }],
+                                yAxes: [{
+                                    stacked: false,
+                                    ticks: {
+                                        callback: function (value, index, values) {
+                                            if (parseInt(value) >= 1000) {
+                                                return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                            } else {
+                                                return '$' + value;
+                                            }
+                                        }
+                                    },
+                                }]
+                            }
+                        }
+                    });
+                },
+                complete: function () {
+                    //$('#EsperaGrafico10').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        } 
+
+    //Fin proyectos cerrados
+
+    function ProyectosPorUDNPorMes() {
+        $.ajax({
+            url: "/Home/SeleccionarProyectosXMes/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+
+                var ctx = document.getElementById('statisticsChart01').getContext('2d');
+
+                var statisticsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            borderColor: '#59d05d',
+                            pointBackgroundColor: 'rgba(243, 84, 93, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[0]],
+                            legendColor: '#59d05d',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[0].Ene,data[0].Feb,data[0].Mar,data[0].Abr,data[0].May,data[0].Jun,data[0].Jul,data[0].Ago,data[0].Sep,data[0].Oct,data[0].Nov,data[0].Dic]
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            borderColor: '#fdaf4b',
+                            pointBackgroundColor: 'rgba(253, 175, 75, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[1]],
+                            legendColor: '#fdaf4b',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[1].Ene, data[1].Feb, data[1].Mar, data[1].Abr, data[1].May, data[1].Jun, data[1].Jul, data[1].Ago, data[1].Sep, data[1].Oct, data[1].Nov, data[1].Dic]
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            borderColor: '#177dff',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[2]],
+                            legendColor: '#177dff',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[2].Ene, data[2].Feb, data[2].Mar, data[2].Abr, data[2].May, data[2].Jun, data[2].Jul, data[2].Ago, data[2].Sep, data[2].Oct, data[2].Nov, data[2].Dic]
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            borderColor: '#ff1aaa',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[3]],
+                            legendColor: '#ff1aaa',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[3].Ene, data[3].Feb, data[3].Mar, data[3].Abr, data[3].May, data[3].Jun, data[3].Jul, data[3].Ago, data[3].Sep, data[3].Oct, data[3].Nov, data[3].Dic]
+                        }, {
+                            label: [etiquetasUDNs[4]],
+                            borderColor: '#aaa321',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[4]],
+                            legendColor: '#aaa321',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[4].Ene, data[4].Feb, data[4].Mar, data[4].Abr, data[4].May, data[4].Jun, data[4].Jul, data[4].Ago, data[4].Sep, data[4].Oct, data[4].Nov, data[4].Dic]
+                        }, {
+                            label: [etiquetasUDNs[5]],
+                            borderColor: '#d0486f',
+                            pointBackgroundColor: 'rgba(208, 72, 11, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[5]],
+                            legendColor: '#d0486f',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[5].Ene, data[5].Feb, data[5].Mar, data[5].Abr, data[5].May, data[5].Jun, data[5].Jul, data[5].Ago, data[5].Sep, data[5].Oct, data[5].Nov, data[5].Dic]
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            borderColor: '#d04eef',
+                            pointBackgroundColor: 'rgba(208, 72, 11, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[6]],
+                            legendColor: '#d04eef',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[6].Ene, data[6].Feb, data[6].Mar, data[6].Abr, data[6].May, data[6].Jun, data[6].Jul, data[6].Ago, data[6].Sep, data[6].Oct, data[6].Nov, data[6].Dic]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            bodySpacing: 4,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            xPadding: 10,
+                            yPadding: 10,
+                            caretPadding: 10
+                        },
+                        layout: {
+                            padding: { left: 5, right: 5, top: 15, bottom: 15 }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    fontStyle: "500",
+                                    beginAtZero: false,
+                                    maxTicksLimit: 5,
+                                    padding: 10
+                                },
+                                gridLines: {
+                                    drawTicks: false,
+                                    display: false
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    zeroLineColor: "transparent"
+                                },
+                                ticks: {
+                                    padding: 10,
+                                    fontStyle: "500"
+                                }
+                            }]
+                        },
+                        legendCallback: function (chart) {
+                            var text = [];
+                            text.push('<ul class="' + chart.id + '-legend html-legend">');
+                            for (var i = 0; i < chart.data.datasets.length; i++) {
+                                text.push('<li><span style="background-color:' + chart.data.datasets[i].legendColor + '"></span>');
+                                if (chart.data.datasets[i].label) {
+                                    text.push(chart.data.datasets[i].label);
+                                }
+                                text.push('</li>');
+                            }
+                            text.push('</ul>');
+                            return text.join('');
+                        }
+                    }
+                });
+
+                var myLegendContainer = document.getElementById("myChartLegend01");
+
+                // generate HTML legend
+                myLegendContainer.innerHTML = statisticsChart.generateLegend();
+
+                // bind onClick event to all LI-tags of the legend
+                var legendItems = myLegendContainer.getElementsByTagName('li');
+                for (var i = 0; i < legendItems.length; i += 1) {
+                    legendItems[i].addEventListener("click", legendClickCallback, false);
+                }
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ImportesPorUDNPorMes() {
+        $.ajax({
+            url: "/Home/SeleccionarImporteXMes/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+
+                var ctx = document.getElementById('statisticsChart02').getContext('2d');
+
+                var statisticsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                        datasets: [{
+                            label: [etiquetasUDNs[0]],
+                            borderColor: '#59d05d',
+                            pointBackgroundColor: 'rgba(243, 84, 93, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[0]],
+                            legendColor: '#59d05d',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[0].Ene, data[0].Feb, data[0].Mar, data[0].Abr, data[0].May, data[0].Jun, data[0].Jul, data[0].Ago, data[0].Sep, data[0].Oct, data[0].Nov, data[0].Dic]
+                        }, {
+                            label: [etiquetasUDNs[1]],
+                            borderColor: '#fdaf4b',
+                            pointBackgroundColor: 'rgba(253, 175, 75, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[1]],
+                            legendColor: '#fdaf4b',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[1].Ene, data[1].Feb, data[1].Mar, data[1].Abr, data[1].May, data[1].Jun, data[1].Jul, data[1].Ago, data[1].Sep, data[1].Oct, data[1].Nov, data[1].Dic]
+                        }, {
+                            label: [etiquetasUDNs[2]],
+                            borderColor: '#177dff',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[2]],
+                            legendColor: '#177dff',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[2].Ene, data[2].Feb, data[2].Mar, data[2].Abr, data[2].May, data[2].Jun, data[2].Jul, data[2].Ago, data[2].Sep, data[2].Oct, data[2].Nov, data[2].Dic]
+                        }, {
+                            label: [etiquetasUDNs[3]],
+                            borderColor: '#ff1aaa',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[3]],
+                            legendColor: '#ff1aaa',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[3].Ene, data[3].Feb, data[3].Mar, data[3].Abr, data[3].May, data[3].Jun, data[3].Jul, data[3].Ago, data[3].Sep, data[3].Oct, data[3].Nov, data[3].Dic]
+                        }, {
+                            label: [etiquetasUDNs[4]],
+                            borderColor: '#aaa321',
+                            pointBackgroundColor: 'rgba(23, 125, 255, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[4]],
+                            legendColor: '#aaa321',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[4].Ene, data[4].Feb, data[4].Mar, data[4].Abr, data[4].May, data[4].Jun, data[4].Jul, data[4].Ago, data[4].Sep, data[4].Oct, data[4].Nov, data[4].Dic]
+                        }, {
+                            label: [etiquetasUDNs[5]],
+                            borderColor: '#d0486f',
+                            pointBackgroundColor: 'rgba(208, 72, 11, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[5]],
+                            legendColor: '#d0486f',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[5].Ene, data[5].Feb, data[5].Mar, data[5].Abr, data[5].May, data[5].Jun, data[5].Jul, data[5].Ago, data[5].Sep, data[5].Oct, data[5].Nov, data[5].Dic]
+                        }, {
+                            label: [etiquetasUDNs[6]],
+                            borderColor: '#d04eef',
+                            pointBackgroundColor: 'rgba(208, 72, 11, 0.6)',
+                            pointRadius: 0,
+                            backgroundColor: [coloresetiquetas[6]],
+                            legendColor: '#d04eef',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[6].Ene, data[6].Feb, data[6].Mar, data[6].Abr, data[6].May, data[6].Jun, data[6].Jul, data[6].Ago, data[6].Sep, data[6].Oct, data[6].Nov, data[6].Dic]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            bodySpacing: 4,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            xPadding: 10,
+                            yPadding: 10,
+                            caretPadding: 10,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: { left: 5, right: 5, top: 15, bottom: 15 }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    fontStyle: "500",
+                                    beginAtZero: false,
+                                    maxTicksLimit: 5,
+                                    padding: 10,
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                                gridLines: {
+                                    drawTicks: false,
+                                    display: false
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    zeroLineColor: "transparent"
+                                },
+                                ticks: {
+                                    padding: 10,
+                                    fontStyle: "500"
+                                }
+                            }]
+                        },
+                        legendCallback: function (chart) {
+                            var text = [];
+                            text.push('<ul class="' + chart.id + '-legend html-legend">');
+                            for (var i = 0; i < chart.data.datasets.length; i++) {
+                                text.push('<li><span style="background-color:' + chart.data.datasets[i].legendColor + '"></span>');
+                                if (chart.data.datasets[i].label) {
+                                    text.push(chart.data.datasets[i].label);
+                                }
+                                text.push('</li>');
+                            }
+                            text.push('</ul>');
+                            return text.join('');
+                        }
+                    }
+                });
+
+                var myLegendContainer = document.getElementById("myChartLegend02");
+
+                // generate HTML legend
+                myLegendContainer.innerHTML = statisticsChart.generateLegend();
+
+                // bind onClick event to all LI-tags of the legend
+                var legendItems = myLegendContainer.getElementsByTagName('li');
+                for (var i = 0; i < legendItems.length; i += 1) {
+                    legendItems[i].addEventListener("click", legendClickCallback, false);
+                }
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ActualizarProyectosImportes() {
+        $.ajax({
+            url: "/Home/ActualizarProyectosImportes/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#divProyectos').show();
+                $('#divImportes').show();
+            },
+            success: function (data) {
+                MultipleLinechartProyectos();
+                MultipleLinechartImportes();
+                $.notify('Se actualizaron los datos de proyectos e importes mensuales', { autohide: true, placement: { from: 'bottom', align: 'right' }, type: 'success' });
+            },
+            complete: function () {
+                $('#divProyectos').hide();
+                $('#divImportes').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.notify('Ha habido un error, revisar en la consola', { autohide: true, placement: { from: 'bottom', align: 'right' }, type: 'danger' });
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+        }
+
+
+    function Pie() {
+        $.ajax({
+            url: "/Home/ProyectosAcumuladosAlMes/",
+            data: { estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+
+
+            var myPieChart = new Chart(pieChart, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6], Conteo[7]],
+                        backgroundColor: ['#59d05d', '#fdaf4b', '#177dff', '#ff1aaa', '#eea123', '#aaa321', '#d0486f', '#d04eef'],
+                        borderWidth: 0,
+                        label: 'DataSet 1'
+                    }],
+                    labels: ['Outsourcing', 'Servicios', 'Soluciones Empresariales', 'Tecnología', 'Proy. Pallares','Comisionistas','Redes Sociales', 'Sistemas']
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            fontColor: 'rgb(154, 154, 154)',
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    pieceLabel: {
+                        render: 'value',
+                        fontColor: 'white',
+                        fontSize: 14,
+                    },
+                    tooltips: true,
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20
+                        }
+                    }
+                }
+            })
+
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Doughnut() {
+        $.ajax({
+            url: "/Home/ProyectosAcumuladosAlMes/",
+            data: { estado: 1 },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+                var Conteo = [];
+                for (var i = 0; i < data.length; i++) {
+                    Conteo.push(data[i].Proyectos);
+                }
+
+                var myDoughnutChart = new Chart(doughnutChart, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [Conteo[0], Conteo[1], Conteo[2], Conteo[3], Conteo[4], Conteo[5], Conteo[6],Conteo[7]],
+                            backgroundColor: ['#59d05d', '#fdaf4b', '#177dff', '#ff1aaa', '#eea123', '#aaa321', '#d0486f', '#d04eef']
+                        }],
+                        labels: ['Outsourcing', 'Servicios', 'Soluciones Empresariales', 'Tecnología', 'Proy. Pallares', 'Comisionistas', 'Redes Sociales', 'Sistemas']
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom'
+                        },
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                                bottom: 20
+                            }
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+        }
+
+    function MultipleLinechartProyectos() {
+
+        $.ajax({
+            url: "/Home/SeleccionarProyectosXMesXAño/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+
+                var multipleLineChart = document.getElementById('multipleLineChartProyectos').getContext('2d');
+
+                var sumas = 0;
+
+                var myMultipleLineChart = new Chart(multipleLineChart, {
+                    type: 'line',
+                    data: {
+                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                        datasets: [{
+                            label: "2020 (" + (data[0].Ene +  data[0].Feb + data[0].Mar + data[0].Abr + data[0].May + data[0].Jun + data[0].Jul + data[0].Ago + data[0].Sep + data[0].Oct + data[0].Nov + data[0].Dic) + ")",
+                            borderColor: "#59d05d",
+                            pointBorderColor: "#FFF",
+                            pointBackgroundColor: "#59d05d",
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 4,
+                            pointHoverBorderWidth: 1,
+                            pointRadius: 4,
+                            backgroundColor: 'transparent',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[0].Ene, data[0].Feb, data[0].Mar, data[0].Abr, data[0].May, data[0].Jun, data[0].Jul, data[0].Ago, data[0].Sep, data[0].Oct, data[0].Nov, data[0].Dic]
+                        }, {
+                                label: "2021 (" + ([data[1].Ene + data[1].Feb + data[1].Mar + data[1].Abr + data[1].May + data[1].Jun + data[1].Jul + data[1].Ago + data[1].Sep + data[1].Oct+  data[1].Nov + data[1].Dic]) + ")",
+                            borderColor: "#177dff",
+                            pointBorderColor: "#FFF",
+                            pointBackgroundColor: "#177dff",
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 4,
+                            pointHoverBorderWidth: 1,
+                            pointRadius: 4,
+                            backgroundColor: 'transparent',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[1].Ene, data[1].Feb, data[1].Mar, data[1].Abr, data[1].May, data[1].Jun, data[1].Jul, data[1].Ago, data[1].Sep, data[1].Oct, data[1].Nov, data[1].Dic]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltips: {
+                            bodySpacing: 4,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            xPadding: 10,
+                            yPadding: 10,
+                            caretPadding: 10
+                        },
+                        layout: {
+                            padding: { left: 15, right: 15, top: 15, bottom: 15 }
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function MultipleLinechartImportes() {
+
+        $.ajax({
+            url: "/Home/SeleccionarImportesXMesXAño/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                //$('#EsperaGrafico10').show();
+            },
+            success: function (data) {
+
+                var multipleLineChart = document.getElementById('multipleLineChartImportes').getContext('2d');
+
+                var myMultipleLineChart = new Chart(multipleLineChart, {
+                    type: 'line',
+                    data: {
+                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                        datasets: [{
+                            label: "2020 ($" + String(([data[0].Ene + data[0].Feb + data[0].Mar + data[0].Abr + data[0].May + data[0].Jun + data[0].Jul + data[0].Ago + data[0].Sep + data[0].Oct + data[0].Nov + data[0].Dic])).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ")",
+                            borderColor: "#FFBE3D",
+                            pointBorderColor: "#FFF",
+                            pointBackgroundColor: "#FFBE3D",
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 4,
+                            pointHoverBorderWidth: 1,
+                            pointRadius: 4,
+                            backgroundColor: 'transparent',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[0].Ene, data[0].Feb, data[0].Mar, data[0].Abr, data[0].May, data[0].Jun, data[0].Jul, data[0].Ago, data[0].Sep, data[0].Oct, data[0].Nov, data[0].Dic]
+                        }, {                                
+                            label: "2021 ($" + String(([data[1].Ene + data[1].Feb + data[1].Mar + data[1].Abr + data[1].May + data[1].Jun + data[1].Jul + data[1].Ago + data[1].Sep + data[1].Oct + data[1].Nov + data[1].Dic])).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, '$1,') + ")",
+                            borderColor: "#FF5656",
+                            pointBorderColor: "#FFF",
+                            pointBackgroundColor: "#FF5656",
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 4,
+                            pointHoverBorderWidth: 1,
+                            pointRadius: 4,
+                            backgroundColor: 'transparent',
+                            fill: true,
+                            borderWidth: 2,
+                            data: [data[1].Ene, data[1].Feb, data[1].Mar, data[1].Abr, data[1].May, data[1].Jun, data[1].Jul, data[1].Ago, data[1].Sep, data[1].Oct, data[1].Nov, data[1].Dic]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltips: {
+                            bodySpacing: 4,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            xPadding: 10,
+                            yPadding: 10,
+                            caretPadding: 10,
+                            callbacks: {
+                                label: function (t, d) {
+                                    var xLabel = d.datasets[t.datasetIndex].label;
+                                    var yLabel = t.yLabel >= 1000 ? '$' + t.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '$' + t.yLabel;
+                                    return xLabel + ': ' + yLabel;
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: { left: 15, right: 15, top: 15, bottom: 15 }
+                        },
+                        scales: {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        if (parseInt(value) >= 1000) {
+                                            return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                        } else {
+                                            return '$' + value;
+                                        }
+                                    }
+                                },
+                            }]
+                        },
+                    }
+                });
+            },
+            complete: function () {
+                //$('#EsperaGrafico10').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    </script>
+
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">CRM-ASAE</h2>
+            </div>
+            <div class="ml-md-auto py-2 py-md-0"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido aquí -->
+<div class="page-inner mt--5">
+
+
+
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card">
+
+                <div class="card-body">
+                    <a href="/Home/Graficos?edo=1&acu=1">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosActivosAlMes" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=1&acu=1">
+                        <div class="chart-container">
+                            <canvas id="EnCurso04"></canvas>
+
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=1&acu=2">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosActivosEnElMes" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=1&acu=2">
+                        <div class="chart-container">
+                            <canvas id="EnCurso03"></canvas>
+                        </div>
+                    </a>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Proyectos cerrados -->
+
+    <div class="row mt--2">
+
+        <!--div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <div class="chart-container">
+                        <canvas id="EnCurso06"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+        </div-->
+        <!--div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <div class="chart-container">
+                        <canvas id="EnCurso05"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div-->
+
+    </div>
+
+    <!--Importes Cerrados Ganados en el mes-->
+
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=4&acu=2">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosCerradosGanadosEnElMes" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=4&acu=2">
+                        <div class="chart-container">
+                            <canvas id="ImportesCerradosGanadosEnElMes"></canvas>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Proyectos Cerrados ganados acumulados al mes -->
+
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+                    <a href="/Home/Graficos?edo=4&acu=1">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosCerradosGanadosAlMes" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+                    <a href="/Home/Graficos?edo=4&acu=1">
+                        <div class="chart-container">
+                            <canvas id="ImportesCerradosGanadosAlMes"></canvas>
+
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--Importes Cerrados Perdidos-->
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+                    <a href="/Home/Graficos?edo=3&acu=2">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosCerradosPerdidosEnElMes" style="width: 50%; height: 50%"></canvas>
+
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=3&acu=2">
+                        <div class="chart-container">
+                            <canvas id="ImportesCerradosPerdidosEnElMes"></canvas>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- Fin Proyectos cerrados -->
+
+    <!-- Proyectos Cerrados perdidos -->
+    <div class="row mt--2">
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=3&acu=1">
+                        <div class="chart-container">
+                            <canvas id="pieChart_ProyectosCerradosPerdidosAlMes" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card full-height">
+
+                <div class="card-body">
+
+                    <a href="/Home/Graficos?edo=3&acu=1">
+                        <div class="chart-container">
+                            <canvas id="ImportesCerradosPerdidosAlMes"></canvas>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- Fin Proyectos Cerrados perdidos -->
+
+    <!--div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title ">Proyectos X U. de Negocio Anual&nbsp;<i class='fas fa-redo btn-refresh-card' data-toggle='tooltip' data-placement='top' title='Actualizar los datos' onclick="ActualizarProyectosImportes();"></i> </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="chart-container" style="min-height: 375px">
+                        <canvas id="statisticsChart01"></canvas>
+                    </div>
+                    <div id="myChartLegend01"></div>
+                </div>
+
+
+            </div>
+        </div>
+    </div-->
+    <!--div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title btn-refresh-card">Importes de proyecto X U. de Negocio Anual</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="chart-container" style="min-height: 375px">
+                        <canvas id="statisticsChart02"></canvas>
+                    </div>
+                    <div id="myChartLegend02"></div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div-->
+    <!--div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Proyectos X U. de Negocio Acumulado (Activos)</div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="pieChart" style="width: 50%; height: 50%"></canvas>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-title text-center"></div>
+            </div>
+        </div>
+    </div-->
+    <!--div class="col-md-6">
+        <div class="card">
+            <div class="chart-container">
+                <canvas id="doughnutChart" style="width: 50%; height: 50%"></canvas>
+            </div>
+        </div>
+    </div-->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title btn-refresh-card">Oportunidades Ganadas Anual (Todas las UDN)&nbsp;<i class='fas fa-redo btn-refresh-card' data-toggle='tooltip' data-placement='top' title='Actualizar los datos' onclick="ActualizarProyectosImportes();"></i> </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div id="chart-container">
+                        <canvas id="multipleLineChartProyectos"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title btn-refresh-card">Oportunidades Ganadas Anual Montos (Todas las UDN)</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div id="chart-container">
+                        <canvas id="multipleLineChartImportes"></canvas>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+</div>
+
+
+
+
+
+

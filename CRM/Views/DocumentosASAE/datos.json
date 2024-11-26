@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Legal",
+    "children": [
+      {
+        "id": "2",
+        "text": "Documento10.xlsx",
+        "icon": "jstree-file"
+      }
+    ]
+  },
+  {
+    "text": "Formatos Oficiales",
+    "children": [
+      {
+        "id": "17",
+        "text": "Como.pdf",
+        "icon": "jstree-file"
+      }
+    ]
+  },
+  {
+    "text": "Políticas y Procedimientos",
+    "children": [
+      {
+        "id": "3",
+        "text": "Propuesta-Comercio-electronico.docx",
+        "icon": "jstree-file"
+      }
+    ]
+  }
+]

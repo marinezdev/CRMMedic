@@ -1,0 +1,1404 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcDocs').addClass("nav-item active submenu");
+        $('#Espera').hide();
+
+        $('#historico').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "order": [[2, "asc"]],
+            "bDestroy": true,
+        });
+
+        $('#usuarios').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "dataSrc": "",
+            "bDestroy": true,
+        });
+
+        $('#busqueda').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "dataSrc": "",
+            "bDestroy": true,
+            "searching": false,
+            'columnDefs': [
+                {
+                    'targets': 3,
+                    'className': 'text-center',
+                }
+            ]
+        });
+
+
+    });
+
+    $("#subirArch").change(function () {
+        //Validar el tamaño del archivo
+        var formData = new FormData();
+        var notas = document.getElementById("eNotasSubir").value;
+        formData.append("notas", notas);
+        var iddoc = document.getElementById("iddocumentooo").value;
+        formData.append("iddoc", iddoc);
+        var file = document.getElementById("subirArch").files[0];
+        formData.append("subirArch", file);
+
+        var extension = file.name.substring(file.name.lastIndexOf("."));
+
+        if (file.size > ValidarPesoArchivo(extension)) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'Archivo excedido en tamaño permitido o extensión no permitida (' + file.size + ' ). Verifique con administrador. ',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                },
+            });
+
+            return;
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                url: '/DocumentosASAE/ReSubirArchivo',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data == "1") {
+                        $('#ModalSubir').modal('hide');
+
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'Se guardó el archivo exitosamente.',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        });
+
+                        Reactualizar();
+
+                    }
+                    else {
+                        swal({
+                            title: 'CRM ASAE',
+                            text: 'No está asignado para la modificación del documento.',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-warning'
+                                }
+                            },
+                        });
+                    }
+                },
+                error: function (error) {
+
+                }
+            });
+        }
+    });
+
+    function SeguroEliminarArchivo(id) {
+        swal({
+            title: 'Eliminación de Archivos',
+            text: "¿Está seguro de querer eliminar este archivo?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: '¡Si, eliminarlo!',
+                    className: 'btn btn-success'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                SeguroEliminarArchivo2(id);
+            }
+        });
+    }
+
+    function SeguroEliminarArchivo2(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/DocumentosASAE/QuitarArchivo",
+            data: {
+                idarchivo: id,
+                idusuario: $('#IdUsuario').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data == "1") {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se eliminó el archivo exitosamente.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            $('#Espera').hide();
+                            location.href = '';
+                        }
+                    );
+
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No está asignado para la modificación del documento.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModificarRegistro(id) {
+        $('#ModalBuscar').modal('hide');
+        $('#buscardocs').val('');
+        $('#ModalModificar').modal('show');
+        SeleccionarPorId(id);
+    }
+
+    function SeleccionarPorId(id) {
+        $.ajax({
+            url: "/DocumentosASAE/ArchivoSeleccionarPorId/",
+            data: { Id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $('#IdRegistro').val(data.Id);
+
+                $('#ModalLabel1').text('Datos del documento ' + data.Nombre);
+
+                //$('#doc').attr('href', '/Documentos/' + data.Nombre);
+
+                $('#eDescripcion').val(data.Descripcion);
+                $('#eVersion').val(data.Version);
+
+                if (data.Vigencia === true) {                          // Para un radiobutton
+                    $('input:radio[class=form-radio-input][id=evig1]').prop('checked', true);
+                }
+                else if (data.Vigencia === false) {
+                    $('input:radio[class=form-radio-input][id=evig2]').prop('checked', true);
+                }
+
+                $('#eVersionusuarios').val(data.VersionUsuarios);
+                var fecha = new Date(parseInt(data.FechaOficial.substr(6)));
+                var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                $('#eFechaoficial').val(fecha.getDate() + '/' + mes + '/' + fecha.getFullYear());
+
+                $('#eClasificacion').val(data.Clasificacion);
+
+                ClasificacionSeleccionada(data.Clasificacion,data.SubClasificacion);
+
+                $('#eliminar').click(function () {
+                    SeguroEliminarArchivo(data.Id);
+                });
+                $('#enviar').click(function () {
+                    EnvioCorreo(data.Id);
+                });
+                $('#subir').click(function () {
+                    Subir(data.Id);
+                });
+                $('#autorizar').click(function () {
+                    Autorizar(data.Id);
+                });
+                $('#histor').click(function () {
+                    CargarHistorico(data.Id);
+                });
+                $('#usuar').click(function () {
+                    CargarUsuarios(data.Id);
+                });
+
+                PermitirDescargaArchivo(data.Id,data.Nombre);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificado() {
+
+        //var checado1 = $('input:radio[name=eclasificacion]:checked').val();
+        var checado2 = $('input:radio[name=evigente]:checked').val();
+        $.ajax({
+            url: "/DocumentosASAE/RegistroModificadoGuardar/",
+            data: {
+                id: $('#IdRegistro').val(),
+                cl: $('#eClasificacion').val(),
+                de: $('#eDescripcion').val(),
+                ve: $('#eVersion').val(),
+                vi: checado2,
+                us: $('#IdUsuario').val(),
+                vu: $('#eVersionusuarios').val(),
+                fo: $('#eFechaoficial').val(),
+                sc: $('#eSubClasificacion').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == "1") {
+                    //Rellenar tabla de archivos
+                    //$('#documentos').DataTable().clear().rows.add(data).draw();
+                    //$('#ModalModificador').modal('show');
+                    Reactualizar();
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No está asignado para la modificación del documento.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function EnvioCorreo(id) {
+        //$('#ModalModificador').modal('hide');
+        $('#ModalCorreo').modal('show');
+        $('#IdRegistro2').val(id);
+    }
+
+    function Subir(id) {
+        //$('#ModalModificador').modal('hide');
+        $('#ModalSubir').modal('show');
+        $('#iddocumentooo').val(id);
+    }
+
+    function Autorizar(id) {
+        //$('#ModalModificador').modal('hide');
+        $('#ModalAutorizar').modal('show');
+        $('#IdDocAut').val(id);
+    }
+
+    function Autorizado() {
+        $('#ModalAutorizar').modal('hide');
+        //$('#ModalModificador').modal('show');
+        $.ajax({
+            url: "/DocumentosASAE/Autorizacion/",
+            data: { iddocumento: $('#IdDocAut').val(), notas: $('#eNotasAut').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se agregó la autorización. Buscar en el histórico',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No está asignado para la modificación del documento.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function EnviarCorreo() {
+        $.ajax({
+            url: "/DocumentosASAE/EnviarCorreo/",
+            data: {
+                eUsuario: $('#eUsuario2').val(),
+                eAsignado: $('#eAsignado2').val(),
+                eDescripcion: $('#eDescripcion2').val(),
+                IdRegistro: $('#IdRegistro2').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data == "1") {
+                    $("#eUsuario").prop("selectedIndex", 0).val();
+                    $("#eAsignado").prop("selectedIndex", 0).val();
+                    $('#eDescripcion2').val(''),
+
+                        $.notify('Se envió el correo exitosamente.', {
+                            autohide: true, type: 'success', placement: {
+                                from: 'bottom',
+                                align: 'right'
+                            }
+                        });
+
+                    //CargaInicial();
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No está asignado para la modificación del documento.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CargarHistorico(id) {
+        //$('#ModalModificador').modal('hide');
+        $('#ModalHistoria').modal('show');
+        $.ajax({
+            type: "GET",
+            url: '/DocumentosASAE/SeleccionarHistoricoDocumento/',
+            data: { iddocumento: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                if (typeof data[0] === 'undefined') {
+                    $('#historico').dataTable().fnClearTable();
+                }
+                else {
+
+                    $('#historico').DataTable().clear();
+
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].DocumentosASAEHistorico.Fecha.substr(6)));
+                        var minutos = fecha.getMinutes() < 10 ? '0' + fecha.getMinutes() : fecha.getMinutes();
+                        $('#historico').dataTable().fnAddData([
+                            data[i].DocumentosASAEHistorico.Nombre,
+                            data[i].DocumentosASAEHistorico.Version,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + ' ' + fecha.getHours() + ":" + minutos + ":" + fecha.getSeconds(),
+                            data[i].Usuarios.Nombre,
+                            data[i].DocumentosASAE.Descripcion,
+                            data[i].DocumentosASAEHistorico.Comentarios
+                        ]);
+                    }
+
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CargarUsuarios(id) {
+        //$('#ModalModificador').modal('hide');
+        $('#ModalUsuarios').modal('show');
+        $.ajax({
+            type: "GET",
+            url: '/DocumentosASAE/SeleccionarUsuariosAsignados/',
+            data: { iddocumento: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].Usuarios.Nombre);
+                if (typeof data[0] === 'undefined') {
+                    $('#usuarios').dataTable().fnClearTable();
+                }
+                else {
+
+                    $('#usuarios').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        $('#usuarios').dataTable().fnAddData([
+                            data[i].Usuarios.Nombre,
+                            data[i].DocumentosASAE.Nombre
+                        ]);
+                    }
+
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Reactualizar() {
+        location.href = '';
+    }
+
+    function ValidarPesoArchivo(extension) {
+        $.ajax({
+            type: "GET",
+            url: '/DocumentosASAE/SeleccionarSiPermitido/',
+            data: { extension: extension },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log("->" + data);
+                if (data == "1") {
+                    return;
+                }
+                else if (data == "2") {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El peso o extensión del archivo podrían no estar permitidos, checar con el administrador.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    })
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Error desconocido con el archivo, checar con el administrador.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        },
+                    })
+                }
+                $('#ModalSubir').modal('hide');
+                $('#ModalModificador').modal('show');
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ClasificacionSeleccionada(id,ids) {
+
+        if (ids != 0) {
+            //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+            $.ajax({
+                url: "/DocumentosASAE/SeleccionarSubclasificacionesPorClasificacion/",
+                data: { idclasificacion: id },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    var len = data.length;
+                    $('#eSubClasificacion').empty();
+                    $('#eSubClasificacion').append('<option value=></option>');
+                    for (var i = 0; i < len; i++) {
+
+                        if (ids == data[i].Id) {
+                            $('#eSubClasificacion').append('<option value=' + data[i].Id + ' selected>' + data[i].Nombre + '</option>');
+                        }
+                        else {
+                            $('#eSubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                        }
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+        else {
+            $('#eSubClasificacion').empty();
+        }
+    }
+
+    function PermitirDescargaArchivo(iddocumento,nombre) {
+        $.ajax({
+            url: "/DocumentosASAE/ValidaSiUsuarioPuedeDescargarDocumento/",
+            data: { iddocumento: iddocumento },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == 1) {
+                    var ext = '.pdf';
+                    if (nombre.indexOf(ext)) {
+                        $('#pdf-js-viewer').attr('src', '/Documentos/' + nombre);
+                    }                    
+
+                    $('#doc').attr('href', '/Documentos/' + nombre);
+
+                    $('#mensajedoc').text('Descargue el documento si no puede visualizarlo').addClass('text-success');
+                }
+                else {
+                    $('#doc').hide();
+                    $('#mensajedoc').text('No puede descargar el documento, solicite acceso al que lo subió.').addClass('text-warning');
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Buscar() {
+        $('#ModalBuscar').modal('show');
+        $('#buscardocs').popover('hide')
+        $.ajax({
+            type: "GET",
+            url: '/DocumentosASAE/BuscarDocumentos/',
+            data: { nombre: $('#buscardocs').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if (typeof data[0] === 'undefined') {
+                    $('#busqueda').dataTable().fnClearTable();
+                }
+                else {
+
+                    $('#busqueda').DataTable().clear();
+
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        var minutos = fecha.getMinutes() < 10 ? '0' + fecha.getMinutes() : fecha.getMinutes();
+                        $('#busqueda').dataTable().fnAddData([                            
+                            data[i].Nombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + ' ' + fecha.getHours() + ":" + minutos + ":" + fecha.getSeconds(),
+                            data[i].Descripcion,
+                            '<a href="#" onclick=ModificarRegistro('+ data[i].Id +')>Ver</a>'
+                        ]);
+                    }
+
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+        
+    }
+
+</script>
+
+<link href="~/assets/css/default/style.min.css" rel="stylesheet" />
+<link href="~/assets/css/default-dark/style.min.css" rel="stylesheet" />
+
+<style>
+    .tree {
+        border: 1px solid black;
+        padding: 10px;
+        width: 600px;
+        margin: 20px;
+        float: left;
+        min-height: 200px;
+    }
+</style>
+
+<input type="hidden" id="IdUsuario" value="@Session["IdUsuario"]" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Biblioteca Documental ASAE</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body text-right">
+
+                    <div class="row">
+
+                        <div class="col-md-8 text-right">
+                            <div class="form-group form-inline">
+                                <div class="col-md-3"></div>
+                                <div class="col-md-3 text-right">
+                                    <label for="buscar" class="col-md-2 col-form-label">Agregue una palabra para buscar:</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <input id="buscardocs" type="text" class="form-control form-control-sm input-solid">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-info" onclick="Buscar();">Buscar</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <div class="form-group form-inline">
+                                <div class="col-md-9 col-lg-9">
+                                    <a href="/DocumentosASAE/Agregar" id="btnAgregar" class="btn btn-primary">Nuevo Documento</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="tab-pane fade active show" id="v-pills-home-icons" role="tabpanel" aria-labelledby="v-pills-home-tab-icons" style="width: 90%">
+                        <div class="accordion accordion-secondary">
+
+                            @foreach (var items in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                            {
+
+                                var encabezado = "heading" + items.Id;
+                                var colapso = "colapso" + items.Id;
+                                var gcolapso = "#colapso" + items.Id;
+                                <div class="card">
+                                    <div class="card-header collapsed" id="@encabezado" data-toggle="collapse" data-target="@gcolapso" aria-expanded="false" aria-controls="@colapso" role="button">
+                                        <div class="span-icon">
+                                            <div class="fas fa-folder text-success"></div>
+                                        </div>
+                                        <div class="span-title text-success">
+                                            @items.Nombre
+                                        </div>
+                                        <div class="span-mode text-success"></div>
+                                    </div>
+
+                                    <div id="@colapso" class="collapse" aria-labelledby="@encabezado" data-parent="#accordion">
+                                        <div class="card-body">
+
+                                            @if (CRM.Models.Catalogos.SeleccionarClasificacionesDocumentosASAE(items.Id.ToString()).Count() > 0)
+                                            {
+
+                                                <table class="table table-striped table-hover table-bordered table-head-bg-success" width="100%">
+                                                    <thead>
+                                                        <tr><th>Nombre</th><th>Fecha</th><th>Descripción</th><th>Versión</th><th>Vigencia</th><th>Usuarios</th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var datos in CRM.Models.Catalogos.SeleccionarClasificacionesDocumentosASAE(items.Id.ToString()))
+                                                        {
+                                                            var vigente = datos.Vigencia == true ? "Sí" : "No";
+                                                            <tr>
+                                                                <td><i class="fas fa-file text-info"></i>&nbsp;<a href="#" onclick="ModificarRegistro(@datos.Id);">@datos.Nombre</a></td>
+                                                                <td>@datos.Fecha</td>
+                                                                <!--td>@CRM.Models.Catalogos.SeleccionarNombrePorId(datos.Clasificacion.ToString(), "DocumentosASAEClasificacion")</td-->
+                                                                <td>@datos.Descripcion</td>
+                                                                <td class="text-center">@datos.VersionUsuarios</td>
+                                                                <td class="text-center">@vigente</td>
+                                                                <td class="text-center">
+                                                                    <h4>
+                                                                        <a href="#" onclick="CargarUsuarios(@datos.Id);"><i class="fas fa-users text-secondary" data-toggle="tooltip" data-placement="left" title="Usuarios asignados"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                    </h4>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            }
+                                            else
+                                            {
+                                                <label class="label label-align-center">No se han agregado documentos.</label>
+                                            }
+
+                                            @foreach (var itemss in CRM.Models.Catalogos.SeleccionarSubConsulta("DocumentosASAESubClasificacion", "IdClasificacion", items.Id.ToString()))
+                                            {
+                                                var encabezadoo = "headingg" + itemss.Id;
+                                                var colapsoo = "colapsoo" + itemss.Id;
+                                                var gcolapsoo = "#colapsoo" + itemss.Id;
+                                                <div class="card">
+                                                    <div class="card-header collapsed" id="@encabezadoo" data-toggle="collapse" data-target="@gcolapsoo" aria-expanded="false" aria-controls="@colapsoo" role="button">
+                                                        <div class="span-icon">
+                                                            <div class="fas fa-folder"></div>
+                                                        </div>
+                                                        <div class="span-title">
+                                                            @itemss.Nombre
+                                                        </div>
+                                                        <div class="span-mode"></div>
+                                                    </div>
+
+                                                    <div id="@colapsoo" class="collapse" aria-labelledby="@encabezadoo" data-parent="#accordion">
+                                                        <div class="card-body" style="background-color: gainsboro">
+
+                                                            @if (CRM.Models.Catalogos.SeleccionarClasificacionSubClasificacionDocumentosASAE(items.Id.ToString(), itemss.Id.ToString()).Count() > 0)
+                                                            {
+                                                                <table class="table table-striped table-hover table-bordered table-head-bg-secondary">
+                                                                    <thead>
+                                                                        <tr><th>Nombre</th><th>Fecha</th><th>Descripción</th><th>Versión</th><th>Vigencia</th><th>Usuarios</th></tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach (var datoss in CRM.Models.Catalogos.SeleccionarClasificacionSubClasificacionDocumentosASAE(items.Id.ToString(), itemss.Id.ToString()))
+                                                                        {
+                                                                            var vigentee = datoss.Vigencia == true ? "Sí" : "No";
+                                                                            <tr>
+                                                                                <td><i class="fas fa-file text-info"></i><a href="#" onclick="ModificarRegistro(@datoss.Id);">@datoss.Nombre</a></td>
+                                                                                <td>@datoss.Fecha</td>
+                                                                                <!--td>@CRM.Models.Catalogos.SeleccionarNombrePorId(datoss.Clasificacion.ToString(), "DocumentosASAEClasificacion")</td-->
+                                                                                <td>@datoss.Descripcion</td>
+                                                                                <td class="text-center">@datoss.VersionUsuarios</td>
+                                                                                <td class="text-center">@vigentee</td>
+                                                                                <td class="text-center">
+                                                                                    <h4>
+                                                                                        <a href="#" onclick="CargarUsuarios(@datoss.Id);"><i class="fas fa-users text-secondary" data-toggle="tooltip" data-placement="left" title="Usuarios asignados"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                    </h4>
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            }
+                                                            else
+                                                            {
+                                                                <label class="label label-align-center">No se han agregado documentos.</label>
+                                                            }
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Modificar registro -->
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-8">
+                            <div class="form-group form-inline">
+                                <label for="Descripcion" class="col-md-3 col-form-label">Descripción</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <textarea class="form-control form-control-sm input-solid" id="eDescripcion" cols="60" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-7">
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label for="eVersion" class="col-md-3 col-form-label">Estatus</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="eVersion" placeholder="" required autocomplete="off" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label for="eVersionusuarios" class="col-md-3 col-form-label">Versión</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="eVersionusuarios" name="eVersionusuarios" placeholder="" required autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label for="eFechaoficial" class="col-md-3 col-form-label">Fecha Oficial</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="eFechaoficial" name="eFechaoficial" placeholder="" required autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-2 col-form-label">Vigente</label>
+
+                                        <div class="form-group form-inline text-left">
+                                            <div class="form-check">
+                                                <label class="form-radio-label">
+                                                    <input class="form-radio-input" type="radio" id="evig1" name="evigente" value="1">
+                                                    <span class="form-radio-sign">&nbsp;Sí</span>
+                                                </label>
+                                                <label class="form-radio-label ml-3">
+                                                    <input class="form-radio-input" type="radio" id="evig2" name="evigente" value="2">
+                                                    <span class="form-radio-sign">&nbsp;No</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Clasificación</label>
+                                        <select class="form-control form-control-sm input-solid" id="eClasificacion" name="eClasificacion" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var clas in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                                            {
+                                                <option value="@clas.Id">@clas.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">SubClasificación&nbsp;</label>
+                                        <select class="form-control form-control-sm input-solid" id="eSubClasificacion" name="eSubClasificacion" style="width: 180px">
+                                        </select>
+                                    </div>
+                                </div>
+                            
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <!--pantalla de visualización-->
+
+                            <div class="row">
+
+                                <div class="col-md-5 text-left" >
+                                    <div style="border:1px solid black; width: 280px; height: 360px">
+                                        <!--documento aquí-->
+                                        <iframe id="pdf-js-viewer" title="webviewer" frameborder="0" width="280" height="350" toolbar="0"></iframe>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-12 text-center">
+
+                            <span id="mensajedoc" style="font-size: 12px"></span>
+
+                        </div>
+
+                    </div>
+
+                    <input type="hidden" id="IdRegistro" value="" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                
+                <table>
+                    <tr>
+                        <td>
+                            <h4>
+                                <a href="~/Documentos/" id="doc" target="_blank"><i class="fas fa-download" data-toggle="tooltip" data-placement="left" title="Descargar el documento" style="color: cornflowerblue"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="eliminar"><i class="fas fa-trash text-danger" data-toggle="tooltip" data-placement="left" title="Eliminar el documento"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="enviar"><i class="fas fa-envelope text-secondary" data-toggle="tooltip" data-placement="left" title="Enviar un correo a un colaborador"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="subir"><i class="fas fa-file-upload text-info" data-toggle="tooltip" data-placement="left" title="Subir una modificación del documento"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="autorizar"><i class="fas fa-check text-success" data-toggle="tooltip" data-placement="left" title="Autorizar documento"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="histor"><i class="fas fa-layer-group text-primary" data-toggle="tooltip" data-placement="left" title="Histórico del documento"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="#" id="usuar"><i class="fas fa-users text-secondary" data-toggle="tooltip" data-placement="left" title="Usuarios asignados"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </h4>
+                        </td>
+                    </tr>
+                </table>
+
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar Modificación</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Correo a colaborador -->
+<div class="modal fade" id="ModalCorreo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Enviar un correo</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-10">
+                            <div class="form-group form-inline">
+                                <label class="col-md-2 col-form-label">Para</label>
+                                <select class="form-control form-control-sm input-solid" id="eUsuario2" style="width: 180px">
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsablesOptionsdeASAE(@Session["IdUsuario"].ToString());
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-10">
+                            <div class="form-group form-inline">
+                                <label class="col-md-2 col-form-label">Asignarlo como</label>
+                                <select class="form-control form-control-sm input-solid" id="eAsignado2" style="width: 180px">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var clas in CRM.Models.Catalogos.Seleccionar("DocumentosASAEUsuarioPosicion"))
+                                    {
+                                        <option value="@clas.Id">@clas.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group form-inline">
+                            <label class="col-md-2 col-form-label">Notas</label>
+                            <div class="col-md-9 col-lg-9">
+                                <textarea id="eDescripcion2" class="form-control form-control-sm input-solid" cols="60" rows="2"></textarea>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <input type="hidden" id="IdRegistro2" value="" />
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="EnviarCorreo();">Enviar Correo</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subir archivo -->
+<div class="modal fade" id="ModalSubir" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Subir documento modificado</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form id="formsubir" method="post" enctype="multipart/form-data">
+
+                    <div class="row">
+                        <h5 class="col-10 text-info">Si desea que un colaborador pueda modificar el documento, envíele un correo</h5>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="eNotasSubir" class="col-md-3 col-form-label">Notas</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <textarea class="form-control form-control-sm input-solid" id="eNotasSubir" cols="40" rows="4" placeholder="Agregue un texto breve"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-12">
+
+                        <div class="input-file input-file-image">
+
+                            <input type="file" class="form-control form-control-file" id="subirArch" name="subirArch" required="">
+                            <label for="subirArch" class="label-input-file btn btn-primary">
+                                Seleccionar archivo para subir (NO modifique el nombre)
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <input type="hidden" id="iddocumentooo" name="iddocumentooo" value="" />
+
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Autorizar -->
+<div class="modal fade" id="ModalAutorizar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Autorizar documento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="eNotasAut" class="col-md-3 col-form-label">Notas</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <textarea class="form-control form-control-sm input-solid" id="eNotasAut" cols="40" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="IdDocAut" value="" />
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="Autorizado();">Autorizar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Histórico -->
+<div class="modal fade" id="ModalHistoria" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Historial del documento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="table-responsive">
+                        <table id="historico" class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Nombre Archivo</th>
+                                    <th>Versión</th>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Posición</th>
+                                    <th>Comentarios</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Usuarios Asignados -->
+<div class="modal fade" id="ModalUsuarios" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Usuarios asignados a los cambios del documento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="table-responsive">
+                        <table id="usuarios" class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Posición</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buscar archivos -->
+<div class="modal fade" id="ModalBuscar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="background-color: gainsboro;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Documentos encontrados</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="table-responsive">
+                        <table id="busqueda" class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Fecha</th>
+                                    <th>Subido por</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+

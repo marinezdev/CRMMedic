@@ -1,0 +1,69 @@
+﻿@model List<CRM.Models.Models.AsaeWebEventos> 
+@{
+    ViewBag.Title = "Externas";
+}
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcExternas').addClass("active");
+        $('#Espera').hide();
+
+    });
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Campañas de Facebook</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                   
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Campaña</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Estado</th>
+                                <th></th><!--Modificar-->
+                                <th></th><!--Modificar-->
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Nombre</td>
+                                        <td>@item.FechaInicio.ToString("dd/MMM/yy")</td>
+                                        <td>@item.FechaFin.ToString("dd/MMM/yy")</td>
+                                        <td>@(item.Activo ? "Activo" : "Inactivo")</td>
+                                        <td><a href="/Marketing/ExternasContactos?Evento=@item.Id">Contactos</a></td>
+                                        <td><a href="/Marketing/ExternasEstadisticas?Evento=@item.Id">Estadísticas</a></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

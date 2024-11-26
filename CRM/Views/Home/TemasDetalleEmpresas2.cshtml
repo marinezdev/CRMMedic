@@ -1,0 +1,67 @@
+﻿
+@{
+    ViewBag.Title = "TemasDetalleEmpresas2";
+}
+
+<script>
+    $(document).ready(function () {
+
+        $("#basic-datatables").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Oportunidades/Edicion?Id=' + firstCellText;
+            }
+        });
+
+    });
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">@CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "P") con @CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "P") Cerrados</h4>
+    </div>
+
+
+    <div class="row">
+
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%; cursor: pointer">
+
+                <thead class="header">
+                    <tr>
+                        <th></th>
+                        <th>@CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</th>
+                        <th>@CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</th>
+                        <th>Clasificación</th><th>SubClasificación</th><th>Creado</th><th>Cierre</th><th></th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Encontrado != null)
+                    {
+                        foreach (var items in ViewBag.Encontrado)
+                        {
+                    <tr>
+                        <td style="color: transparent; width:0px">@items.Oportunidades.Id</td>
+                        <td>@items.Empresas.Nombre</td>
+                        <td>@items.Oportunidades.Nombre</td>
+                        <td>@items.Clasificacion.Nombre</td>
+                        <td>@items.Subclasificacion.Nombre</td>
+                        <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+
+                        @CRM.Utilerias.CustomHelpers.EstadosdeProcesoSABE(items.Bitacora.NombreEstado)
+
+                        <td><a href="/Oportunidades/Editar?Id=@items.Oportunidades.Id">Editar</a></td>
+                    </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>

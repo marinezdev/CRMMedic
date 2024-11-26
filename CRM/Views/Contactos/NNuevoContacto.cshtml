@@ -1,0 +1,1513 @@
+﻿
+@{
+    ViewBag.Title = "NNuevoContacto";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    table.dataTable thead tr {
+        background-color: #1572E8;
+        background: linear-gradient(-45deg,#17a2b8,#1572e8) !important;
+        color: white;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: cadetblue;
+        background-color: #1572E8;
+        background: linear-gradient(-45deg,#17a2b8,#1572e8) !important;
+        color: white;
+    }
+
+    .header th {
+        height: 15px;
+        line-height: 2px;
+    }
+
+    .header2 th {
+        height: 15px;
+        line-height: 2px;
+        background-color: yellowgreen
+    }
+</style>
+
+<!-- Modal Empresa-->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">Agregar empresa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Completa los campos marcados *</p>
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="largeInput">* Nombre </label>
+                            <input type="text" class="form-control form-control" id="NombreEmpresaModal" placeholder="" autocomplete="off" onchange="ValidaInput('NombreEmpresaModal')" style="text-transform:uppercase">
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="largeInput"> RFC </label>
+                            <input type="text" class="form-control form-control" id="RFCEmpresaModal" placeholder="RFC" maxlength="12" autocomplete="off" style="text-transform:uppercase">
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="defaultSelect">* Tipo de empresa </label>
+                            <select class="form-control form-control" id="Select_TipoEmpresa" onchange="ValidaSelect('Select_TipoEmpresa')">
+                                <option value="0">Seleccionar </option>
+                                <option value="1">Interna   </option>
+                                <option value="2">Externa   </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BtnGuardarEmpresa">Guardar</button>
+                <button type="button" class="btn btn-default" id="BtnCerrarEmpresa" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Area-->
+<div class="modal fade" id="ModalArea" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">Agregar area</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Completa los campos marcados *</p>
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="largeInput">* Nombre </label>
+                            <input type="text" class="form-control form-control" placeholder="Nombre" id="NombreAreaModal" autocomplete="off" onchange="ValidaInput('NombreAreaModal')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BtnGuardarArea">Guardar</button>
+                <button type="button" class="btn btn-default" id="BtnCerrarArea" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Paciente</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="@Url.Action("NIndex", "Contactos")">
+                    <i class="flaticon-add-user"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("NNuevoContacto", "Contactos")">Nuevo</a>
+            </li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <h4 class="card-title">Nuevo Paciente</h4>
+                    </div>
+                    <p class="card-category">
+                        Completa los campos marcados *
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="card-category"> Datos </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput"> Nombre (s)</label>
+                                <input type="text" class="form-control form-control" id="Nombre" placeholder="Nombre (s)">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput"> Apellido Paterno</label>
+                                <input type="text" class="form-control form-control" id="ApellidoPaterno" placeholder="Apellido Paterno">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput">Apellido Materno</label>
+                                <input type="text" class="form-control form-control" id="ApellidoMaterno" placeholder="Apellido Materno">
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput"> Fecha nacimiento  </label>
+                                <input type="date" class="form-control form-control" id="Fecha_Nacimiento">
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> Sexo </label>
+                                <select class="form-control form-control" id="Select_Sexo">
+                                    <option value="0">Seleccionar </option>
+                                    <option value="H">Hombre  </option>
+                                    <option value="M">Mujer  </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> Nacionalidad  </label>
+                                <select class="form-control form-control" id="Select_Nacionalidad">
+                                    <option value="0">Seleccionar </option>
+                                    @foreach (var pai in ViewBag.Paises)
+                                    {
+                                        if (pai.Id == 140)
+                                        {
+                                            <option value="@pai.Id" selected="selected">@pai.Nombre</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@pai.Id">@pai.Nombre</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="card-category"> Contacto </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput">* Correo electrónico</label>
+                                <input type="text" class="form-control form-control" id="Correo_Electronico" placeholder="nombre@asae.com" onchange="ValidaInput('Correo_Electronico')">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput"> Teléfono móvil </label>
+                                <input type="text" class="form-control form-control input-number" id="Telefono_Movil" placeholder="Móvil" maxlength="10" autocomplete="off" onchange="ValidaTelefono()">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput"> Teléfono local </label>
+                                <input type="text" class="form-control form-control input-number" id="Telefono_Local" placeholder="Local" maxlength="10" autocomplete="off" onchange="ValidaTelefonoLocal()">
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="card-category"> Dirección (Agiliza tu búsqueda colocando el <strong> código postal </strong>)</div>
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect">CP  </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control" id="CP" placeholder="Código postal" maxlength="6" onchange="CPBuscar(this.value)">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-default" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> Estado  </label>
+                                <select class="form-control form-control" id="Select_Estados" onchange="callEstados(this.value)">
+                                    <option value="0">Seleccionar </option>
+                                    @foreach (var tp in ViewBag.Estados)
+                                    {
+                                        <option value="@tp.Id">@tp.Estado</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> Ciudad o municipio </label>
+                                <select class="form-control form-control" id="Select_Delegacion_Municipio" onchange="callColonias(this.value)">
+                                    <option value="0">Seleccionar </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> Colonia </label>
+                                <select class="form-control form-control" id="Select_Colonia" onchange="callCP(this.value)">
+                                    <option value="0">Seleccionar </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput">Dirección</label>
+                                <input type="text" class="form-control form-control" id="Direccion" placeholder="Dirección">
+                            </div>
+                        </div>
+
+                    </div>
+                    <hr />
+                    <div class="card-category"> Médico ( Puedes agregar médicos o áreas si son requeridas, da clic sobre el botón: <i class="fa fa-plus" aria-hidden="true"></i> )</div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect">Médico</label>
+                                <div class="input-group">
+                                    <select class="form-control form-control" id="Select_Empresa">
+                                        <option value="0">Seleccionar </option>
+                                        @foreach (var tp in ViewBag.Empresas)
+                                        {
+                                            <option value="@tp.Id">@tp.Nombre</option>
+                                        }
+                                    </select>
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect">Área  </label>
+                                <div class="input-group">
+                                    <select class="form-control form-control" id="Select_area">
+                                        <option value="0">Seleccionar </option>
+                                        @foreach (var tp in ViewBag.Area)
+                                        {
+                                            <option value="@tp.Id">@tp.Nombre</option>
+                                        }
+                                    </select>
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#ModalArea"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                <label for="largeInput">Cargo</label>
+                                <input type="text" class="form-control form-control" id="Cargo" placeholder="Cargo">
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="card-category"> Clasificación    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="comment">Notas</label>
+                                <textarea class="form-control" id="comment" rows="5">
+                            </textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="defaultSelect"> * Unidad de negocio  (U de N) </label>
+                                        <select class="form-control form-control" id="Select_UnidadNegocio" onchange="ValidaSelect('Select_UnidadNegocio')">
+                                            <option value="0">Seleccionar </option>
+                                            @if (Session["IdRol"].ToString() == "7")
+                                            {
+                                                <option value="6" selected>Comisionista</option>
+                                            }
+                                            else
+                                            {
+                                                foreach (var udn in ViewBag.UDN)
+                                                {
+                                                    <option value="@udn.Id">@udn.Nombre</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="defaultSelect"> * Tipo Paciente  </label>
+                                        <select class="form-control form-control" id="Select_TipoContato" onchange="ValidaSelect('Select_TipoContato')">
+                                            <option value="0">Seleccionar </option>
+                                            <option value="1">Cliente  </option>
+                                            <option value="2">Prospecto </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="defaultSelect"> * Tipo persona  </label>
+                                        <select class="form-control form-control" id="Select_TipoPersona" onchange="ValidaSelect('Select_TipoPersona')">
+                                            <option value="0">Seleccionar </option>
+                                            @foreach (var tp in ViewBag.TipoPersona)
+                                            {
+                                                <option value="@tp.Id">@tp.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6">
+                            <button class="btn btn-primary" id="BtnGuardarContacto">
+                                <span class="btn-label">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                                Guardar contacto
+                            </button>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row" id="ContenidoContactos">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#comment").text("");
+
+        $('#BtnGuardarEmpresa').click(function () {
+            if (ValidarModalEmpresa()) {
+
+                var InternaExterna = $("#Select_TipoEmpresa option:selected").val();
+
+                var obj = {};
+                obj['Nombre'] = $('#NombreEmpresaModal').val();
+                obj['RFC'] = $('#RFCEmpresaModal').val();
+                obj['InternaExterna'] = InternaExterna;
+                obj['IdUDN'] = $('#UDN').val();
+
+                var jsonObject = {
+                    "Empresas": obj
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Empresa_Agregar", "Contactos")",
+                    async: false,
+                    data: JSON.stringify(jsonObject),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: resultadoEmpresa,
+                    error: errores
+               });
+
+
+            } else {
+                $.notify({
+                    message: "Formulario incompleto!."
+                }, {
+                    type: 'danger',
+                    allow_dismiss: false,
+                    animate: {
+                        enter: 'animated rollIn',
+                        exit: 'animated rollOut'
+                    }
+                });
+            }
+        });
+
+        $('#BtnGuardarArea').click(function () {
+            if (ValidarModalArea()) {
+
+                var obj = {};
+                obj['Nombre'] = $('#NombreAreaModal').val();
+                var jsonObject = {
+                    "Area": obj
+                };
+
+               $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Agregar_Area", "Contactos")",
+                    async: false,
+                    data: JSON.stringify(jsonObject),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: resultado,
+                    error: errores
+               });
+
+            } else {
+                $.notify({
+                    message: "Formulario incompleto!."
+                }, {
+                    type: 'danger',
+                    allow_dismiss: false,
+                    animate: {
+                        enter: 'animated rollIn',
+                        exit: 'animated rollOut'
+                    }
+                });
+            }
+        });
+
+        $('#BtnGuardarContacto').click(function () {
+            if (ValidarContacto()) {
+                if (ValidarTelefono()) {
+                    if (ValidarTelefonoLocal()) {
+
+                        $('#ContenidoContactos').html("");
+
+                        var obj = {};
+
+                        obj['Nombre'] = $('#Nombre').val();
+                        obj['ApellidoPaterno'] = $('#ApellidoPaterno').val();
+                        obj['ApellidoMaterno'] = $('#ApellidoMaterno').val();
+                        obj['Correo'] = $('#Correo_Electronico').val();
+
+                        var jsonObject = {
+                            "Contactos": obj
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("Buscar_Contacto", "Contactos")",
+                            async: false,
+                            data: JSON.stringify(jsonObject),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: resultadoBusquedaContacto,
+                            error: errores
+                       });
+
+                    }
+                }
+            } else {
+                $.notify({
+                    message: "Formulario incompleto!."
+                }, {
+                    type: 'danger',
+                    allow_dismiss: false,
+                    animate: {
+                        enter: 'animated rollIn',
+                        exit: 'animated rollOut'
+                    }
+                });
+            }
+        });
+
+    });
+
+
+    function RegistrarContacto() {
+        var obj = {};
+
+        // Datos
+        obj['Nombre'] = null;
+        obj['ApellidoPaterno'] = null;
+        obj['ApellidoMaterno'] = null;
+
+        obj['FechaCumpleaños'] = null;
+        obj['Sexo'] = null;
+        obj['Pais'] = null;
+
+        if ($('#Nombre').val().length > 0) {
+            obj['Nombre'] = $('#Nombre').val();
+        }
+        if ($('#ApellidoPaterno').val().length > 0) {
+            obj['ApellidoPaterno'] = $('#ApellidoPaterno').val();
+        }
+        if ($('#ApellidoMaterno').val().length > 0) {
+            obj['ApellidoMaterno'] = $('#ApellidoMaterno').val();
+        }
+
+
+        if ($('#Fecha_Nacimiento').val().length > 0) {
+            obj['FechaCumpleaños'] = $('#Fecha_Nacimiento').val();
+        }
+        if ($("#Select_Sexo option:selected").val() > 0) {
+            obj['Sexo'] = $("#Select_Sexo option:selected").val();
+        }
+        if ($("#Select_Nacionalidad option:selected").val() > 0) {
+            obj['Pais'] = $("#Select_Nacionalidad option:selected").val();
+        }
+
+
+        // Contacto
+        obj['Correo'] = null;
+        obj['Celular'] = null;
+        obj['Telefono'] = null;
+
+        if ($('#Correo_Electronico').val().length > 0) {
+            obj['Correo'] = $('#Correo_Electronico').val(); // Obligario
+        }
+        if ($('#Telefono_Movil').val().length > 0) {
+            obj['Celular'] = $('#Telefono_Movil').val();
+        }
+        if ($('#Telefono_Local').val().length > 0) {
+            obj['Telefono'] = $('#Telefono_Local').val();
+        }
+
+
+        //Dirección
+        obj['CP'] = null;
+        obj['Estado'] = null;
+        obj['Direccion'] = null;
+        obj['Ciudad'] = null;
+
+        if ($('#CP').val().length > 0) {
+            obj['CP'] = $('#CP').val();
+        }
+        if ($("#Select_Estados option:selected").val() > 0) {
+            obj['Estado'] = $("#Select_Estados option:selected").val();
+        }
+
+        var estado = $("#Select_Estados option:selected").val();
+        var delegacion = $("#Select_Delegacion_Municipio option:selected").val();
+        var colonia = $("#Select_Colonia option:selected").val();
+
+        var direcicon = "";
+        if (colonia > 0) {
+            direcicon += ", " + $("#Select_Colonia option:selected").text();
+        }
+        if (delegacion > 0) {
+            direcicon += ", " + $("#Select_Delegacion_Municipio option:selected").text();
+        }
+        if (estado > 0) {
+            direcicon += ", " + $("#Select_Estados option:selected").text();
+        }
+
+        if (direcicon.length > 0) {
+            obj['Ciudad'] = direcicon;
+        }
+        if ($('#Direccion').val().length > 0) {
+            obj['Direccion'] = $('#Direccion').val();
+        }
+
+        //Empresa
+        obj['IdEmpresa'] = null;
+        obj['IdArea'] = null;
+        obj['Cargo'] = null;
+
+        if ($("#Select_Empresa option:selected").val() > 0) {
+            obj['IdEmpresa'] = $("#Select_Empresa option:selected").val();
+        }
+        if ($("#Select_area option:selected").val() > 0) {
+            obj['IdArea'] = $("#Select_area option:selected").val();
+        }
+        if ($('#Cargo').val().length > 0) {
+            obj['Cargo'] = $('#Cargo').val();
+        }
+
+        //Clasificación
+        obj['Notas'] = null;
+
+        if ($('#comment').val().length > 0) {
+            obj['Notas'] = $('#comment').val();
+        }
+
+
+        obj['IdUDN'] = $("#Select_UnidadNegocio option:selected").val();
+        obj['TipoContacto'] = $("#Select_TipoContato option:selected").val();
+        obj['TipoPersona'] = $("#Select_TipoPersona option:selected").val();
+
+        var jsonObject = {
+            "Contactos": obj
+        };
+
+
+         $.ajax({
+            type: "POST",
+            url: "@Url.Action("Agregar_Contacto", "Contactos")",
+            async: false,
+            data: JSON.stringify(jsonObject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: resultadoContacto,
+            error: errores
+         });
+
+    }
+
+    function resultadoContacto(data) {
+        if (data.Resultado == 1) {
+            swal({
+                title: 'Operación exitosa ',
+                text: 'Nuevo contacto registrado.',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-success'
+                    }
+                },
+            }).then(
+                function () {
+                    location.reload();
+                }
+            );
+        } else {
+            swal({
+                title: 'Validación',
+                text: 'Problemas al registrar nuevo contacto, verifica la información.',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                },
+            }).then(
+                function () {
+                    
+                }
+            );
+        }
+    }
+
+    function resultadoBusquedaContacto(data){
+
+        if (data.Resultado == 0) {
+            $('#Correo_Electronico').css("border", "2px solid #f44336");
+
+            swal({
+                title: "Alerta nuevo contacto",
+                text: "¡El correo electrónico que intentas registrar ya existe! \n\n ¿Deseas consultar el contacto?",
+                icon: "warning",
+                buttons: [
+                    'Cancelar ',
+                    'Consultar '
+                ],
+                dangerMode: true,
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+
+                    var obj = {};
+                    obj['Correo'] = $('#Correo_Electronico').val();
+
+                    var jsonObject = {
+                        "Contactos": obj
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("Contato_Buscar_Correo", "Contactos")",
+                        async: false,
+                        data: JSON.stringify(jsonObject),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: resultadoTabla,
+                        error: errores
+                    });
+
+                } else {
+                    swal("Cancelado", "Cambia el correo electrónico", "error");
+
+                }
+            });
+        } else if (data.Resultado == 1) {
+            swal({
+                title: "Alerta nuevo contacto",
+                text: "¡Algunos datos tienen coincidencia con otro contacto registrado! \n\n ¿Deseas consultar los contactos?",
+                icon: "warning",
+                buttons: [
+                    'Registrar ',
+                    'Consultar '
+                ],
+                dangerMode: true,
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+
+                    var obj = {};
+                    obj['Nombre'] = $('#Nombre').val();
+                    obj['ApellidoPaterno'] = $('#ApellidoPaterno').val();
+                    obj['ApellidoMaterno'] = $('#ApellidoMaterno').val();
+
+                    var jsonObject = {
+                        "Contactos": obj
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("Contato_Buscar", "Contactos")",
+                        async: false,
+                        data: JSON.stringify(jsonObject),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: resultadoTabla,
+                        error: errores
+                    });
+
+                } else {
+                    RegistrarContacto();
+                }
+            });
+
+        } else if (data.Resultado == 2) {
+            RegistrarContacto();
+        }
+    }
+
+    function resultadoTabla(data) {
+        var contenido = "";
+        contenido += "" +
+            "<div class='card-sub'>" +
+                "El nombre o correo tendría alguna coincidencia con los datos que se muestran:" +
+            "</div>" +
+            "<div class='table-responsive'>" +
+            "<table  id='example2' class='table table-striped table-bordered jambo_table bulk_action' style='width:100%'>" +
+            "<thead>" +
+            "<tr>" +
+                "<th>Nombre </th>" +
+                "<th>Apellido Paterno</th>" +
+                "<th>Apellido Materno</th>" +
+                "<th>Correo</th>" +
+            "</tr>" +
+            "</thead>" +
+            "<tbody>";
+
+        for (var i = 0; i < data.length; i++) {
+            contenido +=
+                "<tr>" +
+                    "<td>" +
+                            data[i].Nombre +
+                    "</td>" +
+                    "<td>" +
+                            data[i].ApellidoPaterno +
+                    "</td>" +
+                    "<td>" +
+                            data[i].ApellidoMaterno +
+                    "</td>" +
+                    "<td>" +
+                            data[i].Correo +
+                    "</td>" +
+                "</tr>";
+        }
+
+        contenido += "</tbody>" +
+            "</table>";
+        "</div>";
+
+        $('#ContenidoContactos').html(contenido);
+
+        $('#example2').DataTable({ 'language': { 'url': '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json' }, scrollY: '300px', scrollX: true, scrollCollapse: true, fixedColumns: true, dom: 'Blfrtip', buttons: [{ extend: 'copy', className: 'btn-sm' }, { extend: 'csv', className: 'btn-sm' }, { extend: 'excel', className: 'btn-sm' }, { extend: 'pdfHtml5', className: 'btn-sm' }, { extend: 'print', className: 'btn-sm' }] });
+    }
+
+    function ValidarContacto()
+    {
+        var respuesta = false;
+
+        $('#Correo_Electronico').css("border", "2px solid #f44336");
+        $('#Select_UnidadNegocio').css("border", "2px solid #f44336");
+        $('#Select_TipoContato').css("border", "2px solid #f44336");
+        $('#Select_TipoPersona').css("border", "2px solid #f44336");
+
+
+        if ($('#Correo_Electronico').val().length > 0) {
+            $('#Correo_Electronico').css("border", "1px solid #b5c3e7");
+        }
+
+        if ($("#Select_UnidadNegocio option:selected").val() > 0) {
+            $('#Select_UnidadNegocio').css("border", "1px solid #b5c3e7");
+        }
+        if ($("#Select_TipoContato option:selected").val() > 0) {
+            $('#Select_TipoContato').css("border", "1px solid #b5c3e7");
+        }
+        if ($("#Select_TipoPersona option:selected").val() > 0) {
+            $('#Select_TipoPersona').css("border", "1px solid #b5c3e7");
+        }
+
+        if (ValidarEmail()) {
+            if ($("#Select_UnidadNegocio option:selected").val() > 0) {
+                if ($("#Select_TipoContato option:selected").val() > 0) {
+                    if ($("#Select_TipoPersona option:selected").val() > 0) {
+                        respuesta = true;
+                    }
+                }
+            }
+        }
+
+        return respuesta;
+    }
+
+    function ValidarEmail() {
+        var respuesta = false;
+
+        if (CorreoFrom() == "ok") {
+            $('#Correo_Electronico').css("border", "1px solid #c2c2c2");
+            respuesta = true;
+        } else {
+
+            $('#Correo_Electronico').css("border", "2px solid #f44336");
+
+            $.notify({
+                //icon: 'fa fa-paw',
+                message: "Correo electrónico invalido."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+        return respuesta;
+    }
+
+
+    function resultadoEmpresa(data) {
+        console.log(data);
+        if (data.Id == '-1') {
+
+            $.notify({
+                message: "La empresa que intentas agregar ya se encuentra registrada ."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+
+            $('#NombreEmpresaModal').css("border", "2px solid #f44336");
+
+        } else if (data.Id > 0) {
+
+            $.notify({
+                message: "¡Nueva empresa agregada!."
+            }, {
+                type: 'success',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Empresas_Seleccionar", "Contactos")",
+                data: '',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    $("#Select_Empresa").empty();
+
+                    if (result.length > 0) {
+
+                        var option = $(document.createElement('option'));
+                        option.text("Seleccionar");
+                        option.val(0);
+
+                        $("#Select_Empresa").append(option);
+
+                        $(result).each(function () {
+                            var option = $(document.createElement('option'));
+
+                            option.text(this.Nombre);
+                            option.val(this.Id);
+
+                            $("#Select_Empresa").append(option);
+                        });
+
+                        $('#Select_Empresa option[value="' + data.Id + '"]').attr("selected", true);
+
+                    }
+                },
+                error: errores
+            });
+
+            $("#BtnCerrarEmpresa").trigger("click");
+            $('#NombreEmpresaModal').val('');
+        }
+    }
+
+    function resultado(data) {
+        if (data.Resultado == '-1') {
+
+            $.notify({
+                message: "El área que intentas agregar ya se encuentra registrada ."
+            }, {
+                type: 'success',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+
+            $('#NombreAreaModal').css("border", "2px solid #f44336");
+
+        } else if (data.Resultado > 0) {
+            $.notify({
+                message: "¡Nueva área agregada!."
+            }, {
+                type: 'success',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Area_Seleccionar", "Contactos")",
+                data: '',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                        $("#Select_area").empty();
+
+                        if (result.length > 0) {
+
+                            var option = $(document.createElement('option'));
+                            option.text("Seleccionar");
+                            option.val(0);
+
+                            $("#Select_area").append(option);
+
+                            $(result).each(function () {
+                                var option = $(document.createElement('option'));
+
+                                option.text(this.Nombre);
+                                option.val(this.Id);
+
+                                $("#Select_area").append(option);
+                            });
+
+                            $('#Select_area option[value="' + data.Id + '"]').attr("selected", true);
+
+                        }
+                },
+                error: errores
+            });
+
+            $("#BtnCerrarArea").trigger("click");
+            $('#NombreAreaModal').val('');
+        }
+    }
+
+    function ValidarModalArea() {
+        var respuesta = false;
+        $('#NombreAreaModal').css("border", "2px solid #f44336");
+
+        if ($('#NombreAreaModal').val().length > 0) {
+            $('#NombreAreaModal').css("border", "1px solid #b5c3e7");
+        }
+        if ($('#NombreAreaModal').val().length > 0) {
+            respuesta = true;
+        }
+
+        return respuesta;
+    }
+
+    function ValidarModalEmpresa() {
+        var respuesta = false;
+        $('#NombreEmpresaModal').css("border", "2px solid #f44336");
+        $('#Select_TipoEmpresa').css("border", "2px solid #f44336");
+        $('#Select_TipoContato').css("border", "2px solid #f44336");
+        $('#Select_TipoContato').css("border", "2px solid #f44336");
+
+
+
+
+        if ($("#Select_TipoEmpresa option:selected").val() > 0) {
+            $('#Select_TipoEmpresa').css("border", "1px solid #b5c3e7");
+        }
+        if ($('#NombreEmpresaModal').val().length > 0) {
+            $('#NombreEmpresaModal').css("border", "1px solid #b5c3e7");
+        }
+        if ($('#NombreEmpresaModal').val().length > 0) {
+            if ($("#Select_TipoEmpresa option:selected").val() > 0) {
+                respuesta = true;
+            }
+        }
+        return respuesta;
+    }
+
+    function ValidaTelefonoLocal() {
+
+        if ($('#Telefono_Local').val().length > 9) {
+            $('#Telefono_Local').css("border", "1px solid #c2c2c2");
+        } else if ($('#Telefono_Local').val().length == 0) {
+            $('#Telefono_Local').css("border", "1px solid #c2c2c2");
+        }
+        else {
+            $('#Telefono_Local').css("border", "2px solid #f44336");
+        }
+    }
+
+    function ValidaTelefono() {
+
+        if ($('#Telefono_Movil').val().length > 9) {
+            $('#Telefono_Movil').css("border", "1px solid #c2c2c2");
+        } else if ($('#Telefono_Movil').val().length == 0) {
+            $('#Telefono_Movil').css("border", "1px solid #c2c2c2");
+        }
+        else {
+            $('#Telefono_Movil').css("border", "2px solid #f44336");
+        }
+    }
+
+    function ValidarTelefonoLocal() {
+        var respuesta = false;
+
+        if ($('#Telefono_Local').val().length > 9) {
+            respuesta = true;
+        } else if ($('#Telefono_Local').val().length == 0) {
+            respuesta = true;
+        }
+        else {
+            $.notify({
+                message: "Teléfono local invalido."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+        return respuesta;
+
+    }
+
+    function ValidarTelefono() {
+        var respuesta = false;
+        if ($('#Telefono_Movil').val().length > 9) {
+            respuesta = true;
+        } else if ($('#Telefono_Movil').val().length == 0) {
+            respuesta = true;
+        } else {
+            $('#Telefono_Movil').css("border", "2px solid #f44336");
+
+            $.notify({
+                //icon: 'fa fa-paw',
+                message: "Teléfono móvil invalido."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+
+        }
+
+        return respuesta;
+
+    }
+
+    function ValidaInput(name) {
+        if ($('#' + name).val().length > 0) {
+            $('#' + name).css("border", "1px solid #b5c3e7");
+        } else {
+            $('#' + name).css("border", "2px solid #f44336");
+        }
+    }
+
+    function ValidaSelect(name) {
+        if ($('#' + name + ' option:selected').val() > 0) {
+            $('#' + name).css("border", "1px solid #b5c3e7");
+        } else {
+            $('#' + name).css("border", "2px solid #f44336");
+        }
+    }
+
+
+    $(document).ready(function () {
+        //var now = new Date();
+        //var day = ("0" + now.getDate()).slice(-2);
+        //var month = ("0" + (now.getMonth() + 1)).slice(-2);
+        //var today = now.getFullYear() + "-" + (month) + "-" + (day);
+        //$("#Fecha_Nacimiento").val(today);
+
+        $('#opcContactos').addClass("nav-item active submenu");
+
+        $('.input-number').on('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        $('.input-number-fecha').on('input', function () {
+            this.value = this.value.replace(/[^0-9/]/g, '');
+        });
+
+        $('input[type="text"]').each(function () {
+            if ($(this).val() != "") {
+                empty = false;
+                return false;
+            }
+        });
+
+        $('#Fecha_Nacimiento').datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'yyyy-mm-dd',
+        });
+
+    });
+
+    function CPBuscar(valor) {
+        if (valor.length > 0) {
+            var obj = {};
+            obj['_CP'] = valor;
+
+            var jsonObject = {
+                "CP": obj
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("CP_Busqueda", "Contactos")",
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultadoBusqueda,
+                error: errores
+            });
+        } else {
+            $.notify({
+                message: "Coloca tu código postal."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+
+    }
+
+    function resultadoBusqueda(data) {
+
+        if (data[0].IdCP > 0) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Consulta_Estados", "Contactos")",
+                async: false,
+                //data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (dataestados) {
+
+                    $("#Select_Estados").empty();
+                    if (dataestados.length > 0) {
+
+                        var option = $(document.createElement('option'));
+                        option.text("Seleccionar");
+                        option.val(0);
+
+                        $("#Select_Estados").append(option);
+
+                        $(dataestados).each(function () {
+                            var option = $(document.createElement('option'));
+
+                            option.text(this.Estado);
+                            option.val(this.Id);
+
+                            $("#Select_Estados").append(option);
+                        });
+
+                        $('#Select_Estados option[value="' + data[0].IdEstado + '"]').attr("selected", true);
+
+                        var IdPoblacion = $("#Select_Estados option:selected").val();
+
+                        if (IdPoblacion > 0) {
+                            var obj = {};
+                            obj['Id'] = IdPoblacion;
+
+                            var jsonObject = {
+                                "Estados": obj
+                            };
+
+                            $.ajax({
+                                type: "POST",
+                                url: "@Url.Action("Consulta_DelegacionMunicipio", "Contactos")",
+                                data: JSON.stringify(jsonObject),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function (result) {
+
+                                    $("#Select_Delegacion_Municipio").empty();
+
+                                    if (result.length > 0) {
+
+                                        var option = $(document.createElement('option'));
+                                        option.text("Seleccionar");
+                                        option.val(0);
+
+                                        $("#Select_Delegacion_Municipio").append(option);
+
+                                        $(result).each(function () {
+                                            var option = $(document.createElement('option'));
+
+                                            option.text(this.Poblacion);
+                                            option.val(this.Id);
+
+                                            $("#Select_Delegacion_Municipio").append(option);
+                                        });
+                                    }
+                                    $('#Select_Delegacion_Municipio option[value="' + data[0].IdPoblacion + '"]').attr("selected", true);
+
+
+                                    $("#Select_Colonia").empty();
+
+                                    if (data[0].IdCP > 0) {
+
+                                        var option = $(document.createElement('option'));
+                                        option.text("Seleccionar");
+                                        option.val(0);
+
+                                        $("#Select_Colonia").append(option);
+
+                                        $(data).each(function () {
+                                            var option = $(document.createElement('option'));
+
+                                            option.text(this.Colonia);
+                                            option.val(this.IdCP);
+
+                                            $("#Select_Colonia").append(option);
+                                        });
+                                    }
+
+                                    $('#Select_Colonia option[value="' + data[0].IdCP + '"]').attr("selected", true);
+
+                                }
+                            });
+                        }
+
+                    }
+                },
+                error: function () {
+                    $.notify({
+                        message: "Inténtelo mas tarde."
+                    }, {
+                        type: 'danger',
+                        allow_dismiss: false,
+                        animate: {
+                            enter: 'animated rollIn',
+                            exit: 'animated rollOut'
+                        }
+                    });
+                }
+            });
+
+        } else {
+
+            $("#Select_Estados").val(0);
+
+            $("#Select_Delegacion_Municipio").empty();
+
+            var option = $(document.createElement('option'));
+            option.text("Seleccionar");
+            option.val(0);
+
+            $("#Select_Delegacion_Municipio").append(option);
+
+            $("#Select_Colonia").empty();
+            var option = $(document.createElement('option'));
+            option.text("Seleccionar");
+            option.val(0);
+
+            $("#Select_Colonia").append(option);
+
+
+            $.notify({
+                message: "Código postal no encontrado."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+
+    }
+
+    function callEstados(valor) {
+        if (valor > 0) {
+
+            $("#Select_Colonia").empty();
+            $("#CP").val('');
+
+            var option = $(document.createElement('option'));
+            option.text("Seleccionar");
+            option.val(0);
+
+            $("#Select_Colonia").append(option);
+
+            var obj = {};
+            obj['Id'] = valor;
+
+            var jsonObject = {
+                "Estados": obj
+            };
+
+            console.log(jsonObject);
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Consulta_DelegacionMunicipio", "Contactos")",
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultadoEstados,
+                error: errores
+            });
+
+        }
+    }
+
+    function resultadoEstados(data) {
+        console.log(data);
+
+        $("#Select_Delegacion_Municipio").empty();
+
+        if (data.length > 0) {
+
+            var option = $(document.createElement('option'));
+            option.text("Seleccionar");
+            option.val(0);
+
+            $("#Select_Delegacion_Municipio").append(option);
+
+            $(data).each(function () {
+                var option = $(document.createElement('option'));
+
+                option.text(this.Poblacion);
+                option.val(this.Id);
+
+                $("#Select_Delegacion_Municipio").append(option);
+            });
+        }
+    }
+
+    function callColonias(valor) {
+        if (valor > 0) {
+
+            var obj = {};
+            obj['Id'] = valor;
+
+            var jsonObject = {
+                "Poblaciones": obj
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Consulta_Colonias", "Contactos")",
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultadoPoblaciones,
+                error: errores
+            });
+
+        }
+    }
+
+    function resultadoPoblaciones(data) {
+        console.log(data);
+
+        $("#Select_Colonia").empty();
+
+        if (data.length > 0) {
+
+            var option = $(document.createElement('option'));
+            option.text("Seleccionar");
+            option.val(0);
+
+            $("#Select_Colonia").append(option);
+
+            $(data).each(function () {
+                var option = $(document.createElement('option'));
+
+                option.text(this.Colonia);
+                option.val(this.IdCP);
+
+                $("#Select_Colonia").append(option);
+            });
+        }
+
+    }
+
+    function callCP(valor)
+    {
+        if (valor > 0) {
+
+            //$('#Select_Colonia').css("border", "1px solid #c2c2c2");
+
+            var obj = {};
+            obj['Id'] = valor;
+
+            var jsonObject = {
+                "CP": obj
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Consulta_CP", "Contactos")",
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultadoCP,
+                error: errores
+            });
+        }
+    }
+
+    function resultadoCP(data) {
+        $("#CP").val(data[0]._CP);
+    }
+
+    function errores() {
+        $.notify({
+            message: "Inténtelo mas tarde."
+        }, {
+            type: 'danger',
+            allow_dismiss: false,
+            animate: {
+                enter: 'animated rollIn',
+                exit: 'animated rollOut'
+            }
+        });
+    }
+
+    function CorreoFrom() {
+        var respuesta = "";
+        object = document.getElementById("Correo_Electronico");
+        valueForm = object.value;
+
+        var patronTelefono = new RegExp("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$");
+        if ($(object).val() == "") {
+            var respuesta = "";
+
+        } else if (valueForm.search(patronTelefono)) {
+            var respuesta = "";
+            return;
+        } else {
+            var respuesta = "ok";
+        }
+        return respuesta;
+    }
+
+</script>

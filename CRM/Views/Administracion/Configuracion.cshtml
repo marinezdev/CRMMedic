@@ -1,0 +1,362 @@
+﻿@model IEnumerable<CRM.Models.Models.Configuracion>
+@{
+    ViewBag.Title = "Configuracion";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcConfiguracion').addClass("active");
+    });
+
+    function SeleccionarConfiguracionEditar(idconf) {
+        $.ajax({
+            url: "/Administracion/SeleccionarConfiguracionEditar/",
+            data: { id: idconf },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                //console.log(data);
+                $('#ModalModificar').modal('show')
+                $('#eNombre').val(data.Nombre);
+                $('#eLogo').val(data.Logo);
+                $('#eTituloIntermedio').val(data.TituloIntermedioPestaña);
+                $('#eId').val(data.Id);
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function Agregar(){
+        $.ajax({
+            url: "/Administracion/AgregarConfiguracion/",
+            data: { nombre: $('#aNombre').val(), logo: $('#aLogo').val(), intermedio: $('#aTituloIntermedio').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function Modificar() {
+        $.ajax({
+            url: "/Administracion/ModificarConfiguracion/",
+            data: { nombre: $('#eNombre').val(), logo: $('#eLogo').val(), intermedio: $('#eTituloIntermedio').val(), id: $('#eId').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el registro modificado',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Configuración del Sistema por Empresa</h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-body text-right">
+
+                    <button class="btn btn-primary animated bounceInDown" data-toggle="modal" data-target="#ModalNuevo">Nuevo</button>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Nombre</th>
+                                <th>Logo</th>
+                                <th>Titulo Intermedio en la Pestaña</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model == null)
+                            {
+                                <tr><td colspan="5" align="center">Sin datos para mostrar</td></tr>
+                            }
+                            @foreach (CRM.Models.Models.Configuracion items in Model)
+                            {
+                                <tr>
+                                    <td>@items.Id</td>
+                                    <td>@items.Nombre</td>
+                                    <td>@items.Logo</td>
+                                    <td>@items.TituloIntermedioPestaña</td>
+                                    <td><a href="#" onclick="SeleccionarConfiguracionEditar(@items.Id);">Editar</a></td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <a href="https://themekita.com/demo-atlantis-lite-bootstrap/livepreview/documentation/index.html" target="_blank">Liga para configuración de la aplicación</a>
+
+            </div>
+
+
+
+
+            <script>
+
+                $(function () {
+                    $('#BtnGuardarNuevo').click(function () {
+
+                        var url = "@Url.Action("AgregarConfiguracion", "Administracion")";
+                        var data = { nombre: $('#aNombre').val(), logo: $('#aLogo').val(), intermedio: $('#aTituloIntermedio').val() };
+
+                        $.post(url, data).done(function (data) {
+                            if (data.Ok)
+                            {
+                                swal({
+                                    title: 'CRM',
+                                    text: 'Se ha creado el nuevo registro exitosamente',
+                                    icon: 'success',
+                                    buttons: {
+                                        confirm: {
+                                            className: 'btn btn-success'
+                                        }
+                                    }
+                                }).then(
+                                    function () {
+                                        location.reload();
+                                    });
+                            }
+                            else
+                            {
+                                swal({
+                                    title: 'CRM',
+                                    text: 'Ha habido un error al intentar procesar los datos',
+                                    icon: 'error',
+                                    buttons: {
+                                        confirm: {
+                                            className: 'btn btn-error'
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    });
+
+
+
+                });
+
+            </script>
+
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Nueva Empresa al Sistema</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aNombre" id="aNombre" placeholder="" required tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoPaterno" class="col-md-3 col-form-label fc-left">Logo</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aLogo" id="aLogo" placeholder="" required tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aTituloIntermedio" class="col-md-3 col-form-label fc-left">Tít intermedio</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aTituloIntermedio" id="aTituloIntermedio" placeholder="" required tabindex="3">
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="Guardar();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar Empresa</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="eNombre" id="eNombre" placeholder="" required tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eLogo" class="col-md-3 col-form-label fc-left">Logo</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="eLogo" id="eLogo" placeholder="" required tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eTituloIntermedio" class="col-md-3 col-form-label fc-left">Tít intermedio</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="eTituloIntermedio" id="eTituloIntermedio" placeholder="" required tabindex="3">
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="eId" name="eId" />
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="Modificar();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

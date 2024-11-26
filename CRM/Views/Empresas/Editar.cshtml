@@ -1,0 +1,784 @@
+﻿@{
+    ViewBag.Title = "Empresas";
+
+}
+
+<script src="../assets/js/Views/Empresas/Editar.js"></script>
+
+<input type="hidden" id="Contadas" value="@ViewBag.EmpresasEnOportunidadesContadas" />
+<input type="hidden" id="ContactosContados" value="@ViewBag.ContactosEnEmpresasContados" />
+<input type="hidden" id="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+<input type="hidden" id="IdEmpresa" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 id="titulo" class="page-title"></h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+               
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Edición</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-adicional" role="tab" aria-controls="pills-profile" aria-selected="false">Adicional</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-direcciones" role="tab" aria-controls="pills-profile" aria-selected="false">Direcciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-contactos" role="tab" aria-controls="pills-profile" aria-selected="false">Contactos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-oportunidades" role="tab" aria-controls="pills-profile" aria-selected="false">Oportunidades</a>
+                        </li>
+                    </ul>
+
+                <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <p style="width: 650px;"></p>
+
+                        <form method="post" action="Modificar">
+
+                            <input type="hidden" name="Id" id="Id" />
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Nombre" class="col-md-4 col-form-label">Nombre</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="Nombre" name="Nombre" onkeypress="return letras(event)" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="RFC" class="col-md-3 col-form-label">RFC</label>
+                                        <div class="col-md-9 p-0">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="RFC" name="RFC" onchange="ValidarRFC()" onkeyup="mayus(this);" placeholder="AAAA123456AA1" maxlength="13" tabindex="6" data-toggle="tooltip" data-placement="bottom" title="El RFC consta de cuatro letras, seis números y tres alfanuméricos, ejemplo: CAGL960709EJ8">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                   
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-radio-label">
+                                                <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" checked>
+                                                <span class="form-radio-sign">Interna</span>
+                                            </label>
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2">
+                                                <span class="form-radio-sign">Externa</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Direccion" class="col-md-4 col-form-label">Dirección</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    
+                                    <div class="form-group form-inline">
+                                        <label for="CP" class="col-md-3 col-form-label" data-toggle="tooltip" data-placement="top" title="Código Postal">CP</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="CP" name="CP" type="text" class="form-control form-control-sm input-solid input-number" maxlength="5" onblur="CodigoPostal();" style="width:58px" data-toggle="tooltip" data-placement="top" title="Presione la tecla Tab o dé click en cualquier parte del formulario después de agregar el código para mostrar los datos">
+                                        </div>
+                                    </div>
+                                    
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label id="lblColonias" for="Colonias" class="col-md-3 col-form-label input-solid" style="display: none">Colonia</label>
+                                        <select id="Colonias" class="form-control form-control-sm input-solid" style="width: 180px; display: none" onchange="CodigoElegido();"></select>
+                                        <div id="divCP" name="divCP" class="input-solid"></div>
+                                    </div>
+                                    <input id="hCiudad" name="hCiudad" type="text" style="display: none">
+                                    
+                                </div>
+
+                            </div>
+                    
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Sector" class="col-md-4 col-form-label">Sector</label>
+                                        <select class="form-control form-control-sm input-solid" id="Sector" name="Sector" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var sec in ViewBag.Sectores)
+                                            {
+                                                <option value="@sec.Id">@sec.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Telefono" class="col-md-3 col-form-label">Teléfono</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Telefono" name="Telefono" type="text" placeholder="" class="form-control form-control-sm input-solid input-number" data-toggle="tooltip" data-placement="top" title="Sólo números">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Extension" class="col-md-3 col-form-label">Extensión</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="Extension" name="Extension" type="text" placeholder="" class="form-control form-control-sm input-solid input-number" data-toggle="tooltip" data-placement="top" title="Sólo números">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Paginaweb" class="col-md-4 col-form-label">Página Web</label>
+                                        <div class="col-md-8 p-0">
+                                            <input id="PaginaWeb" name="PaginaWeb" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="UDN" class="col-md-3 col-form-label" data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</label>
+                                        <div class="col-md-7 p-0">
+                                            <select class="form-control form-control-sm input-solid" id="UDN" name="UDN" style="width: 180px" required tabindex="13">
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var udn in ViewBag.UDN)
+                                                {
+                                                    <option value="@udn.Id">@udn.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Pais" class="col-md-3 col-form-label">País</label>
+                                        <select class="form-control form-control-sm input-solid" id="Pais" name="Pais" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var pai in ViewBag.Paises)
+                                            {
+                                                <option value="@pai.Id">@pai.Nombre</option>
+                                            }
+
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <center>
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <label class="form-radio-label">
+                                                    <input class="form-radio-input" type="radio" id="tipoemp1" name="tipoemp" value="1" checked>
+                                                    <span class="form-radio-sign">Cliente</span>
+                                                </label>
+                                                <label class="form-radio-label ml-3">
+                                                    <input class="form-radio-input" type="radio" id="tipoemp2" name="tipoemp" value="2">
+                                                    <span class="form-radio-sign">Prospecto</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </center>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <center>
+                                        <div class="form-group">
+                                            <a href="#" class="nav-link" data-toggle="modal" data-target="#ModalCompartir">Compartir</a>
+                                        </div>
+                                    </center>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <center>
+                                        <div class="form-group">
+                                            <div class="form-check" style="margin-left: 70px">
+                                                <label class="form-check-label">
+                                                    <input id="Activo" name="Activo" class="form-check-input" type="checkbox">
+                                                    <span class="form-check-sign">Activo</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </center>
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div id="divCompartidos"></div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4"></div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12 text-center">
+
+                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7528.871817540055!2d-99.1818357376438!3d19.350269090719852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ce0026db097507%3A0x54061076265ee841!2sCiudad%20de%20M%C3%A9xico%2C%20CDMX!5e0!3m2!1ses-419!2smx!4v1617906567075!5m2!1ses-419!2smx" width="800" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+
+                                </div>
+                            </div>
+
+                            <div class="card-action label-align-center">
+                                <button type="submit" class="btn btn-success animated bounceInLeft">Guardar</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-adicional" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+
+                        <div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Fuente" class="col-md-3 col-form-label">Fuente</label>
+                                        <select class="form-control form-control-sm input-solid" id="Fuente" name="Fuente" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var fte in CRM.Models.Catalogos.Seleccionar("Fuente"))
+                                            {
+                                                <option value="@fte.Id">@fte.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Tipo" class="col-md-3 col-form-label">Tipo</label>
+                                        <select class="form-control form-control-sm input-solid" id="Tipo" name="Tipo" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var tip in CRM.Models.Catalogos.Seleccionar("Tipo"))
+                                            {
+                                                <option value="@tip.Id">@tip.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Industria" class="col-md-3 col-form-label">Industria</label>
+                                        <select class="form-control form-control-sm input-solid" id="Industria" name="Industria" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var ind in CRM.Models.Catalogos.Seleccionar("Industria"))
+                                            {
+                                                <option value="@ind.Id">@ind.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12 col-lg-12">
+
+                                    <center>
+                                        <button class="btn btn-success" onclick="GuardarAdicional();">Guardar</button>
+                                    </center>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-direcciones" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+
+                        Agregar más direcciones y/o direcciones fiscales
+
+                        <div>
+                            <div class="row"></div>
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="DireccionAdicional" class="col-md-3 col-form-label">Dirección</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="DireccionAdicional" name="DireccionAdicional" type="text" class="form-control form-control-sm input-solid">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="CPAdicional" class="col-md-3 col-form-label">CP</label>
+                                        <div class="col-md-9 p-0">
+                                            <input id="CPAdicional" name="CPAdicional" type="text" class="form-control form-control-sm input-solid input-number" maxlength="5" onblur="CodigoPostal2();" style="width:58px" data-toggle="tooltip" data-placement="top" title="Presione la tecla Tab o dé click en cualquier parte del formulario después de agregar el código para mostrar los datos">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-radio-label">
+                                                <input class="form-radio-input" type="radio" id="tipodireccion1" name="tipodireccion" value="1" checked>
+                                                <span class="form-radio-sign">Dirección</span>
+                                            </label>
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" id="tipodireccion2" name="tipodireccion" value="2">
+                                                <span class="form-radio-sign">Fiscal</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label id="lblColoniasAdicional" for="ColoniasAdicional" class="col-md-3 col-form-label input-solid" style="display: none">Colonia</label>
+                                        <select id="ColoniasAdicional" class="form-control form-control-sm input-solid" style="width: 180px; display: none" onchange="CodigoElegido2();"></select>
+                                        <div id="divCPAdicional" name="divCPAdicional" class="input-solid"></div>
+                                    </div>
+                                    <input id="hCiudadAdicional" name="hCiudadAdicional" type="text" style="display: none">
+
+
+
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="PaisAdicional" class="col-md-3 col-form-label">País</label>
+                                        <select class="form-control form-control-sm input-solid" id="PaisAdicional" name="PaisAdicional" style="width: 180px">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var paia in ViewBag.Paises)
+                                            {
+                                                <option value="@paia.Id">@paia.Nombre</option>
+                                            }
+
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <input type="hidden" id="IdDireccionAdicional" name="IdDireccionAdicional" />
+
+                                <div class="col-md-12 col-lg-12">
+                                    <center>
+                                        <button id="BtnGuardarDireccionAdicional" class="btn btn-success" onclick="GuardarDireccionAdicional();">Agregar</button>
+                                        <button id="BtnModificarDireccionAdicional" class="btn btn-success" onclick="GuardarDireccionAdicionalModificada();">Modificar</button>
+                                    </center>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-12 col-lg-12">
+
+                                    <div class="table-responsive">
+
+                                        <table id="basic-datatables" class="display table-striped table-hover" style="width: 100%">
+                                            <thead class="header">
+                                                <tr>
+                                                    <th>Tipo</th>
+                                                    <th>Dirección</th>
+                                                    <th>CP</th>
+                                                    <th>Colonia, Ciudad, Estado</th>
+                                                    <th>País</th>
+                                                    <th>Modificar</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                @foreach (var items in ViewBag.DireccionesAdicionales)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @CRM.Utilerias.CustomHelpers.TipoDireccion(items.IdTipoDireccion.ToString())
+                                                        </td>
+                                                        <td>@items.Direccion</td>
+                                                        <td>@items.CP</td>
+                                                        <td>@items.Ciudad</td>
+                                                        <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.IdPais.ToString(), "Paises")</td>
+                                                        <td align="center"><a href="#" onclick="SeleccionarDireccionAdicionalPorId(@items.Id);"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='left' title='Modificar'></i></a></td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="pills-contactos" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+                        <h4>Contactos asignados en @ViewBag.NombreEmpresa</h4>
+
+
+
+                        <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                            <thead class="header">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @if (ViewBag.ContactosEnEmpresas.Count > 0 || ViewBag.ContactosEnEmpresas != null )
+                                {
+                                    foreach (var itm in ViewBag.ContactosEnEmpresas)
+                                    {
+                                        <tr>
+                                            <td>@itm.Nombre @itm.ApellidoPaterno @itm.ApellidoMaterno</td>
+                                            <td><a href="/Contactos/Editar?Id=@itm.Id">Detalle</a></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="2" align="center">No hay contactos asignados para esta empresa</td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-oportunidades" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+                        <h4>Oportunidades en las que está asignado @ViewBag.NombreEmpresa</h4>
+
+                        <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                            <thead class="header">
+                                <tr>
+                                    <th>Oportunidad</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var itm in ViewBag.EmpresaEnOportunidades)
+                                {
+
+                                    <tr>
+                                        <td>@itm.Nombre</td>
+                                        <td>
+                                            @if (CRM.Utilerias.CustomHelpers.ValidarSiUsuarioPuedeVerOportunidadesNoSuyas(itm.Id.ToString(), Session["IdUsuario"].ToString()))
+                                            {
+                                                <a href="/Oportunidades/Editar?Id=@itm.Id">Detalle</a>
+                                            }
+                                            else
+                                            {
+                                                <span></span>
+                                            }
+
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="pills-asuntos" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+                        <h4>Asuntos en los que está asignado @ViewBag.NombreEmpresa</h4>
+
+                        <table class="table table-head-bg-primary nowrap" style="width:100%;">
+                            <thead class="header">
+                                <tr>
+                                    <th>Asunto</th>
+                                    <th>Vencimiento</th>
+                                    <th>Administrador Asunto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var itm in ViewBag.EmpresaEnOportunidades)
+                                {
+
+                                <tr>
+                                    <td>@itm.Nombre</td>
+                                    <td>@itm.Cierre.ToString("dd/MM/yyyy")</td>
+                                    <td>@CRM.Utilerias.CustomHelpers.NombreCreadorOportunidad(itm.Id.ToString())</td>
+                                    <td><a href="/Oportunidades/Edicion?Id=@itm.Id">Detalle</a></td>
+                                </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="ModalCompartir" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Compartir Modificaciones de este médico</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+                    <p>Seleccionar el usuario con el que se compartirán los cambios.</p>
+                    <p>A partir de ahora el usuario seleccionado podrá modificar este registro.</p>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Usuario</label>
+                                <div class="col-md-8 p-0">
+                                    <select id="NuevoResponsable" class="form-group form-control-sm input-solid" style="width:180px">
+                                        <option value=""></option>
+                                        @foreach (var item in ViewBag.ResponsablesParaCompartir)
+                                        {
+                                            <option value="@item.Id">@item.Nombre @item.ApellidoPaterno @item.ApellidoMaterno</option>
+                                        }
+                                    </select>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <button type="button" class="btn btn-sm btn-success" onclick="Compartir();">Aceptar</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+
+
+    function ValidarRFC() {
+        var rfc = $('#RFC').val();
+
+        if (rfcValido(rfc, true)) {
+            // RFC correcto
+        } else {
+            // RFC incorrecto
+            $.notify({
+                message: "RFC no valido!."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+    }
+
+    //Función para validar un RFC
+    // Devuelve el RFC sin espacios ni guiones si es correcto
+    // Devuelve false si es inválido
+    // (debe estar en mayúsculas, guiones y espacios intermedios opcionales)
+    function rfcValido(rfc, aceptarGenerico = true) {
+        const re = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/;
+        var validado = rfc.match(re);
+
+        if (!validado)  //Coincide con el formato general del regex?
+            return false;
+
+        //Separar el dígito verificador del resto del RFC
+        const digitoVerificador = validado.pop(),
+            rfcSinDigito = validado.slice(1).join(''),
+            len = rfcSinDigito.length,
+
+            //Obtener el digito esperado
+            diccionario = "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ",
+            indice = len + 1;
+        var suma,
+            digitoEsperado;
+
+        if (len == 12) suma = 0
+        else suma = 481; //Ajuste para persona moral
+
+        for (var i = 0; i < len; i++)
+            suma += diccionario.indexOf(rfcSinDigito.charAt(i)) * (indice - i);
+        digitoEsperado = 11 - suma % 11;
+        if (digitoEsperado == 11) digitoEsperado = 0;
+        else if (digitoEsperado == 10) digitoEsperado = "A";
+
+        //El dígito verificador coincide con el esperado?
+        // o es un RFC Genérico (ventas a público general)?
+        if ((digitoVerificador != digitoEsperado)
+            && (!aceptarGenerico || rfcSinDigito + digitoVerificador != "XAXX010101000"))
+            return false;
+        else if (!aceptarGenerico && rfcSinDigito + digitoVerificador == "XEXX010101000")
+            return false;
+        return rfcSinDigito + digitoVerificador;
+    }
+
+
+    //Handler para el evento cuando cambia el input
+    // -Lleva la RFC a mayúsculas para validarlo
+    // -Elimina los espacios que pueda tener antes o después
+    function validarInput(input) {
+        var rfc = input.value.trim().toUpperCase(),
+            resultado = document.getElementById("resultado"),
+            valido;
+
+        var rfcCorrecto = rfcValido(rfc);   // ⬅️ Acá se comprueba
+
+        if (rfcCorrecto) {
+            valido = "Válido";
+            resultado.classList.add("ok");
+        } else {
+            valido = "No válido"
+            resultado.classList.remove("ok");
+        }
+
+        resultado.innerText = "RFC: " + rfc
+            + "\nResultado: " + rfcCorrecto
+            + "\nFormato: " + valido;
+    }
+
+
+
+    function mayus(e) {
+        e.value = e.value.toUpperCase();
+    }
+
+
+
+    function letras(e) {
+        var key = e.keyCode || e.which,
+            tecla = String.fromCharCode(key).toLowerCase(),
+            letras = " áéíóúabcdefghijklmnñopqrstuvwxyz",
+            especiales = [8, 37, 39, 46],
+            tecla_especial = false;
+
+        for (var i in especiales) {
+            if (key == especiales[i]) {
+                tecla_especial = true;
+                break;
+            }
+        }
+
+        if (letras.indexOf(tecla) == -1 && !tecla_especial) {
+            return false;
+        }
+    }
+</script>

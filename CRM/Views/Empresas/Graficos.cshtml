@@ -1,0 +1,458 @@
+﻿@{
+    ViewBag.Title = "Graficos";
+}
+
+
+<script>
+
+    $(document).ready(function () {
+        //Selecciona y deja activa opción del menú
+        $('#opcEmpresas').addClass("nav-item active submenu");
+
+        //Permite un click en la fila de la tabla
+        $("#multi-filter-select").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Empresas/Editar?Id=' + firstCellText;
+            }
+        });
+
+        //Permite un click en la fila de la tabla
+        $("#multi-filter-select2").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Empresas/Editar?Id=' + firstCellText;
+            }
+        });
+
+        //Inicializa tabla
+        $('#multi-filter-select').DataTable({
+            columnDefs: [
+                {
+                    //"orderable": false,
+                    //"targets": [0, 8],
+                    //"width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 50,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        //Inicializa tabla
+        $('#multi-filter-select2').DataTable({
+            columnDefs: [
+                {
+                    // "orderable": false,
+                    // "targets": [0, 8],
+                    // "width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 50,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        $('#Espera').hide();
+
+        $.ajax({
+            url: "/Empresas/ConteosFiltros",
+            data: { idconfiguracion: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                var valormaximo = 200;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circles01',
+                    radius: radio,
+                    value: data[0].internas,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //interna
+
+                Circles.create({
+                    id: 'circles02',
+                    radius: radio,
+                    value: data[0].externas,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF8C21'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //externa
+
+                Circles.create({
+                    id: 'circles03',
+                    radius: radio,
+                    value: data[0].clientes,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#5EFF3A'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cliente
+
+                Circles.create({
+                    id: 'circles04',
+                    radius: radio,
+                    value: data[0].prospectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#63FF99'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //prospecto
+
+                Circles.create({
+                    id: 'circles05',
+                    radius: radio,
+                    value: data[0].outsorcings,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#59d05d'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //outsourcing
+
+                Circles.create({
+                    id: 'circles06',
+                    radius: radio,
+                    value: data[0].servicios,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#fdaf4b'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //servicios
+
+                Circles.create({
+                    id: 'circles07',
+                    radius: radio,
+                    value: data[0].soluciones,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#177dff'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //soluciones
+
+                Circles.create({
+                    id: 'circles08',
+                    radius: radio,
+                    value: data[0].valdemar,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#ff1aaa'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //valdemar
+
+                Circles.create({
+                    id: 'circles09',
+                    radius: radio,
+                    value: data[0].comisiones,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#aaa321'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //comisionista
+
+                Circles.create({
+                    id: 'circles10',
+                    radius: radio,
+                    value: data[0].redes,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d0486f'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //redes
+
+                Circles.create({
+                    id: 'circles11',
+                    radius: radio,
+                    value: data[0].sistemas,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d04eef'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //sistemas
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+
+            }
+        });
+
+    });
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Medidores Médicos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row text-center">
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles01"></div>
+                                <center><a href="/Empresas/Graficos?opc=1" class="text-small">Interna</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles02"></div>
+                                <center><a href="/Empresas/Graficos?opc=2" class="text-small">Externa</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles03"></div>
+                                <center><a href="/Empresas/Graficos?opc=3" class="text-small">Cliente</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles04"></div>
+                                <center><a href="/Empresas/Graficos?opc=4" class="text-small">Prospecto</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles05"></div>
+                                <center><a href="/Empresas/Graficos?opc=5" class="text-small">Serv. Esp.</a></center>
+                                @Model.
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles06"></div>
+                                <center><a href="/Empresas/Graficos?opc=6" class="text-small">Serv. Mtto.</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles07"></div>
+                                <center><a href="/Empresas/Graficos?opc=7" class="text-small">Sol. Emp.</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles08"></div>
+                                <center><a href="/Empresas/Graficos?opc=8" class="text-small">Tecnología</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles09"></div>
+                                <center><a href="/Empresas/Graficos?opc=9" class="text-small">Comisionista</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles10"></div>
+                                <center><a href="/Empresas/Graficos?opc=10" class="text-small">Redes Sociales</a></center>
+                            </div>
+                        </div>
+
+                        <div class="card card-round" style="margin-right:10px">
+                            <div class="body">
+                                <div id="circles11"></div>
+                                <center><a href="/Empresas/Graficos?opc=11" class="text-small">Sistemas</a></center>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="table-responsive">
+
+                            <table id="multi-filter-select" class="display table-striped table-hover" style="width: 100%; cursor: pointer">
+                                <thead class="header">
+                                    <tr>
+                                        <th></th>
+                                        <th>Nombre</th>
+                                        <th>RFC</th>
+                                        <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                        <th>Estado</th>
+                                        <th>Interna/Externa</th>
+                                        <th>Teléfono</th>
+                                        <th style="width: 100px">Web</th>
+                                        <th>Tipo</th>
+                                        <th>Creado&nbsp;por</th>
+                                        <th>Detalle</th>
+                                        <th>Completado</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th>Nombre</th>
+                                        <th>RFC</th>
+                                        <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                        <th>Estado</th>
+                                        <th>Interna/Externa</th>
+                                        <th>Teléfono</th>
+                                        <th style="width: 100px">Web</th>
+                                        <th>Tipo</th>
+                                        <th>Creado&nbsp;por</th>
+                                        <th>Detalle</th>
+                                        <th>Completado</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+
+                                    @foreach (var items in ViewBag.Empresas)
+                                    {
+                                        var tipo = items.Tipo == 1 ? "Cliente" : "Prospecto";
+                                        <tr>
+                                            <td style="color: transparent; width:0px">@items.Id</td>
+                                            <td>@items.Nombre</td>
+                                            <td>@items.RFC</td>
+                                            <td>@items.UDNNombre</td>
+                                            <td>@CRM.Utilerias.CustomHelpers.EstadoPorCodigoPostal(@items.CP)</td>
+                                            <td>@CRM.Utilerias.Funciones.TipoEmpresaNombre(items.InternaExterna.ToString())</td>
+                                            <td>@items.Telefono</td>
+                                            <td>@items.PaginaWeb</td>
+                                            <td>@tipo</td>
+                                            <td>@items.CreadorNombre</td>
+                                            <td align="center"><a href="#" onclick="location.href='/Empresas/Editar?Id='@items.Id"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='left' title='Detalle'></i></a></td>
+                                            @CRM.Utilerias.CustomHelpers.SemaforoCompletadoEmpresa(items.Id.ToString())
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

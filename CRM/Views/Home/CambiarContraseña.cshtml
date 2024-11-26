@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewBag.Title = "Cambiar Contraseña";
+}
+
+<script>
+
+    $(document).ready(function () {
+        var minLength = 12;
+        var maxLength = 12;
+
+        $("#ClaveNueva").on("keydown keyup change", function () {
+            var value = $(this).val();
+            if (value.length < minLength)
+                $("#spnNueva").text("Texto demasiado corto");
+            else
+                $("#spnNueva").text("Texto válido");
+        });
+
+        $("#Repetir").on("keydown keyup change", function () {
+            var value = $(this).val();
+            if (value.length < minLength)
+                $("#spnRepetir").text("Texto demasiado corto");
+            else
+                $("#spnRepetir").text("Texto válido");
+        });
+       
+    });
+
+
+
+
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Cambiar mi Contraseña</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="alert alert-primary" role="alert">A partir del 1o. de Octubre de 2020 las contraseñas deberán cambiarse a <strong>12 dígitos</strong> (deben incluir mayúsculas, minúsculas, números y caracteres tales como <strong>#$%&</strong>)</div>
+
+                        <form method="post" action="CambiarContraseña">
+                            <div class="form-group form-inline">
+                                <label for="ClaveActual" class="col-md-4 col-form-label">Contraseña Actual</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="password" class="form-control form-control-sm input-solid" name="ClaveActual" placeholder="" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="ClaveNueva" class="col-md-4 col-form-label">Contraseña Nueva</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="password" class="form-control form-control-sm input-solid" id="ClaveNueva" name="ClaveNueva" maxlength="12" placeholder="" required><span id="spnNueva"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="Repetir" class="col-md-4 col-form-label">Repetir Contraseña</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="password" class="form-control form-control-sm input-solid" id="Repetir" name="Repetir" maxlength="12" placeholder="" required><span id="spnRepetir"></span>
+                                </div>
+                            </div>
+
+                            <div class="card-action label-align-center">
+                                <button type="submit" class="btn btn-primary">Aceptar</button>
+                            </div>
+                        </form>
+
+                        @Html.Raw(ViewData["Mensaje"])
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+</div>

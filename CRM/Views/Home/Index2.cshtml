@@ -1,0 +1,562 @@
+﻿
+@{
+    ViewBag.Title = "Seguimiento";
+}
+
+<script>
+
+    function SeleccionarBitacoraPorId(id) {
+        $.ajax({
+            url: "/Oportunidades/BitacoraSeleccionarPorIdBitacora/" + id
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalSeguimiento').modal('show');
+                $('#eNotas').text(data.Notas);
+                $('#eIdBitacora').val(data.Id);
+
+                if (data.Estado == 3 || data.Estado == 4)
+                    $('#GuardarSeguimiento').hide();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos (SeleccionarBitacoraPorId)',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function SeleccionarOportunidadPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                //Cargar el detalle del asunto
+                $('#NombreAsunto').text(data.Oportunidades.Nombre);
+                $('#Importe').text(data.Oportunidades.Importe);
+
+                var fechaCierre = new Date(parseInt(data.Oportunidades.Cierre.substr(6)));
+                var mes = (fechaCierre.getMonth() + 1) < 10 ? '0' + (fechaCierre.getMonth() + 1) : (fechaCierre.getMonth() + 1);
+                $('#Cierre').text(fechaCierre.getFullYear() + '-' + mes + '-' + fechaCierre.getDate());
+                $('#Atencion').text(data.Oportunidades.PeriodoAtencionNombre);
+
+                $('#Contraparte').text(data.Oportunidades.Contraparte);
+
+                var fechaAviso = new Date(parseInt(data.Oportunidades.Aviso.substr(6)));
+                var mes = (fechaAviso.getMonth() + 1) < 10 ? '0' + (fechaAviso.getMonth() + 1) : (fechaAviso.getMonth() + 1);
+                $('#Aviso').text(fechaAviso.getFullYear() + '-' + mes + '-' + fechaAviso.getDate());
+
+                var ultimafechaescalacion = new Date(parseInt(data.Escalacion.Fecha.substr(6)));
+                var mes = (ultimafechaescalacion.getMonth() + 1) < 10 ? '0' + (ultimafechaescalacion.getMonth() + 1) : (ultimafechaescalacion.getMonth() + 1);
+                $('#Escalacion').text(ultimafechaescalacion.getFullYear() + '-' + mes + '-' + ultimafechaescalacion.getDate());
+
+                $('#Clasificacion').text(data.Clasificacion.Nombre);
+                $('#SubClasificacion').text(data.SubClasificacion.Nombre);
+
+                $('#Notas').text(data.Oportunidades.Notas);
+
+                SeleccionarActividadesPorId(id);
+
+                SeleccionarArchivosPorId(id);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos (SeleccionaroportunidadPorId)',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            },
+        });
+    }
+
+    function SeleccionarActividadesPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesActividades/SeleccionarOportunidadesActividades/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //Cargar las actividades
+                //console.log(data);
+                var len = data.length;
+                $('#basic-datatables-actividades').empty();
+
+                var firstRow = '<tr><th>Notas</th></tr>';
+                $('#basic-datatables-actividades').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    //var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var row = '<tr>' +
+                        
+                        '<td>' + data[i].Notas + '</td>' +
+                        '</tr>';
+                    $('#basic-datatables-actividades').append(row);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos (SeleccionarActividadesPorId)',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            },
+        });
+    }
+
+    function SeleccionarArchivosPorId(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ObtenerArchivos/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //Cargar los archivos
+                var len = data.length;
+                $('#basic-datatables-archivos').empty();
+                var firstRow = '<tr><th>Nombre</th><th></th></tr>';
+                $('#basic-datatables-archivos').append(firstRow);
+                for (var i = 0; i < data.length; i++) {
+                    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                    var row = '<tr>' +
+                        '<td>' + data[i].Nombre + '</td>' +
+                        '<td>' + fecha.getFullYear() + '-' + mes + '-' + fecha.getDate() + '</td>' +
+                        '<td><a href=/Archivos/' + data[i].Nombre + ' target=_blank>' + data[i].Nombre + '</a></td>' +
+                        '</tr>';
+                    $('#basic-datatables-archivos').append(row);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos (SeleccionarArchivosPorId)',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            },
+        });
+    }
+
+    function ModificarBitacora() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ActualizarBitacora",
+            data: {
+                Notas: $('#eNotas').val(), Estado: $('#eEstado').val(), IdBitacora: $('#eIdBitacora').val(),
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalSeguimiento').modal('hide');
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se guardaron los cambios exitosamente.',
+                    icon: 'success',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                });
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos (ModificarBitacora)',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            },
+        });
+    }
+
+    //Revision de asunto, si es primera vez crea bitacora
+    function ModalAsunto(idoportunidad) {
+        //Cargar el detalle del asunto
+        $('#ModalAsunto').modal('show');
+        var obje = idoportunidad.split(',');
+        SeleccionarOportunidadPorId(obje[0]);
+
+        CrearBitacora(obje[0], obje[1]);
+    }
+
+    function CrearBitacora(idoportunidad, idresponsable) {
+        //Crea una bitacora para el asunto asignado al responsable
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CrearNuevaBitacora",
+            data: {
+                IdContacto: idresponsable, IdOportunidad: idoportunidad,
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                /*if (data >= 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se ha creado la bitácora, puede guardar ahora sus actividades.',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No se creó la bitácora.',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }*/
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function () {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            },
+        });
+
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Seguimiento de Asuntos</h4>
+    </div>
+    <div class="row">
+
+        <div id="Espera" style="display:none; width:69px;height:90px;position:absolute;top:20%;left:50%;padding:2px;z-index:1000">
+            <img src="../assets/img/spinner.gif" width="64" height="64" /><br />Cargando...
+        </div>
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                <thead class="header">
+                    <tr>
+                        <th>Asunto</th>
+                        <th>Cierre</th>
+                        <th>Estado</th>
+                        <th>Bitácora</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Resultado != null)
+                    {
+                        foreach (var items in ViewBag.Resultado)
+                        {
+                            <tr>
+                                <td>@items.Oportunidades.Nombre</td>
+                                <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                @if (items.Clasificacion.Nombre == "EnProceso1") //Mas de 60 días
+                                {
+                                    <td align='center'><i class='fas fa-cogs' style='color: lightblue' data-toggle='tooltip' data-placement='left' title='En Proceso'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "EnProceso2") //Sin terminar a 15 días
+                                {
+                                    <td align='center'><i class='fas fa-flag' style='color: yellow' data-toggle='tooltip' data-placement='left' title='Alerta'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "EnProceso3") //Sin terminar a 7 días
+                                {
+                                    <td align='center'><i class='fas fa-flag' style='color: orange' data-toggle='tooltip' data-placement='left' title='Por Vencer'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "EnProceso4")
+                                {
+                                    <td align='center'><i class='fas fa-flag' style='color: red' data-toggle='tooltip' data-placement='left' title='Vencido'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "Cerrado") //Cerrado por el propietario por negociación
+                                {
+                                    <td align='center'><i class='fas fa-hands-helping' style='color: coral' data-toggle='tooltip' data-placement='left' title='Cerrado'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "Terminado") //Terminado
+                                {
+                                    <td align='center'><i class='fas fa-check-circle' style='color: greenyellow' data-toggle='tooltip' data-placement='left' title='Terminado'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "Cancelado") //Cancelado por el propietario
+                                {
+                                    <td align='center'><i class='fas fa-times-circle' style='color: darkkhaki' data-toggle='tooltip' data-placement='left' title='Cancelado'></i></td>
+                                }
+                                else if (items.Clasificacion.Nombre == "Suspendido") //Suspendido por el propietario
+                                {
+                                    <td align='center'><i class='fas fa-times-circle' style='color: deeppink' data-toggle='tooltip' data-placement='left' title='Suspendido'></i></td>
+                                }
+                                <td align="center"><a href="/Oportunidades/ResponsableActividades?id=@items.Oportunidades.Id"><i class='fas fa-layer-group'></i></a></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAsunto" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Información General del  Asunto al que se le da Seguimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+                <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Asunto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Actividades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Archivos</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <p style="width: 650px;"></p>
+
+                        <div class="row">
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Objeto:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Asunto:</label>
+                                        <label class="label" id="NombreAsunto" name="NombreAsunto"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Vencimiento:</label>
+                                    <label class="label" id="Cierre" name="Cierre"></label>
+                                </div>
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Contraparte:</label>
+                                        <label class="label" id="Contraparte" name="Contraparte"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                { 
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Per. Atención:</label>
+                                        <label class="label" id="Atencion" name="Atencion"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Clasificación:</label>
+                                    <label class="label" id="Clasificacion" name="Clasificacion"></label>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-6">
+
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                { 
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Características:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-3 col-form-label">Importe:</label>
+                                        <label class="label" id="Importe" name="Importe"></label>
+                                    </div>
+                                }
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Aviso:</label>
+                                    <label class="label" id="Aviso" name="Aviso"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Escalación:</label>
+                                    <label class="label" id="Escalacion" name="Escalacion"></label>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4 col-form-label">Sub-Clasificación:</label>
+                                    <label class="label" id="SubClasificacion" name="SubClasificacion"></label>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label class="col-md-3 col-form-label">Notas</label>
+                            <label class="label" id="Notas" name="Notas"></label>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <p style="width: 650px;"></p>
+
+                        <table id="basic-datatables-actividades" class="display table table-striped table-hover"></table>
+
+                    </div>
+                    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                        <p style="width: 650px;"></p>
+
+                        <table id="basic-datatables-archivos" class="display table table-striped table-hover"></table>
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal" onclick="location.href='';">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalSeguimiento" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Información General del Asunto al que se le da Seguimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post" action="ActualizarBitacora" action-controller="Home">
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="eNotas" class="col-md-3 col-form-label">Notas</label>
+                                <div class="col-md-12 p-0">
+                                    <textarea id="eNotas" class="form-control input-solid" cols="90" rows="10" tabindex="1"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="eIdBitacora" name="eIdBitacora" />
+
+                    <div class="form-group form-inline">
+                        <label for="eEstado" class="col-md-3 col-form-label">Estatus:</label>
+                        <div class="col-md-9 p-0">
+                            <select class="form-control input-solid" id="eEstado" required style="width: 250px" tabindex="2">
+                                <option value="">&nbsp;</option>
+                                <option value="2" selected>En Proceso</option>
+                                <option value="3">Terminado</option>
+                                <option value="4">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button id="GuardarSeguimiento" type="button" class="btn btn-primary" data-dismiss="modal" onclick="ModificarBitacora();">Guardar</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

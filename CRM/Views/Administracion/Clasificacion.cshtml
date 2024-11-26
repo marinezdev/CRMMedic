@@ -1,0 +1,750 @@
+﻿@model dynamic
+@{
+    ViewBag.Title = "Clasificacion";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcClasificacion').addClass("active");
+    });
+
+    //Clasificación
+
+    function GuardarClasificacion() {
+        $.ajax({
+            url: "/Administracion/AgregarClasificacion/",
+            data: { nombre: $('#aNombreClas').val(), empresa: $('#aEmpresa').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarClasificacionEditar(idclas) {
+        $.ajax({
+            url: "/Administracion/SeleccionarClasificacionEditar/",
+            data: { id: idclas },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalClasificacionEditar').modal('show')
+                $('#eNombreClas').val(data.Nombre);
+                $('#eEmpresaClas').val(data.IdConfiguracion);
+                $('#eIdClasificacion').val(data.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModificarClasificacion() {
+        $.ajax({
+            url: "/Administracion/ModificarClasificacion/",
+            data: { nombre: $('#eNombreClas').val(), id: $('#eIdClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el cambio al registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    //SubClasificacion
+
+    function GuardarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/AgregarSubClasificacion/",
+            data: { nombre: $('#aNombreSubClas').val(), clasificacion: $('#aClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });  
+    }
+
+    function SeleccionarSubClasificacionEditar(idsubclas) {
+        $.ajax({
+            url: "/Administracion/SeleccionarSubClasificacionEditar/",
+            data: { id: idsubclas },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalSubClasificacionEditar').modal('show')
+                $('#eNombreSubClas').val(data.Nombre);
+                $('#eClasificacion').val(data.IdClasificacion);
+                $('#eIdSubClasificacion').val(data.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModificarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/ModificarSubClasificacion/",
+            data: { nombre: $('#eNombreSubClas').val(), idclasificacion: $('#eClasificacion').val(), id: $('#eIdSubClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el cambio al registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    //Etiquetas
+    function MostrarEtiquetasEditar(clas, subclas) {
+        //console.log(clas, subclas);
+        $('#ModalEtiquetas').modal('show');
+        $.ajax({
+            url: "/Administracion/SeleccionarEtiquetas/",
+            data: { clasificacion: clas, subclasificacion: subclas },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $('#aEtiqueta1').val(data.ClassSubClassEtiquetas.Etiqueta1);
+                $('#aEtiqueta2').val(data.ClassSubClassEtiquetas.Etiqueta2);
+                $('#aEtiqueta3').val(data.ClassSubClassEtiquetas.Etiqueta3);
+                $('#aEtiqueta4').val(data.ClassSubClassEtiquetas.Etiqueta4);
+                $('#ClasificacionNombre').text(data.Clasificacion.Nombre);
+                $('#SubClasificacionNombre').text(data.SubClasificacion.Nombre);
+                $('#aIdClasificacionEtiquetas').val(data.Clasificacion.Id);
+                $('#aIdSubClasificacionEtiquetas').val(data.SubClasificacion.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });  
+    }
+
+    function ModificarEtiquetas() {
+        $.ajax({
+            url: "/Administracion/ModificarEtiquetas/",
+            data: {
+                etiqueta1: $('#aEtiqueta1').val(), etiqueta2: $('#aEtiqueta2').val(), etiqueta3: $('#aEtiqueta3').val(), etiqueta4: $('#aEtiqueta4').val(),
+                idclasificacion: $('#aIdClasificacionEtiquetas').val(), idsubclasificacion: $('#aIdSubClasificacionEtiquetas').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el cambio al registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Configuración de Clasificación, SubClasificación, Etiquetas de Campos Adicionales de Oportunidades</h4>
+    </div>
+    <div class="row">
+
+            <div class="col-md-12">
+                <div class="card">
+
+
+                    <div class="card-body text-right">
+
+                        <button class="btn btn-primary animated bounceInDown" data-toggle="modal" data-target="#ModalClasificacion">Nueva Clasificación</button>
+                        <button class="btn btn-secondary animated bounceInDown" data-toggle="modal" data-target="#ModalSubClasificacion">Nueva Sub-Clasificación</button>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-12">
+
+                            <h5 class="text-sm-center">Clasificaciones</h5>
+                            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Clasificación</th>
+                                        <th>Empresa</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @if (Model.Clasificacion == null)
+                                    {
+                                        <tr><td colspan="4" align="center">Sin datos para mostrar</td></tr>
+                                    }
+                                    @foreach (CRM.Models.Models.UsuariosRoles items in Model.Clasificacion)
+                                    {
+                                    <tr>
+                                        <td>@items.Clasificacion.Id</td>
+                                        <td>@items.Clasificacion.Nombre</td>
+                                        <td>@items.Configuracion.Nombre</td>
+                                        <td><a href="#" onclick="SeleccionarClasificacionEditar(@items.Clasificacion.Id);">Editar</a></td>
+                                    </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-12">
+
+                            <h5 class="text-sm-center">Sub Clasificaciones</h5>
+                            <table id="basic-datatables2" class="display compact table-striped table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>SubClasificación</th>
+                                        <th>Clasificación</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @if (Model.SubClasificacion == null)
+                                    {
+                                        return;
+                                    }
+                                    @foreach (CRM.Models.Models.UsuariosRoles items in Model.SubClasificacion)
+                                    {
+                                        <tr>
+                                            <td>@items.SubClasificacion.Id</td>
+                                            <td>@items.SubClasificacion.Nombre</td>
+                                            <td>@items.Clasificacion.Nombre</td>
+                                            <td><a href="#" onclick="SeleccionarSubClasificacionEditar(@items.SubClasificacion.Id);">Editar</a></td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-12">
+                            <h5 class="text-sm-center">Etiquetas y Campos</h5>
+                            <table id="basic-datatables3" class="display compact table-striped table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Etiqueta 1</th>
+                                        <th>Etiqueta 2</th>
+                                        <th>Etiqueta 3</th>
+                                        <th>Etiqueta 4</th>
+                                        <th>SubClasificación</th>
+                                        <th>Clasificación</th>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @if (Model.Etiquetas == null)
+                                    {
+                                        return;
+                                    }
+                                    @foreach (CRM.Models.Models.UsuariosRoles items in Model.Etiquetas)
+                                    {
+                                        <tr>
+                                            <td>@items.ClassSubClassEtiquetas.Etiqueta1</td>
+                                            <td>@items.ClassSubClassEtiquetas.Etiqueta2</td>
+                                            <td>@items.ClassSubClassEtiquetas.Etiqueta3</td>
+                                            <td>@items.ClassSubClassEtiquetas.Etiqueta4</td>
+                                            <td>@items.SubClasificacion.Nombre</td>
+                                            <td>@items.Clasificacion.Nombre</td>
+                                            <td><a href="#" onclick="MostrarEtiquetasEditar(@items.Clasificacion.Id,@items.SubClasificacion.Id);">Editar</a></td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade" id="ModalClasificacion" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Agregar Nueva Clasificación</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreClas" id="aNombreClas" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+                            
+
+                            <div class="form-group form-inline">
+                                <label for="aEmpresa" class="col-md-3 col-form-label fc-left">Empresa</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="aEmpresa" name="aEmpresa" style="width: 180px" required tabindex="2">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Empresas)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarClasificacion();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalClasificacionEditar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Editar Clasificación</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="eNombreClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="eNombreClas" id="eNombreClas" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group form-inline">
+                                <label for="eEmpresaClas" class="col-md-3 col-form-label fc-left">Empresa</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="eEmpresaClas" name="eEmpresaClas" style="width: 180px" required tabindex="2" readonly="true">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Empresas)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="eIdClasificacion" name="eIdClasificacion" />
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="ModificarClasificacion();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalSubClasificacion" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Agregar Nueva SubClasificación</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreSubClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreSubClas" id="aNombreSubClas" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-3 col-form-label fc-left">Clasificación</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="aClasificacion" name="aClasificacion" style="width: 180px" required tabindex="2">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (CRM.Models.Models.UsuariosRoles itm in Model.Clasificacion)
+                                        {
+                                            <option value="@itm.Clasificacion.Id">@itm.Clasificacion.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarSubClasificacion();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalSubClasificacionEditar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Editar Sub-Clasificación</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="eNombreSubClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="eNombreSubClas" id="eNombreSubClas" placeholder="" required tabindex="1">
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group form-inline">
+                                <label for="eClasificacion" class="col-md-3 col-form-label fc-left">Clasificacion</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="eClasificacion" name="eClasificacion" style="width: 180px" required tabindex="2" readonly="true">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (CRM.Models.Models.UsuariosRoles itm in Model.Clasificacion)
+                                        {
+                                            <option value="@itm.Clasificacion.Id">@itm.Clasificacion.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="eIdSubClasificacion" name="eIdSubClasificacion" />
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="ModificarSubClasificacion();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="ModalEtiquetas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="ModalLabel">Modificar Etiquetas de Clasificación/SubClasificación</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12">
+
+                            <label class="label" id="ClasificacionNombre"></label> - <label class="label" id="SubClasificacionNombre"></label>
+                            <input type="hidden" id="aIdClasificacionEtiquetas" />
+                            <input type="hidden" id="aIdSubClasificacionEtiquetas">
+
+                            <div class="form-group form-inline">
+                                <label for="aEtiqueta1" class="col-md-3 col-form-label fc-left">Etiqueta 1</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aEtiqueta1" id="aEtiqueta1" placeholder="">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aEtiqueta2" class="col-md-3 col-form-label fc-left">Etiqueta 2</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aEtiqueta2" id="aEtiqueta2" placeholder="">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aEtiqueta3" class="col-md-3 col-form-label fc-left">Etiqueta 3</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aEtiqueta3" id="aEtiqueta3" placeholder="">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aEtiqueta4" class="col-md-3 col-form-label fc-left">Etiqueta 4</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aEtiqueta4" id="aEtiqueta4" placeholder="">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                    <button type="button" id="BtnGuardarNuevaSubClass" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="ModificarEtiquetas();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    

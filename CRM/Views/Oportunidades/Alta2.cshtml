@@ -1,0 +1,644 @@
+﻿
+@{
+    ViewBag.Title = "Alta";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcOport').addClass("nav-item active submenu");
+
+        $("#Importe").on({
+            "focus": function (event) {
+                $(event.target).select();
+            },
+            "keyup": function (event) {
+                $(event.target).val(function (index, value) {
+                    return value.replace(/\D/g, "")
+                        .replace(/([0-9])([0-9]{2})$/, '$1.$2')
+                        .replace(/\B(?=(\d{3})+(?!\d)\.?)/g, ",");
+                });
+            }
+        });
+
+        $('#Espera').hide();
+
+    });
+
+    function Guardar() {
+        if ($('#Nombre').val() === '') {
+            $('#Nombre').focus();
+            return;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/AgregarCompleto/",
+            data: {
+                Nombre: $('#Nombre').val().toUpperCase(), Clasificacion: $('#Clasificacion').val(), SubClasificacion: $('#SubClasificacion').val(),
+                Empresa: $('#Empresa').val(), PeriodoAtencion: $('#Atencion').val(), Vencimiento: $('#Cierre').val(), Notas: $('#Notas').val(),
+                IdUsuario: $('#IdUsuario').val(), IdConfiguracion: $('#IdConfiguracion').val(), IdUDN: $('#UDN').val(),
+                Importe: $('#Importe').val(), TipoMoneda: $('#TipoMoneda').val(), TipoCambio: $('#TipoCambio').val(), Rubro: ''
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data > 0) {
+                    swal({
+                        title: 'GESTION',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Oportunidades/Index';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No se guardó el registro, revise sus datos',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#Clasificacion').val();
+        //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+        $.ajax({
+            url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#SubClasificacion').empty();
+                $('#SubClasificacion').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                if (mensajesErrorActivados) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha habido un error al intentar procesar los datos (Clasificacion Seleccionada)',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function Grande(element) {
+        $(element).animate({
+            zIndex: 10002,
+            width: '240px',
+            height: '20px'
+        });
+    }
+
+    function Normal(element) {
+        $(element).animate({
+            width: '175px',
+            height: '20px'
+        });
+    }
+
+    function TextAreaGrande(element) {
+        zIndex: 10003,
+            $(element).attr('rows', '10');
+    }
+
+    function TextAreaNormal(element) {
+        $(element).attr('rows', 0);
+    }
+
+    function ValidaFechaAviso() {
+        if ($('#Aviso').val() > $('#Cierre').val()) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'La fecha de aviso no puede ser mayor a la fecha de vencimiento, corrija.',
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                }
+            });
+        }
+    }
+
+    function AgregarClasSubClass() {
+        $('#ModalClassSubclass').modal('show');
+    }
+
+    function AgregarClasificacion() {
+        //alert($('#aNombreClas').val() + ' ' + $('#IdConfiguracion').val());
+        $.ajax({
+            url: "/Administracion/AgregarClasificacion/",
+            data: { nombre: $('#aNombreClas').val(), empresa: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //location.reload();
+                            CargarClasificacion($('#IdConfiguracion').val());
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function AgregarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/AgregarSubClasificacion/",
+            data: { nombre: $('#aNombreSubClas').val(), clasificacion: $('#aClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function CargarClasificacion(id) {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarClasificacionPorIdConfiguracion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#Clasificacion').empty();
+                $('#Clasificacion').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#Clasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+
+                $('#aClasificacion').empty();
+                $('#aClasificacion').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#aClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Usuarios.Id)" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Generar @CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    @if (Session["IdRol"].ToString() == "2")
+                    {
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4">&nbsp;</div>
+                            <div class="col-md-6 col-lg-8">
+                                <center>
+                                    <a href="#" onclick="AgregarClasSubClass();">Agregar más Clasificaciones/SubClasificaciones</a>
+                                </center>
+                            </div>
+
+                        </div>
+                    }
+
+                    <div class="row">
+
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Asunto" class="col-md-4 labe1">Descripción</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="" required tabindex="1" onfocus="Grande(this);" onblur="Normal(this);" autocomplete="off">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Clasificacion" class="col-md-4 col-form-label">Clasificación</label>
+                                <div class="col-md-8 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Clasificacion" name="Clasificacion" style="width: 180px" required tabindex="2" onchange="ClasificacionSeleccionada();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="SubClasificacion" class="col-md-5 col-form-label">Sub-Clasificación</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="SubClasificacion" name="SubClasificacion" required style="width: 180px"></select>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Vencimiento</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Cierre" name="Cierre" required tabindex="5">
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Empresa" class="col-md-4 col-form-label">Médico</label>
+                                <div class="col-md-8 p-0">
+
+                                    @CRM.Utilerias.CustomHelpers.SelectEmpresas(Session["IdConfiguracion"].ToString(), Session["IdRol"].ToString(), Session["IdUsuario"].ToString())
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Atencion" class="col-md-5 col-form-label" data-toggle="tooltip" data-placement="top" title="Período de Atención">Período de Atn.</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Atencion" name="Atencion" required style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var atn in ViewBag.Atencion)
+                                        {
+                                            <option value="@atn.Id">@atn.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Importe" class="col-md-4 col-form-label" data-toggle="tooltip" data-placement="top" title="Importe en Otras Monedas">Importe</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Importe" name="Importe" required placeholder="$000,000.00" tabindex="4" data-toggle="tooltip" data-placement="top" title="Agregue la cantidad sin caracteres especiales">
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoMoneda" class="col-form-label" style="width: 90px">Moneda</label>
+                                <select class="form-control form-control-sm input-solid" id="TipoMoneda" name="TipoMoneda" style="width: 180px" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var itm in ViewBag.Monedas)
+                                    {
+                                        <option value="@itm.Id">@itm.Nombre</option>
+                                    }
+                                </select>
+
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoCambio" class="col-md-5 col-form-label">Tipo de Cambio</label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="TipoCambio" name="TipoCambio" placeholder="0" required data-toggle="tooltip" data-placement="top" title="Agregue sólo números, sólo el punto para decimales, 0 si la moneda es nacional">
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+
+
+                            <div class="form-group form-inline">
+                                <label for="UDN" class="col-md-5 col-form-label" data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</label>
+                                <div class="col-md-6 p-0">
+
+                                    <select class="form-control form-control-sm input-solid" id="UDN" name="UDN" style="width: 180px" required tabindex="13">
+                                        <option value="">&nbsp;</option>
+                                        @if (Session["IdRol"].ToString() == "7")
+                                        {
+                                            <option value="6" selected>Comisionista</option>
+                                        }
+                                        else
+                                        {
+                                            foreach (var udn in CRM.Models.Catalogos.Seleccionar("UDN"))
+                                            {
+                                                <option value="@udn.Id">@udn.Nombre</option>
+                                            }
+                                        }
+                                    </select>
+
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                    </div>
+    
+    
+    
+    <!--div class="row">
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Rubro" class="col-md-4 col-form-label">Rubro</label>
+                                <div class="col-md-6 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Rubro" name="Rubro" required style="width: 180px" data-toggle="tooltip" data-placement="top" title="Seleccione un rubro aún si no existe, solicite que sea agregado después">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var rub in CRM.Models.Catalogos.Seleccionar("Rubros"))
+                                        {
+                                            <option value="@rub.Id">@rub.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 col-lg-4"></div>
+                        <div class="col-md-6 col-lg-4"></div>
+
+                    </div-->
+
+                    <div class="form-group">
+                        <label for="Notas">Notas:</label>
+                        <textarea id="Notas" name="Notas" class="form-control form-inline input-solid" tabindex="10" cols="100" onfocus="TextAreaGrande(this);" onblur="TextAreaNormal(this);"></textarea>
+                    </div>
+
+                    <center>
+                        <button id="BtnGuardar" class="btn btn-success animated bounceInDown" onclick="Guardar();">Guardar Oportunidad</button>
+                    </center>
+
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalClassSubclass" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Clasificaciones/SubClasificaciones</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Clasificaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">SubClasificaciones</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreClas" id="aNombreClas" placeholder="" required>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarClasificacion();">Aceptar</button>
+
+
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreSubClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreSubClas" id="aNombreSubClas" placeholder="" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-3 col-form-label fc-left">Clasificación</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="aClasificacion" name="aClasificacion" style="width: 180px" required>
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion2)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarSubClasificacion();">Aceptar</button>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script> 
+
+<script>
+
+    $('#Cierre').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

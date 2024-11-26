@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Recuperar Contraseña";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        //$.notify({
+        //    // options
+        //    message: 'Hello World'
+        //}, {
+        //    // settings
+        //        type: 'success',
+        //        placement: {
+        //            from: "bottom",
+        //            align: "left"
+        //        }
+        //});
+
+    });
+
+</script>
+<!--
+<div class="page-inner">
+    <div class="row">
+
+        <div class="col-md-7">
+            <div class="card" style="border:0px solid black">
+
+
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Recuperar Contraseña de Acceso</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-10 col-lg-7">
+
+                            <div class="form-group">
+                                <div class="input-icon">
+                                    <span class="input-icon-addon">
+                                        <i class="fa fa-envelope"></i>
+                                    </span>
+                                    <input type="text" class="form-control" name="Correo" placeholder="Correo" required autocomplete="off">
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-action label-align-left">
+                    <button type="submit" class="btn btn-default">Recuperar</button>
+                </div>
+
+
+                <a href="/" class="nav-link">Regresar</a>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+-->
+
+<form method="post" action="/Home/RecuperaContraseña">
+    <div class="wrapper wrapper-login">
+        <div class="container container-login animated fadeIn">
+            <h3 class="text-center">Recuperación de Contraseña</h3>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="clave" class="placeholder"><b>Correo</b></label>
+                    <input id="clave" name="clave" type="text" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary col-md-5 float-right mt-3 mt-sm-0 fw-bold">Recuperar</button>
+                    <br><br><br><a href="/" class="link float-right">Regresar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@Html.Raw(TempData["Mensaje"])
+
+@Html.Raw(ViewBag.CorreoEnviado)
+

@@ -1,0 +1,403 @@
+﻿
+@{
+    ViewBag.Title = "Menu";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcMenu').addClass("active");
+
+        $('#menu').DataTable({
+            "paging": false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+        });
+
+    });
+
+    function Modificar(id) {        
+        $.ajax({
+            url: "/Administracion/SeleccionarMenuPorId/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalModificar').modal('show');
+
+                $('#eIdJQuery').val(data.IdJquery);
+                $('#eRuta').val(data.Ruta);
+                $('#eIcono').val(data.Icono);
+                $('#eNombre').val(data.Nombre);
+                $('#eConfiguracionEmpresa').val(data.IdConfiguracion);
+
+                if (data.Disponible) {                          // Para un checkbox
+                    $("#eDisponible").prop('checked', true);
+                }
+                else {
+                    $("#eDisponible").prop('checked', false);
+                }
+
+                $('#eId').val(data.Id);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificado() {
+        var valorDisponible;
+        if ($('#eDisponible').is(":checked")) {
+            //alert('Si');
+            valorDisponible = 1;
+        }
+        else {
+            //alert('no');
+            valorDisponible = 0;
+        }
+        $.ajax({
+            url: "/Administracion/ModificarMenu/",
+            data: {
+                idjquery: $('#eIdJQuery').val(),
+                ruta: $('#eRuta').val(),
+                icono: $('#eIcono').val(),
+                nombre: $('#eNombre').val(),
+                idconfiguracion: $('#eConfiguracionEmpresa').val(),
+                disponible: valorDisponible,
+                id: $('#eId').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se modificó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se guardó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function Agregar() {
+        $('#ModalAgregar').modal('show');
+    }
+
+    function GuardarAgregado() {
+        var valorDisp;
+        if ($('#aDisponible').is(":checked")) {
+            //alert('Si');
+            valorDisp = 1;
+        }
+        else {
+            //alert('no');
+            valorDisp = 0;
+        }
+        $.ajax({
+            url: "/Administracion/AgregarMenu/",
+            data: {
+                idjquery: $('#aIdJQuery').val(),
+                ruta: $('#aRuta').val(),
+                icono: $('#aIcono').val(),
+                nombre: $('#aNombre').val(),
+                idconfiguracion: $('#aConfiguracionEmpresa').val(),
+                disponible: valorDisp
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data > 0) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se agregó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se agregó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Menú - Páginas Generales</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body text-right">
+
+                    <a href="MenuRoles" class="btn btn-secondary">Menú Roles</a>&nbsp;
+
+                    <a href="#" onclick="Agregar();" class="btn btn-primary">Nuevo</a>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <table id="menu" class="display compact" style="width:100%">
+                        <thead class="header">
+                            <tr>
+                                <th>Id</th>
+                                <th>IdJQuery</th>
+                                <th>Ruta</th>
+                                <th>Icono</th>
+                                <th>Nombre</th>
+                                <th>Configuración</th>
+                                <th>Disponible</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var items in ViewBag.Registros)
+                            {
+                                var disponible = items.Disponible == true ? "Sí" : "No";
+                                <tr>
+                                    <td>@items.Id</td>
+                                    <td>@items.IdJquery</td>
+                                    <td>@items.Ruta</td>
+                                    <td>@items.Icono</td>
+                                    <td>@items.Nombre</td>
+                                    <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.IdConfiguracion.ToString(), "Configuracion")</td>
+                                    <td>@disponible</td>
+                                    <td><a href="#" onclick="Modificar(@items.Id)">Modificar</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalAgregar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Nuevo Registro</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aIdJQuery" class="col-md-3 col-form-label fc-left">IdJQuery</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="aIdJQuery" name="aIdJQuery" placeholder="" tabindex="1" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aRuta" class="col-md-3 col-form-label fc-left">Ruta</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="aRuta" name="aRuta" placeholder="" tabindex="2" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aIcono" class="col-md-3 col-form-label fc-left">Icono</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="aIcono" name="aIcono" placeholder="" tabindex="3" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="aNombre" name="aNombre" placeholder="" tabindex="4" required>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group form-inline">
+                            <label for="aConfiguracionEmpresa" class="col-md-3 col-form-label">Configuración</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="aConfiguracionEmpresa" name="aConfiguracionEmpresa" style="width: 250px" tabindex="5" required>
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.ConfiguracionEmpresas)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="aDisponible" name="aDisponible" value="" checked tabindex="6" required>
+                                <span class="form-check-sign">Disponible</span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarAgregado();">Guardar</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar registro del menú</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="eIdJQuery" class="col-md-3 col-form-label fc-left">IdJQuery</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eIdJQuery" name="eIdJQuery" placeholder="" tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eRuta" class="col-md-3 col-form-label fc-left">Ruta</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eRuta" name="eRuta" placeholder="" tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eIcono" class="col-md-3 col-form-label fc-left">Icono</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eIcono" name="eIcono" placeholder="" tabindex="3">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eNombre" name="eNombre" placeholder="" tabindex="4">
+                            </div>
+                        </div>
+
+
+                        <div class="form-group form-inline">
+                            <label for="eConfiguracionEmpresa" class="col-md-3 col-form-label">Configuración</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eConfiguracionEmpresa" name="eConfiguracionEmpresa" style="width: 250px" tabindex="5">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.ConfiguracionEmpresas)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="eDisponible" name="eDisponible" value="" tabindex="6">
+                                <span class="form-check-sign">Disponible</span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+
+            </div>
+        </div>
+    </div>
+</div>

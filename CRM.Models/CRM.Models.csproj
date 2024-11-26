@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CD6D0089-8728-45B4-82E5-BF1E0B3D6E50}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CRM.Models</RootNamespace>
+    <AssemblyName>CRM.Models</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccesoDatos.cs" />
+    <Compile Include="Business\AAAPruebas.cs" />
+    <Compile Include="Business\Abstractas\Usuario.cs" />
+    <Compile Include="Business\Actividades2.cs" />
+    <Compile Include="Business\AsaeWebEventos.cs" />
+    <Compile Include="Business\AsaeWebUsuariosEventos.cs" />
+    <Compile Include="Business\BitacoraUsuarios.cs" />
+    <Compile Include="Business\BitacoraUsuariosDetalle.cs" />
+    <Compile Include="Business\Actividades.cs" />
+    <Compile Include="Business\ActividadesContacto.cs" />
+    <Compile Include="Business\ActividadesContactoDetalle.cs" />
+    <Compile Include="Business\Archivos.cs" />
+    <Compile Include="Business\ArchivosBitacora.cs" />
+    <Compile Include="Business\Area.cs" />
+    <Compile Include="Business\Aviso.cs" />
+    <Compile Include="Business\Bitacora.cs" />
+    <Compile Include="Business\Business.cs" />
+    <Compile Include="Business\Clasificacion.cs" />
+    <Compile Include="Business\ClasificacionRolesContactos.cs" />
+    <Compile Include="Business\ClassSubClass.cs" />
+    <Compile Include="Business\ClassSubClassEtiquetas.cs" />
+    <Compile Include="Business\CodigoPostal.cs" />
+    <Compile Include="Business\Colonias.cs" />
+    <Compile Include="Business\CompartirContactos.cs" />
+    <Compile Include="Business\CompartirEmpresa.cs" />
+    <Compile Include="Business\CompartirOportunidades.cs" />
+    <Compile Include="Business\Configuracion.cs" />
+    <Compile Include="Business\ContactoRol.cs" />
+    <Compile Include="Business\Contactos.cs" />
+    <Compile Include="Business\ContactosActividades.cs" />
+    <Compile Include="Business\ContactosDetalle.cs" />
+    <Compile Include="Business\ContactosEmpresas.cs" />
+    <Compile Include="Business\CP.cs" />
+    <Compile Include="Business\DocumentosASAE.cs" />
+    <Compile Include="Business\DocumentosASAEHistorico.cs" />
+    <Compile Include="Business\DocumentosASAESubClasificaciones.cs" />
+    <Compile Include="Business\DocumentosASAETipoArchivo.cs" />
+    <Compile Include="Business\DocumentosASAEUsuarios.cs" />
+    <Compile Include="Business\Empresas.cs" />
+    <Compile Include="Business\EmpresasDetalle.cs" />
+    <Compile Include="Business\EmpresasDirecciones.cs" />
+    <Compile Include="Business\EmpresasProveedores.cs" />
+    <Compile Include="Business\EmpresasUsuarios.cs" />
+    <Compile Include="Business\Escalacion.cs" />
+    <Compile Include="Business\Estadisticas.cs" />
+    <Compile Include="Business\EstadoOportunidad.cs" />
+    <Compile Include="Business\Estados.cs" />
+    <Compile Include="Business\EtapasBitacora.cs" />
+    <Compile Include="Business\EtapasOportunidad.cs" />
+    <Compile Include="Business\FechaVencimientoCambios.cs" />
+    <Compile Include="Business\Interfaces\IEtiquetas.cs" />
+    <Compile Include="Business\Interfaces\IValidacion.cs" />
+    <Compile Include="Business\Inyeccion\ConcentradorValidacion.cs" />
+    <Compile Include="Business\Marketing.cs" />
+    <Compile Include="Business\MarketingContactos.cs" />
+    <Compile Include="Business\MarketingCorreo.cs" />
+    <Compile Include="Business\MarketingCorreoPlantillas.cs" />
+    <Compile Include="Business\MarketingRecordatorios.cs" />
+    <Compile Include="Business\MarketingSeguimiento.cs" />
+    <Compile Include="Business\Menu.cs" />
+    <Compile Include="Business\Metricas.cs" />
+    <Compile Include="Business\Moneda.cs" />
+    <Compile Include="Business\MultiRepositorio.cs" />
+    <Compile Include="Business\Oportunidades.cs" />
+    <Compile Include="Business\OportunidadesActividades.cs" />
+    <Compile Include="Business\OportunidadesEmpresasContactosUsuarios.cs" />
+    <Compile Include="Business\OportunidadesImportes.cs" />
+    <Compile Include="Business\OportunidadesResponsables.cs" />
+    <Compile Include="Business\OportunidadesUsuarios.cs" />
+    <Compile Include="Business\Paises.cs" />
+    <Compile Include="Business\Poblaciones.cs" />
+    <Compile Include="Business\Roles.cs" />
+    <Compile Include="Business\SubClasificacion.cs" />
+    <Compile Include="Business\Tareas.cs" />
+    <Compile Include="Business\TareasUsuariosContactosEmpresas.cs" />
+    <Compile Include="Business\TipoPersona.cs" />
+    <Compile Include="Business\UDN.cs" />
+    <Compile Include="Business\UsuarioConfiguracion.cs" />
+    <Compile Include="Business\Usuarios.cs" />
+    <Compile Include="Business\UsuariosEmpresasOportunidades.cs" />
+    <Compile Include="Business\UsuariosRoles.cs" />
+    <Compile Include="Business\ValidacionPropietarioPermiso.cs" />
+    <Compile Include="Catalogos.cs" />
+    <Compile Include="Models\Actividades.cs" />
+    <Compile Include="Models\ActividadesContacto.cs" />
+    <Compile Include="Models\ActividadesContactoDetalle.cs" />
+    <Compile Include="Models\ActividadesContactoDetalleTipo.cs" />
+    <Compile Include="Models\Archivos.cs" />
+    <Compile Include="Models\ArchivosBitacora.cs" />
+    <Compile Include="Models\Area.cs" />
+    <Compile Include="Models\AsaeWebEventos.cs" />
+    <Compile Include="Models\AsaeWebUsuariosEventos.cs" />
+    <Compile Include="Models\AsaeWebUsuarioToken.cs" />
+    <Compile Include="Models\Aviso.cs" />
+    <Compile Include="Models\Bitacora.cs" />
+    <Compile Include="Models\Bitacoras.cs" />
+    <Compile Include="Models\BitacoraUsuarios.cs" />
+    <Compile Include="Models\BitacoraUsuariosDetalle.cs" />
+    <Compile Include="Models\Catalogos.cs" />
+    <Compile Include="Models\Clasificacion.cs" />
+    <Compile Include="Models\ClasificacionRolesContactos.cs" />
+    <Compile Include="Models\ClassSubClass.cs" />
+    <Compile Include="Models\ClassSubClassEtiquetas.cs" />
+    <Compile Include="Models\Colonias.cs" />
+    <Compile Include="Models\CompartirContactos.cs" />
+    <Compile Include="Models\CompartirEmpresas.cs" />
+    <Compile Include="Models\CompartirOportunidades.cs" />
+    <Compile Include="Models\CompartirUsuarios.cs" />
+    <Compile Include="Models\Configuracion.cs" />
+    <Compile Include="Models\ContactoRol.cs" />
+    <Compile Include="Models\Contactos.cs" />
+    <Compile Include="Models\ContactosActividades.cs" />
+    <Compile Include="Models\ContactosBuscar.cs" />
+    <Compile Include="Models\ContactosBuscarDetalle.cs" />
+    <Compile Include="Models\ContactosDetalle.cs" />
+    <Compile Include="Models\ContactosEmpresas.cs" />
+    <Compile Include="Models\CP.cs" />
+    <Compile Include="Models\Direccion.cs" />
+    <Compile Include="Models\DocumentosASAE.cs" />
+    <Compile Include="Models\DocumentosASAEHistorico.cs" />
+    <Compile Include="Models\DocumentosASAETipoArchivo.cs" />
+    <Compile Include="Models\DocumentosASAEUsuarios.cs" />
+    <Compile Include="Models\Empresas.cs" />
+    <Compile Include="Models\EmpresasDetalle.cs" />
+    <Compile Include="Models\EmpresasDirecciones.cs" />
+    <Compile Include="Models\EmpresasMabe.cs" />
+    <Compile Include="Models\EmpresasProveedores.cs" />
+    <Compile Include="Models\EmpresasUsuarios.cs" />
+    <Compile Include="Models\Escalacion.cs" />
+    <Compile Include="Models\EstadisticasTablas.cs" />
+    <Compile Include="Models\EstadoOportunidad.cs" />
+    <Compile Include="Models\Estados.cs" />
+    <Compile Include="Models\EtapasBitacora.cs" />
+    <Compile Include="Models\EtapasOportunidad.cs" />
+    <Compile Include="Models\FechaVencimientoCambios.cs" />
+    <Compile Include="Models\ManejadorModelos.cs" />
+    <Compile Include="Models\Marketing.cs" />
+    <Compile Include="Models\MarketingContactos.cs" />
+    <Compile Include="Models\MarketingCorreo.cs" />
+    <Compile Include="Models\MarketingCorreoPlantillas.cs" />
+    <Compile Include="Models\MarketingModelos.cs" />
+    <Compile Include="Models\MarketingRecordatorios.cs" />
+    <Compile Include="Models\MarketingSeguimiento.cs" />
+    <Compile Include="Models\Menu.cs" />
+    <Compile Include="Models\MenuMenuRoles.cs" />
+    <Compile Include="Models\MenuRoles.cs" />
+    <Compile Include="Models\Metricas.cs" />
+    <Compile Include="Models\Modelos.cs" />
+    <Compile Include="Models\ModelosLista.cs" />
+    <Compile Include="Models\Moneda.cs" />
+    <Compile Include="Models\Multi.cs" />
+    <Compile Include="Models\Multi2.cs" />
+    <Compile Include="Models\Oportunidades.cs" />
+    <Compile Include="Models\OportunidadesActividades.cs" />
+    <Compile Include="Models\OportunidadesBuscar.cs" />
+    <Compile Include="Models\OportunidadesECU.cs" />
+    <Compile Include="Models\OportunidadesEmpresasContactosUsuarios.cs" />
+    <Compile Include="Models\OportunidadesImportes.cs" />
+    <Compile Include="Models\OportunidadesResponsables.cs" />
+    <Compile Include="Models\OportunidadesUsuarios.cs" />
+    <Compile Include="Models\Poblaciones.cs" />
+    <Compile Include="Models\Roles.cs" />
+    <Compile Include="Models\RolesUsuarios.cs" />
+    <Compile Include="Models\Subclasificacion.cs" />
+    <Compile Include="Models\Tareas.cs" />
+    <Compile Include="Models\TareasUsuarios.cs" />
+    <Compile Include="Models\TareasUsuariosContactosEmpresas.cs" />
+    <Compile Include="Models\TipoPersona.cs" />
+    <Compile Include="Models\UDN.cs" />
+    <Compile Include="Models\UsuarioConfiguracion.cs" />
+    <Compile Include="Models\Usuarios.cs" />
+    <Compile Include="Models\UsuariosEmpresasOportunidades.cs" />
+    <Compile Include="Models\UsuariosEmpresasOportunidadesDetalle.cs" />
+    <Compile Include="Models\UsuariosRoles.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\Actividades2Repository.cs" />
+    <Compile Include="Repository\ActividadesContactoDetalleRepositorio.cs" />
+    <Compile Include="Repository\ActividadesContactoRepositorio.cs" />
+    <Compile Include="Repository\ActividadesRepositorio.cs" />
+    <Compile Include="Repository\ArchivosBitacoraRepositorio.cs" />
+    <Compile Include="Repository\ArchivosRepositorio.cs" />
+    <Compile Include="Repository\AreaRepositorio.cs" />
+    <Compile Include="Repository\AsaeWebEventosRepository.cs" />
+    <Compile Include="Repository\AsaeWebUsuariosEventosRepository.cs" />
+    <Compile Include="Repository\AvisoRepositorio.cs" />
+    <Compile Include="Repository\BitacoraRespositorio.cs" />
+    <Compile Include="Repository\BitacoraUsuariosDetalleRepositorio.cs" />
+    <Compile Include="Repository\BitacoraUsuariosRepositorio.cs" />
+    <Compile Include="Repository\ClasificacionRepositorio.cs" />
+    <Compile Include="Repository\ClasificacionRolesContactosRespositorio.cs" />
+    <Compile Include="Repository\ClassSubClassEtiquetasRepositorio.cs" />
+    <Compile Include="Repository\ClassSubClassRepositorio.cs" />
+    <Compile Include="Repository\CodigoPostalRespositorio.cs" />
+    <Compile Include="Repository\ColoniasRepositorio.cs" />
+    <Compile Include="Repository\CompartirContactosRepositorio.cs" />
+    <Compile Include="Repository\CompartirEmpresaRepository.cs" />
+    <Compile Include="Repository\CompartirOportunidadesRepositorio.cs" />
+    <Compile Include="Repository\Comun.cs" />
+    <Compile Include="Repository\ConfiguracionRepositorio.cs" />
+    <Compile Include="Repository\ContactoRolRepositorio.cs" />
+    <Compile Include="Repository\ContactosActividadesRepositorio.cs" />
+    <Compile Include="Repository\ContactosDetalleRepositorio.cs" />
+    <Compile Include="Repository\ContactosEmpresasRepositorio.cs" />
+    <Compile Include="Repository\ContactosRepositorio.cs" />
+    <Compile Include="Repository\CPRepositorio.cs" />
+    <Compile Include="Repository\DocumentosASAEHistoricoRepositorio.cs" />
+    <Compile Include="Repository\DocumentosASAERepository.cs" />
+    <Compile Include="Repository\DocumentosASAESubClasificacionesRepository.cs" />
+    <Compile Include="Repository\DocumentosASAETipoArchivo.cs" />
+    <Compile Include="Repository\DocumentosASAEUsuariosRepositorio.cs" />
+    <Compile Include="Repository\EmpresasDetalleRepositorio.cs" />
+    <Compile Include="Repository\EmpresasDireccionesRepositorio.cs" />
+    <Compile Include="Repository\EmpresasProveedoresRepositorio.cs" />
+    <Compile Include="Repository\EmpresasRepositorio.cs" />
+    <Compile Include="Repository\EmpresasUsuariosRepositorio.cs" />
+    <Compile Include="Repository\EscalacionRepositorio.cs" />
+    <Compile Include="Repository\EstadisticasRepositorio.cs" />
+    <Compile Include="Repository\EstadoOportunidadRepositorio.cs" />
+    <Compile Include="Repository\EstadosRepositorio.cs" />
+    <Compile Include="Repository\EtapasBitacoraRepositorio.cs" />
+    <Compile Include="Repository\EtapasOportunidadRepositorio.cs" />
+    <Compile Include="Repository\FechaVencimientoCambiosRepositorio.cs" />
+    <Compile Include="Repository\MarketingCorreoPlantillasRepositorio.cs" />
+    <Compile Include="Repository\MarketingCorreoRepositorio.cs" />
+    <Compile Include="Repository\MarketingContactosRepositorio.cs" />
+    <Compile Include="Repository\MarketingRecordatoriosRepository.cs" />
+    <Compile Include="Repository\MarketingRepositorio.cs" />
+    <Compile Include="Repository\MarketingSeguimientoRepositorio.cs" />
+    <Compile Include="Repository\MenuRepositorio.cs" />
+    <Compile Include="Repository\MetricasRepository.cs" />
+    <Compile Include="Repository\MonedaRepositorio.cs" />
+    <Compile Include="Repository\MultiRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesActividadesRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesEmpresasContactosUsuariosRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesImportesRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesResponsablesRepositorio.cs" />
+    <Compile Include="Repository\OportunidadesUsuariosRepositorio.cs" />
+    <Compile Include="Repository\PaisesRepository.cs" />
+    <Compile Include="Repository\PoblacionesRepositorio.cs" />
+    <Compile Include="Repository\RolesRepositorio.cs" />
+    <Compile Include="Repository\SubclasificacionRepositorio.cs" />
+    <Compile Include="Repository\TareasRepositorio.cs" />
+    <Compile Include="Repository\TareasUsuariosContactosEmpresasRepositorio.cs" />
+    <Compile Include="Repository\TipoPersonaRepositorio.cs" />
+    <Compile Include="Repository\UDNRepositorio.cs" />
+    <Compile Include="Repository\UsuarioConfiguracionRepositorio.cs" />
+    <Compile Include="Repository\UsuariosEmpresasOportunidadesRepositorio.cs" />
+    <Compile Include="Repository\UsuariosRepositorio.cs" />
+    <Compile Include="Repository\UsuariosRolesRepositorio.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CRM.Utilerias\CRM.Utilerias.csproj">
+      <Project>{f654c399-c2c0-472f-916c-a034127692cc}</Project>
+      <Name>CRM.Utilerias</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

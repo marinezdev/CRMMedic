@@ -1,0 +1,978 @@
+﻿
+@{
+    ViewBag.Title = "Medidores";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#IndexHome').addClass("nav-item active submenu");
+
+        $.fn.dataTable.moment("DD/MM/YYYY");
+
+        var formattedOutput = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+        });
+
+        $('#proyectos').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 20,
+            "language": {
+                'url': '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json',
+                'decimal': '.',
+                'thousands': ','
+            },
+            "scrollX": true,
+            columnDefs: [
+                {
+                    targets: [3],
+                    className: "text-right",
+                    render: $.fn.dataTable.render.number(',', '.', 2,'$')
+                },{
+                    targets: [9],
+                    className: "text-center",
+                }
+            ],
+            //'rowCallback': function (row, data, index) {
+            //    if (data[3] > 200000) {
+            //        $(row).find('td:eq(3)').css('color', 'lime');
+            //    }
+            //},
+            "footerCallback": function (row, data, start, end, display) {
+                var api = this.api(), data;
+
+                // convirtiendo a entero para encontrar el total
+                var intVal = function (i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+                
+                // sumando la columna Total
+                var monTotal = api
+                    .column(3)
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+                $(api.column(3).footer()).html(formattedOutput.format(monTotal).replace('₺', '$'));
+            },
+        });
+
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+
+            // Get the column API object
+            var column = $('#basic-datatables-').DataTable().column($(this).attr('data-column'));
+
+            // Toggle the visibility
+            column.visible(!column.visible());
+        });
+
+        $('#Espera').hide();
+
+        $('#pieChart').sparkline([20, 50, 30], {
+            type: 'pie',
+            height: '45',
+            width: '60'
+
+        });
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var edo = obtenerParametrodeURL('edo');
+        var acu = obtenerParametrodeURL('acu');
+
+        if (acu == 1) {
+
+            //Carga inicial
+            verUDNsAcumulado(edo);
+            $('#Acum').val(acu);
+            //verEstadosAcumulado(1, 1);
+        }
+        else if (acu == 2) {
+
+            verUDNsEnElMes(edo,1);
+            //verEstadosEnElMes(1);
+            //$('input:radio[class=form-radio-input][id=Acumulado2]').prop('checked', true);
+            $('#Acum').val(acu);
+        }
+        else {
+            verUDNsAcumulado(1);
+            //verEstadosAcumulado(1, 1);
+        }
+
+    });
+
+    //Acumulado
+    function verUDNsAcumulado(edo) {
+        $('#udnsacumulado').show();
+        $('#udnsenelmes').hide();
+        $.ajax({
+            url: "/Home/SeleccionarProyectosAcumuladosAlMesPorUDN",
+            data: { estado: edo },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                var valormaximo = 50;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circles01',
+                    radius: radio,
+                    value: data[0].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#F1F1F1', '#59d05d'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //outsourcing
+
+                Circles.create({
+                    id: 'circles02',
+                    radius: radio,
+                    value: data[1].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#fdaf4b'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //servicios
+
+                Circles.create({
+                    id: 'circles03',
+                    radius: radio,
+                    value: data[2].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#177dff'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //soluciones
+
+                Circles.create({
+                    id: 'circles04',
+                    radius: radio,
+                    value: data[3].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#ff1aaa'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //valdemar
+
+                Circles.create({
+                    id: 'circles05',
+                    radius: radio,
+                    value: data[4].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#aaa321'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //comisionistas
+
+                Circles.create({
+                    id: 'circles06',
+                    radius: radio,
+                    value: data[5].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d0486f'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //redes
+
+                Circles.create({
+                    id: 'circles07',
+                    radius: radio,
+                    value: data[6].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d04eef'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //sistemas
+
+                $('#uout').on('click', function () { CargarTabla(edo,1);  }); 
+                $('#user').on('click', function() { CargarTabla(edo,2);  }); 
+                $('#usol').on('click', function() { CargarTabla(edo,3);  }); 
+                $('#uval').on('click', function() { CargarTabla(edo,4);  }); 
+                $('#ucom').on('click', function() { CargarTabla(edo,6); }); 
+                $('#ured').on('click', function () { CargarTabla(edo,7);  }); 
+                $('#usis').on('click', function () { CargarTabla(edo,8);  }); 
+
+                $('#uout').css('color', 'blue');
+                $('#user').css('color', 'blue');
+                $('#usol').css('color', 'blue');
+                $('#uval').css('color', 'blue');
+                $('#ucom').css('color', 'blue');
+                $('#ured').css('color', 'blue');
+                $('#usis').css('color', 'blue');
+
+                $('#uout').css('color', 'green');
+
+                //verEstadosAcumulado(1, 1);
+
+                
+
+            },
+            error: function (errormessage) {
+
+            }
+        });
+    }
+
+    function verEstadosAcumulado(idudn, opc) {
+        $('#edosacum').show();
+        $('#edosmes').hide();
+        $.ajax({
+            url: "/Oportunidades/SeleccionMedidoresEstadosAcumulado",
+            data: { idudn: idudn },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                $('#IdUDN').val(idudn);
+
+                var valormaximo = 50;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circles08',
+                    radius: radio,
+                    value: data[0].enproceso,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF0C39'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //en proceso
+
+                Circles.create({
+                    id: 'circles10',
+                    radius: radio,
+                    value: data[0].cerradoganado,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#98FF96'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cerrados perdidos
+
+                Circles.create({
+                    id: 'circles09',
+                    radius: radio,
+                    value: data[0].cerradoperdido,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF8288'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cerrados ganados
+
+                $('#uout').css('color', 'blue');
+                $('#user').css('color', 'blue');
+                $('#usol').css('color', 'blue');
+                $('#uval').css('color', 'blue');
+                $('#ucom').css('color', 'blue');
+                $('#ured').css('color', 'blue');
+                $('#usis').css('color', 'blue');
+
+                if (idudn == 1) {
+                    $('#uout').css('color', 'green');
+                }
+                else if (idudn == 2) {
+                    $('#user').css('color', 'green');
+                }
+                else if (idudn == 3) {
+                    $('#usol').css('color', 'green');
+                }
+                else if (idudn == 4) {
+                    $('#uval').css('color', 'green');
+                }
+                else if (idudn == 6) {
+                    $('#ucom').css('color', 'green');
+                }
+                else if (idudn == 7) {
+                    $('#ured').css('color', 'green');
+                }
+                else if (idudn == 8) {
+                    $('#usis').css('color', 'green');
+                }
+
+                $('#aenproceso').css('color', 'blue');
+                $('#acerradosganados').css('color', 'blue');
+                $('#acerradosperdidos').css('color', 'blue');
+
+                $('#aenproceso').css('color', 'green');
+
+                $('#proyectos').dataTable().fnClearTable();
+                $('#proyectos').DataTable().clear();
+
+            },
+            error: function (errormessage) {
+
+            }
+        });
+
+    }
+
+    //En el mes
+    function verUDNsEnElMes(edo,idudn) {
+
+        if (edo == undefined) { edo = 1;}
+        $('#udnsacumulado').hide();
+        $('#udnsenelmes').show();
+        $.ajax({
+            url: "/Home/ProyectosEnElMes",
+            data: { estado: edo, idudn: idudn },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                //console.log(data[0].Proyectos + ' | ' + data[1].Proyectos + ' | ' + data[2].Proyectos);
+
+                var valormaximo = 50;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circlesA',
+                    radius: radio,
+                    value: data[0].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#F1F1F1', '#59d05d'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //outsourcing
+
+                Circles.create({
+                    id: 'circlesB',
+                    radius: radio,
+                    value: data[1].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#fdaf4b'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //servicios
+
+                Circles.create({
+                    id: 'circlesC',
+                    radius: radio,
+                    value: data[2].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#177dff'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //soluciones
+
+                Circles.create({
+                    id: 'circlesD',
+                    radius: radio,
+                    value: data[3].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#ff1aaa'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //valdemar
+
+                Circles.create({
+                    id: 'circlesE',
+                    radius: radio,
+                    value: data[4].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#aaa321'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //comisionistas
+
+                Circles.create({
+                    id: 'circlesF',
+                    radius: radio,
+                    value: data[5].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d0486f'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //redes
+
+                Circles.create({
+                    id: 'circlesG',
+                    radius: radio,
+                    value: data[6].Proyectos,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#d04eef'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //sistemas
+
+                $('#eout').css('color', 'blue').val('');
+                $('#eser').css('color', 'blue').val('');
+                $('#esol').css('color', 'blue').val('');
+                $('#eval').css('color', 'blue').val('');
+                $('#ecom').css('color', 'blue').val('');
+                $('#ered').css('color', 'blue').val('');
+                $('#esis').css('color', 'blue').val('');
+
+                var idudn = $('#IdUDN').val();
+
+                if (idudn == 1) {
+                    $('#eout').css('color', 'green');
+                }
+                else if (idudn == 2) {
+                    $('#eser').css('color', 'green');
+                }
+                else if (idudn == 3) {
+                    $('#esol').css('color', 'green');
+                }
+                else if (idudn == 4) {
+                    $('#eval').css('color', 'green');
+                }
+                else if (idudn == 6) {
+                    $('#ecom').css('color', 'green');
+                }
+                else if (idudn == 7) {
+                    $('#ered').css('color', 'green');
+                }
+                else if (idudn == 8) {
+                    $('#esis').css('color', 'green');
+                }
+
+                $('#eout').on('click', function () { CargarTabla(edo,1); });
+                $('#eser').on('click', function () { CargarTabla(edo,2); });
+                $('#esol').on('click', function () { CargarTabla(edo,3); });
+                $('#eval').on('click', function () { CargarTabla(edo,4); });
+                $('#ecom').on('click', function () { CargarTabla(edo,6); });
+                $('#ered').on('click', function () { CargarTabla(edo,7); });
+                $('#esis').on('click', function () { CargarTabla(edo,8); });
+
+                //verEstadosEnElMes(1);
+
+            },
+            error: function (errormessage) {
+
+            }
+        });
+    }
+
+    function verEstadosEnElMes(idudn) {
+        $('#edosacum').hide();
+        $('#edosmes').show();
+        $.ajax({
+            url: "/Oportunidades/SeleccionMedidoresEstadosEnElMes",
+            data: { idudn: idudn },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+
+                var valormaximo = 50;
+                var radio = 25;
+                var ancho = 6;
+
+                Circles.create({
+                    id: 'circlesH',
+                    radius: radio,
+                    value: data[0].enproceso,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF0C39'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //en proceso
+
+                Circles.create({
+                    id: 'circlesI',
+                    radius: radio,
+                    value: data[0].cerradoganado,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#98FF96'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cerrados perdidos
+
+                Circles.create({
+                    id: 'circlesJ',
+                    radius: radio,
+                    value: data[0].cerradoperdido,
+                    maxValue: valormaximo,
+                    width: ancho,
+                    colors: ['#f1f1f1', '#FF8288'],
+                    duration: 200,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                }); //cerrados ganados
+
+                $('#IdUDN').val(idudn);
+
+                $('#eout').css('color', 'blue').val('');
+                $('#eser').css('color', 'blue').val('');
+                $('#esol').css('color', 'blue').val('');
+                $('#eval').css('color', 'blue').val('');
+                $('#ecom').css('color', 'blue').val('');
+                $('#ered').css('color', 'blue').val('');
+                $('#esis').css('color', 'blue').val('');
+
+                if (idudn == 1) {
+                    $('#eout').css('color', 'green');
+                }
+                else if (idudn == 2) {
+                    $('#eser').css('color', 'green');
+                }
+                else if (idudn == 3) {
+                    $('#esol').css('color', 'green');
+                }
+                else if (idudn == 4) {
+                    $('#eval').css('color', 'green');
+                }
+                else if (idudn == 6) {
+                    $('#ecom').css('color', 'green');
+                }
+                else if (idudn == 7) {
+                    $('#ered').css('color', 'green');
+                }
+                else if (idudn == 8) {
+                    $('#esis').css('color', 'green');
+                }
+
+                $('#eenproceso').css('color', 'blue');
+                $('#ecerradosganados').css('color', 'blue');
+                $('#ecerradosperdidos').css('color', 'blue');
+
+                $('#eenproceso').css('color', 'green');
+
+                $('#eenproceso').on('click', function () { CargarTabla(1); });
+                $('#ecerradosganados').on('click', function () { CargarTabla(4); });
+                $('#ecerradosperdidos').on('click', function () { CargarTabla(3); });
+
+            },
+            error: function (errormessage) {
+
+            }
+        });
+    }
+
+    //Tabla con resultados
+    function CargarTabla(opc,idudn) {
+
+        var obtenido = $('#Acum').val();
+
+        if (obtenido == 1) {
+            $.ajax({
+                type: 'GET',
+                url: "/Home/Proyectos",
+                data: { ed: opc, idudn: idudn },
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+
+                    //$('#aenproceso').css('color', 'blue');
+                    //$('#acerradosganados').css('color', 'blue');
+                    //$('#acerradosperdidos').css('color', 'blue');
+
+                    //if (opc == 1) {
+                    //    $('#aenproceso').css('color', 'green');
+                    //}
+                    //else if (opc == 4) {
+                    //    $('#acerradosganados').css('color', 'green');
+                    //}
+                    //else if (opc == 3) {
+                    //    $('#acerradosperdidos').css('color', 'green');
+                    //}
+
+                    if (typeof data[0] === 'undefined') {
+                        $('#proyectos').dataTable().fnClearTable();
+                    }
+                    else {
+                        $('#proyectos').DataTable().clear();
+                        for (var i = 0; i < data.length + 1; i++) {
+                            var fecha = new Date(parseInt(data[i].Oportunidades.Fecha.substr(6)));
+                            var cierre = new Date(parseInt(data[i].Oportunidades.Cierre.substr(6)));
+
+                            $('#proyectos').dataTable().fnAddData([
+                                data[i].UDN.Nombre,
+                                data[i].Empresas.Nombre,
+                                '<a href=/Oportunidades/Editar?Id=' + data[i].Oportunidades.Id + '>' + data[i].Oportunidades.Nombre + '</a>',
+                                data[i].Oportunidades.Importe,
+                                data[i].Clasificacion.Nombre,
+                                data[i].Subclasificacion.Nombre,
+                                data[i].Usuarios.Nombre,
+                                fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                                cierre.getDate() + '/' + (cierre.getMonth() + 1) + '/' + cierre.getFullYear(),
+                                EstadosOportunidades(data[i].Oportunidades.Id,data[i].Actividades.Nombre)
+                            ]);
+                        }
+                    }
+                },
+                error: function (data) {
+                },
+            });
+        }
+        else if (obtenido == 2) {
+            $.ajax({
+                type: 'GET',
+                url: "/Home/ProyectosEnElMesEnCurso",
+                data: { ed: opc, idudn: idudn },
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (data) {
+
+                    if (typeof data[0] === 'undefined') {
+                        $('#proyectos').dataTable().fnClearTable();
+                    }
+                    else {
+                        $('#proyectos').DataTable().clear();
+                        for (var i = 0; i < data.length + 1; i++) {
+                            var fecha = new Date(parseInt(data[i].Oportunidades.Fecha.substr(6)));
+                            var cierre = new Date(parseInt(data[i].Oportunidades.Cierre.substr(6)));
+                            
+                            $('#proyectos').dataTable().fnAddData([
+                                data[i].UDN.Nombre,
+                                data[i].Empresas.Nombre,
+                                '<a href=/Oportunidades/Editar?Id=' + data[i].Oportunidades.Id + '>' + data[i].Oportunidades.Nombre + '</a>',
+                                data[i].Oportunidades.Importe,
+                                data[i].Clasificacion.Nombre,
+                                data[i].Subclasificacion.Nombre,
+                                data[i].Usuarios.Nombre,
+                                fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                                cierre.getDate() + '/' + (cierre.getMonth() + 1) + '/' + cierre.getFullYear(),
+                                EstadosOportunidades(data[i].Oportunidades.Id,data[i].Actividades.Nombre) 
+                            ]);
+                        }
+                    }
+                },
+                error: function (data) {
+                },
+            });
+        }
+    }
+
+    function EstadosOportunidades(id,estado) {
+        var proceso = "";
+        if (estado == 'EnProceso1') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="fas fa-cogs" style="color: lightblue" data-toggle="tooltip" data-placement="left" title="En Proceso"></i></a>';
+        }
+        else if (estado == 'EnProceso2') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="fas fa-flag" style="color: yellow" data-toggle="tooltip" data-placement="left" title="Alerta"></i></a>';
+        }
+        else if (estado == 'EnProceso3') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="fas fa-flag" style="color: orange" data-toggle="tooltip" data-placement="left" title="Por Vencer"></i></a>';
+        }
+        else if (estado == 'EnProceso4') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="fas fa-flag" style="color: red" data-toggle="tooltip" data-placement="left" title="Vencido"></i></a>';
+        }
+        else if (estado == 'CerradoGanado') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="far fa-handshake" style="color: green" data-toggle="tooltip" data-placement="left" title="Cerrado Ganado"></i></a>';
+        }
+        else if (estado == 'CerradoPerdido') {
+            proceso = '<a href=/Oportunidades/Editar?Id=' + id + '><i class="far fa-sad-tear" style="color: red" data-toggle="tooltip" data-placement="left" title="Cerrado Perdido"></i></a>';
+        }
+        return proceso;
+    }
+
+
+</script>
+
+<input type="hidden" id="IdUDN" />
+<input type="hidden" id="Acum" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Medidores de Proyectos e Importes (Acumulado y en el Mes)</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-md-12 text-center">Unidad de Negocio</div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4"></div>
+
+                        <div id="udnsacumulado" class="col-md-6 form-inline text-center">
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles01"></div>
+                                    <center><a id="uout" href="#" class="text-small">Serv. Esp.</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles02"></div>
+                                    <center><a id="user" href="#" class="text-small">Serv. Mtto.</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles03"></div>
+                                    <center><a id="usol" href="#" class="text-small">Sol. Emp.</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles04"></div>
+                                    <center><a id="uval" href="#" class="text-small">Tecnología</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles05"></div>
+                                    <center><a id="ucom" href="#" class="text-small">Comisionistas</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round" style="margin-right: 10px">
+                                <div class="body">
+                                    <div id="circles06"></div>
+                                    <center><a id="ured" href="#" class="text-small">Redes Sociales</a></center>
+                                </div>
+                            </div>
+
+                            <div class="card card-round">
+                                <div class="body">
+                                    <div id="circles07"></div>
+                                    <center><a id="usis" href="#" class="text-small">Sistemas</a></center>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="udnsenelmes" class="col-md-6 form-inline text-center" style="display: block;">
+
+                            <table>
+                                <tr>
+                                    <td>
+                                    <div class="card card-round" style="margin-right: 10px">
+                                        <div class="body">
+                                            <div id="circlesA"></div>
+                                            <center><a id="eout" href="#" class="text-small">Serv. Esp.</a></center>
+                                        </div>
+                                    </div>
+                                    </td>
+                                    <td>
+                                        <div class="card card-round" style="margin-right: 10px">
+                                            <div class="body">
+                                                <div id="circlesB"></div>
+                                                <center><a id="eser" href="#" class="text-small">Serv. Mtto.</a></center>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+
+                                        <div class="card card-round" style="margin-right: 10px">
+                                            <div class="body">
+                                                <div id="circlesC"></div>
+                                                <center><a id="esol" href="#" class="text-small">Sol. Emp.</a></center>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+
+                                        <div class="card card-round" style="margin-right: 10px">
+                                            <div class="body">
+                                                <div id="circlesD"></div>
+                                                <center><a id="eval" href="#" class="text-small">Tecnología</a></center>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="card card-round" style="margin-right: 10px">
+                                            <div class="body">
+                                                <div id="circlesE"></div>
+                                                <center><a id="ecom" href="#" class="text-small">Comisionistas</a></center>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="card card-round" style="margin-right: 10px">
+                                            <div class="body">
+                                                <div id="circlesF"></div>
+                                                <center><a id="ered" href="#" class="text-small">Redes Sociales</a></center>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="card card-round">
+                                            <div class="body">
+                                                <div id="circlesG"></div>
+                                                <center><a id="esis" href="#" class="text-small">Sistemas</a></center>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <h3>Oportunidades Creadas</h3>
+                        <table id="proyectos" class="display compact table-bordered table-striped table-hover" style="width:100%;">
+
+                            <thead class="header">
+                                <tr>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Médico</th>
+                                    <th>Oportunidad</th>
+                                    <th>Monto</th>
+                                    <th>Clasificación</th>
+                                    <th>SubClasificación</th>
+                                    <th>Creador</th>
+                                    <th>Creado</th>
+                                    <th>Cierre</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Dé click en el icono para ver el detalle">Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td align="right">Total:</td>
+                                    <td style="font-weight: bold"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+

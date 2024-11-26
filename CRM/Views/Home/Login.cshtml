@@ -1,0 +1,55 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<script src="../assets/js/CRM.js"></script>
+
+@*@CRM.Utilerias.Cifrado.Desencriptar("50bteRavVKR5ykS8I3Gh1Q==");*@
+
+<form method="post" action="/Home/Login">
+    <div class="wrapper wrapper-login">
+        <div class="container container-login animated fadeIn">
+            <h2 class="text-center fw-bold" >CRMedic</h2>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="clave" class="placeholder"><b>Clave o Correo</b></label>
+                    <input id="clave" name="clave" type="text" class="form-control" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="contraseña" class="placeholder"><b>Contraseña</b></label>
+
+                    <div class="position-relative">
+                        <input id="contraseña" name="contraseña" type="password" class="form-control" required>
+                        <div class="show-password">
+                            <i class="icon-eye"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary col-md-5 float-right mt-3 mt-sm-0 fw-bold">Acceder</button>
+                    <br><br><br><a href="/Home/RecuperarContraseña" class="link float-right">Recuperar mi contraseña</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+
+    window.onload = function () {
+        document.getElementById("clave").focus();
+    }; 
+
+    $(function () {
+        var msg = '@ViewData["Mensaje"]';
+        if (msg == 'Falso') {
+            Mensajes('Atención', 'El usuario no existe, tecleó mal la clave o la contraseña ó está bloqueado', 3);
+            
+        }
+        else {
+
+        }
+    });
+</script>

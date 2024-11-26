@@ -1,0 +1,143 @@
+﻿
+@{
+    ViewBag.Title = "Correo";
+}
+<!--link href="../assets/css/summernote.css" rel="stylesheet" /-->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+<!-- include plugin -->
+<script src="[folder where script is located]/[plugin script].js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+    });
+
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Preparar Correo a Enviar</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    <p><a href="/Marketing/Index">Campañas</a> | <a href="/Marketing/Alta">Agregar Campaña</a></p>
+
+                    <form method="post" action="/Marketing/Correo">
+                        <input type="hidden" name="IdCampaña" value="@Session["IdCampaña"]" />
+
+                        <div class="mail-wrapper bg-white" style="width:100%">
+                            <div class="page-content mail-content">
+                                <div class="email-head d-lg-flex d-block">
+                                    <h3>
+                                        <i class="fas fa-pen mr-1"></i>
+                                        Crear un nuevo mensaje
+                                    </h3>
+                                </div>
+                                <div class="email-compose-fields">
+                                    <div class="form-group row">
+                                        <label for="asunto" class="col-form-label col-md-1">Asunto</label>
+                                        <div class="col-md-11">
+                                            <input type="text" class="form-control" id="asunto" name="asunto" placeholder="Agregue el asunto" value="Asunto" required />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-secondary" role="alert">
+                                    Si el correo será personalizado agregue [nombre]
+                                </div>
+                                <div class="alert alert-secondary" role="alert">
+                                    Agregue la siguiente liga para que el contacto agende el evento en su calendario<br />
+                                    @CRM.Utilerias.CustomHelpers.CadenaAgenda(Request["IdCampaña"].ToString())
+                                </div>
+
+                                <div class="alert alert-secondary" role="alert">
+                                    <a href="#" data-toggle="modal" data-target="#ModalPlantillas">Plantillas de correo</a>
+                                </div>
+
+
+                                <div class="email-editor">
+                                    <textarea name="contenido" id="editor" placeholder="Cuerpo del correo" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-action label-align-center">
+                            <button name="Boton1" type="submit" class="btn btn-success">Terminar</button>
+                            &nbsp;
+                            <button name="Boton2" type="submit" class="btn btn-primary">Guardar e ir a hacer Pruebas</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalPlantillas" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1">Plantillas de Correo</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <p>Seleccione el texto de la plantilla deseada colocando el cursor en la casilla, dé click.</p>
+                        <p>Presione las teclas Control + A para seleccionar el contenido.</p>
+                        <p>Presione Control + C para seleccionarlo.</p>
+                        <p>Cierre la ventana y en la casilla de edición, presione el botón <code>&lt;/&gt;</code> para entrar en modo texto, pegue ahí el código copiado presionando Control + V.</p>
+                        <p>Vuelva a presionar el botón <code>&lt;/&gt;</code> para salir del modo texto y continuar en modo gráfico para editar el correo.</p>
+                    </div>
+
+                    @CRM.Utilerias.CustomHelpers.ContenidoPlantillas()
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+<script src="../assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+<script src="../assets/js/plugin/bootstrap-toogle/bootstrap-toggle.min.js"></script>
+
+<script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script src="../assets/js/plugin/summernote/summernote-bs4.min.js"></script>
+<script src="../assets/js/plugin/summernote/summernote-es.js"></script>
+<script>
+    $('#editor').summernote({
+        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Helvetica', 'Times new Roman'],
+        tabsize: 2,
+        height: 300,
+        lang: 'es-ES',
+    });
+</script>

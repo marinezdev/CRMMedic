@@ -1,0 +1,638 @@
+﻿
+@{
+    ViewBag.Title = "Alta";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#opcOport').addClass("nav-item active submenu");
+        //$('#oport').addClass("collapse show");
+        //$('#sopcOport').addClass("active");
+
+        var now = new Date();
+
+        var dia = ("0" + now.getDate()).slice(-2);
+        var mes = ("0" + (now.getMonth() + 1)).slice(-2);
+
+        var hoy = (dia) + "/" + (mes) + "/" + now.getFullYear();
+        //console.log(hoy);
+        $('#Cierre').val(hoy);
+    });
+
+    function EmpresaSeleccionada() {
+        var valor = $('#Empresa').val();
+        //Obtener los contactos que pertenecen a esta empresa y llenar el select correspondiente
+        $.ajax({
+            url: "/Contactos/SeleccionarContactosPorEmpresa/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+                console.log(data);
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function Guardar() {
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/Agregar/",
+            data: {
+                Nombre: $('#Nombre').val(),
+                //Importe: $('#Importe').val(),
+                Cierre: $('#Cierre').val(),
+                //Asignado: $('#Asignado').val(),
+                //Avance: $('#Avance').val(),
+                Notas: $('#Notas').val(),
+                IdClasificacion: $('#Clasificacion').val(),
+                IdSubclasificacion: $('#SubClasificacion').val(),
+                PeriodoAtencion: $('#PeriodoAtencion').val(),
+                //Aviso: $('#Aviso').val(),
+                //Estado: $('#Estado').val(),
+                Contraparte: $('#Contraparte').val(),
+                Caracteristicas: $('#Caracteristicas').val(),
+                IdUDN: $('#UDN').val(),
+                Empresa: $('#Empresa').val(),
+                IdUsuario: $('#IdUsuario').val(),
+                idconfiguracion: $('#IdConfiguracion').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                /*
+                if (data.length > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '/Oportunidades/Index';
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'No se guardó el registro, revise sus datos',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }
+                */
+
+                swal({
+                    title: 'Los datos se han guardado exitosamente',
+                    text: "¿Desea agregar los Responsables?",
+                    type: 'warning',
+                    buttons: {
+                        confirm: {
+                            text: 'Si, ir a agregarlos!',
+                            className: 'btn btn-success'
+                        },
+                        cancel: {
+                            visible: true,
+                            className: 'btn btn-warning',
+                            text: 'Agregarlos después'
+                        }
+                    }
+                }).then((Delete) => {
+                    if (Delete) {
+                        location.href = '/Oportunidades/Responsables?Id=' + data;
+                    } else {
+                        swal.close();
+                        location.href = '/Oportunidades/Index';
+                    }
+                });
+
+
+
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#Clasificacion').val();
+        //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+        $.ajax({
+            url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#SubClasificacion').empty();
+                $('#SubClasificacion').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                if (mensajesErrorActivados) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha habido un error al intentar procesar los datos (Clasificacion Seleccionada)',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function AgregarClasSubClass() {
+        $('#ModalClassSubclass').modal('show');
+    }
+
+    function AgregarClasificacion() {
+        //alert($('#aNombreClas').val() + ' ' + $('#IdConfiguracion').val());
+        $.ajax({
+            url: "/Administracion/AgregarClasificacion/",
+            data: { nombre: $('#aNombreClas').val(), empresa: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //location.reload();
+                            CargarClasificacion($('#IdConfiguracion').val());
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function AgregarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/AgregarSubClasificacion/",
+            data: { nombre: $('#aNombreSubClas').val(), clasificacion: $('#aClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            $('#aNombreClass').val('');
+                            $('#aNombreSubClass').val('');
+                            ClasificacionSeleccionada();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function CargarClasificacion(id) {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarClasificacionPorIdConfiguracion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#Clasificacion').empty();
+                $('#Clasificacion').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#Clasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM',
+                    text: 'Error, ha habido un error al intentar procesar los datos: ' + errormessage.text,
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#Clasificacion').val();
+        //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+        $.ajax({
+            url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#SubClasificacion').empty();
+                $('#SubClasificacion').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                if (mensajesErrorActivados) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha habido un error al intentar procesar los datos (Clasificacion Seleccionada)',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    //Elementos del formulario
+
+    function Grande(element) {
+        $(element).animate({
+            zIndex: 10002,
+            width: '250px',
+            height: '20px'
+        });
+    }
+
+    function GrandeAmplio(element) {
+        $(element).animate({
+            zIndex: 10100,
+            width: '240px',
+            height: '340px'
+        });
+    }
+
+    function Normal(element) {
+        $(element).animate({
+            width: '175px',
+            height: '20px'
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Usuarios.Id)" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Crear @CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "S")</h4>
+    </div>
+    <div class="row">
+
+        <div id="Espera" style="display:none; width:69px;height:90px;position:absolute;top:20%;left:50%;padding:2px;z-index:1000">
+            <img src="../assets/img/spinner.gif" width="64" height="64" /><br />Cargando...
+        </div>
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Ingrese en los campos</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">&nbsp;</div>
+                        <div class="col-md-6 col-lg-8">
+                            <center>
+                                @if (Session["IdRol"].ToString() == "2" || Session["IdRol"].ToString() == "3")
+                                {
+                                    <a href="#" onclick="AgregarClasSubClass();">Agregar más Clasificaciones/SubClasificaciones</a>
+                                }
+                            </center>
+                        </div>
+
+                    </div>
+
+
+                    <div id="Formulario" class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                @CRM.Utilerias.CustomHelpers.EtiquetaNombre(Session["IdConfiguracion"].ToString())
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="" required tabindex="1" onfocus="Grande(this);" onblur="Normal(this);" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="Caracteristicas" class="col-md-4 col-form-label">Características:</label>
+                                <div class="col-md-8 p-0">
+                                    <!--input type="text" class="form-control form-control-sm input-solid" id="Caracteristicas" name="Caracteristicas" required placeholder="" tabindex="4" onfocus="GrandeAmplio(this);" onblur="Normal(this);"-->
+                                    <textarea rows="1" cols="18" class="form-control form-control-sm input-solid" id="Caracteristicas" name="Caracteristicas" tabindex="4" onfocus="GrandeAmplio(this);" onblur="Normal(this);" autocomplete="off"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Vencimiento:</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Cierre" name="Cierre" required tabindex="7">
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Empresa" class="col-md-4 col-form-label">Médico:</label>
+                                <div class="col-md-8 p-0">
+
+                                    @CRM.Utilerias.CustomHelpers.SelectEmpresas(Session["IdConfiguracion"].ToString(), Session["IdRol"].ToString(), Session["IdUsuario"].ToString())
+
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="Clasificacion" class="col-md-4 col-form-label">Clasificación:</label>
+                                <div class="col-md-8 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Clasificacion" name="Clasificacion" style="width: 180px" required tabindex="5" onchange="ClasificacionSeleccionada();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!--div class="form-group form-inline">
+                                <label for="Aviso" class="col-md-4 col-form-label">Aviso:</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="date" class="form-control form-control-sm input-solid" id="Aviso" name="Aviso" required placeholder="" tabindex="8" onblur="ValidaFechaAviso();">
+                                </div>
+                            </div--->
+
+
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Contraparte" class="col-md-5 col-form-label">Contraparte:</label>
+                                <div class="col-md-7 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Contraparte" name="Contraparte" required placeholder="" tabindex="3" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="SubClasificacion" class="col-md-5 col-form-label">Sub-Clasificación:</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="SubClasificacion" name="SubClasificacion" required tabindex="6" style="width: 180px" onchange="SubClasificacionSeleccionada();"></select> <!-- onchange=SubClasificacionSeleccionada();-->
+                                </div>
+                            </div>
+
+                            <!--div class="form-group form-inline">
+                                <label for="Escalacion" class="col-md-4 col-form-label">Escalación:</label>
+                                <div class="col-md-6">
+                                    <input type="date" class="form-control form-control-sm input-solid" id="Escalacion" name="Escalacion" placeholder="" tabindex="9" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <a href="#" class="far fa-calendar-alt" onclick="MostrarEscalacion();" data-toggle="tooltip" data-placement="right" title="Dé click para agregar una nueva fecha de Escalación y ver las que ya se hayan dado de alta"></a>
+                                </div>
+                            </div-->
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="card-action label-align-center">
+
+                        <button id="BtnGuardar" class="btn btn-success animated bounceInDown" onclick="Guardar();">Guardar Nuevo</button>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalClassSubclass" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Clasificaciones/SubClasificaciones</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Clasificaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">SubClasificaciones</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreClas" id="aNombreClas" placeholder="" required>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarClasificacion();">Aceptar</button>
+
+
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-3 col-form-label fc-left">Clasificación</label>
+                                <div class="col-md-9 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="aClasificacion" name="aClasificacion" style="width: 180px" required>
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion2)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreSubClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreSubClas" id="aNombreSubClas" placeholder="" required>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarSubClasificacion();">Aceptar</button>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+<script>
+
+    $('#Cierre').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

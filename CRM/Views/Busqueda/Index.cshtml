@@ -1,0 +1,224 @@
+﻿@model IEnumerable<CRM.Models.Models.ContactosBuscar>
+@{
+    ViewBag.Title = "Index";
+ }
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover();
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    function ModalDetalle(eid) {
+        //alert('El registro de lque se verá el detalle es el : ' + eid)
+        $.ajax({
+            url: "/Contactos/SeleccionarDetalleContactoEmpresaPorId/" + eid
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+                console.log(data);
+                $('#ModalDetalle').modal('show');
+                $('#mContacto').text(data.Contactos.Nombre);
+                $('#mCargo').text(data.Contactos.Cargo);
+                $('#mCorreo').text(data.Contactos.Correo);
+                $('#mTelefono').text(data.Contactos.Telefono);
+                $('#mCelular').text(data.Contactos.Celular);
+                $('#mCiudad').text(data.Contactos.Ciudad);
+                $('#mNotas').text(data.Contactos.Notas);
+                $('#mEmpresa').text(data.Empresas.Nombre);
+                $('#mEmpresaCorreo').text(data.Empresas.Correo);
+                $('#mEmpresaTelefono').text(data.Empresas.Telefono);
+                $('#mEmpresaPaginaWeb').text(data.Empresas.PaginaWeb);
+                $('#mEmpresaDireccion').text(data.Empresas.Direccion);
+                $('#mEmpresaCiudad').text(data.Empresas.Ciudad);
+                $('#mEmpresaEstado').text(data.Empresas.Estado);
+                if (data.Empresas.Prospecto) {                          // Para un checkbox
+                    $("#mProspecto").prop('checked', true);
+                }
+                else {
+                    $("#mProspecto").prop('checked', false);
+                }
+                if (data.Empresas.Cliente) {                          // Para un checkbox
+                    $("#mCliente").prop('checked', true);
+                }
+                else {
+                    $("#mCliente").prop('checked', false);
+                }
+                if (data.Empresas.Competidor) {                          // Para un checkbox
+                    $("#mCompetidor").prop('checked', true);
+                }
+                else {
+                    $("#mCompetidor").prop('checked', false);
+                }
+                $('#mSector').text(data.Empresas.Sector);
+
+                $('#BtnEdicionContacto').click(function () {
+                    window.location.href = '/Contactos/Editar?Id=' + data.Contactos.Id;
+                });
+                $('#TareaContacto').click(function () {
+                    window.location.href = '/Tareas/Index?IdContacto=' + data.Contactos.Id;
+                });
+                $('#TareaEmpresa').click(function () {
+                    window.location.href = '/Tareas/Index?IdEmpresa=' + data.Empresas.Id;
+                });
+                $('#BtnEdicionEmpresa').click(function () {
+                    window.location.href = '/Empresas/Editar?Id=' + data.Empresas.Id;
+                });
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+
+        return false;        
+    }
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Búsqueda General</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="table-responsive">
+                    <table id="basic-datatables" class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Contacto</th>
+                                <th>Empresa</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
+                                <th>Celular</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (ViewBag.Encontrado == null)
+                            {
+                                return;
+                            }
+                            @foreach (var items in ViewBag.Encontrado)
+                            {
+                                <tr data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Da click para ver el detalle">
+                                    <td>@items.Contactos.Nombre</td>
+                                    <td>@items.Empresas.Nombre</td>
+                                    <td>@items.Contactos.Correo</td>
+                                    <td>@items.Contactos.Telefono</td>
+                                    <td>@items.Contactos.Celular</td>
+                                    <td><a href="#" onclick="ModalDetalle(@items.Contactos.Id);">Detalle</a></td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalDetalle" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Detalle de Contacto/Empresa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="card card-profile">
+                    <div class="card-body">
+
+                        <div class="row col-md-12">
+                            <div class="col-md-6">
+
+                                <div class="email-list-detail text-left fas fa-calendar-check" id="TareaContacto" data-toggle="tooltip" title="Agregar una tarea para este contacto"></div>
+                                <div class="user-profile text-center">
+                                    <div class="name"><span id="mContacto"></span></div>
+                                    <div class="job"><span id="mCargo"></span></div>
+                                    <div class="email-list-detail text-left">Correo:&nbsp;<span id="mCorreo"></span></div>
+                                    <div class="email-list-detail text-left">Teléfono:&nbsp;<span id="mTelefono"></span></div>
+                                    <div class="email-list-detail text-left">Celular:&nbsp;<span id="mCelular"></span></div>
+                                    <div class="email-list-detail text-left">Ciudad:&nbsp;<span id="mCiudad"></span></div>
+                                    <div class="email-list-detail text-left">Notas:&nbsp;<span id="mNotas"></span></div>
+
+                                    <div class="email-list-detail text-left">&nbsp;</div>
+                                    <div class="email-list-detail text-left">&nbsp;</div>
+                                    <div class="email-list-detail text-left">&nbsp;</div>
+
+                                    <div class="view-profile">
+                                        <button class="btn btn-secondary btn-block" id="BtnEdicionContacto">Editar Contacto</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6">
+
+                                <div id="TareaEmpresa" class="fas fa-calendar-check text-right" data-toggle="tooltip" title="Agregar una tarea para esta empresa"></div>
+                                <div class="user-profile text-center">
+                                    <div class="name"><span id="mEmpresa"></span></div>
+                                    <div class="email-list-detail text-left">Correo:&nbsp;<span id="mEmpresaCorreo"></span></div>
+                                    <div class="email-list-detail text-left">Teléfono:&nbsp;<span id="mEmpresaTelefono"></span></div>
+                                    <div class="email-list-detail text-left">Página Web:&nbsp;<span id="mEmpresaPaginaweb"></span></div>
+                                    <div class="email-list-detail text-left">Dirección:&nbsp;<span id="mEmpresaDireccion"></span></div>
+                                    <div class="email-list-detail text-left">Ciudad:&nbsp;<span id="mEmpresaCiudad"></span></div>
+                                    <div class="email-list-detail text-left">Estado:&nbsp;<span id="mEmpresaEstado"></span></div>
+
+                                    <div class="row user-stats text-center">
+                                        <div class="col">
+                                            <div class="number">Prospecto</div>
+                                            <div class="title"><input type="checkbox" id="mProspecto" /></div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="number">Cliente</div>
+                                            <div class="title"><input type="checkbox" id="mCliente" /></div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="number">Competidor</div>
+                                            <div class="title"><input type="checkbox" id="mCompetidor" /></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="email-list-detail text-left">Sector:&nbsp;<span id="mSector"></span></div>
+
+                                    
+                                    <div class="view-profile">
+                                        <button class="btn btn-secondary btn-block" id="BtnEdicionEmpresa">Editar Empresa</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

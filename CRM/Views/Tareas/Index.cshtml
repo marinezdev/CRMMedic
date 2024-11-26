@@ -1,0 +1,266 @@
+﻿
+@{
+    ViewBag.Title = "Tareas";
+}
+
+
+<script>
+    $(document).ready(function () {
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        //$('#IdContacto').val(obtenerParametrodeURL('IdContacto'));
+        $('#IdEmpresa').val(obtenerParametrodeURL('IdEmpresa'));
+
+        $('#opcTareas').addClass("nav-item active submenu");
+        $('#opTareas').addClass("collapse show");
+        $('#sopcTareas').addClass("active");
+    });
+
+    function AgregarActividad() {
+        //alert(valor);
+        $.ajax({
+            url: "/Actividades/AgregarActividad/"
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json"
+            , data: { eNombre: $("#eNombre").val() },
+            success: function (data) {
+                $('#Actividad').empty();
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    $('#Actividad').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Tareas</h4>
+    </div>
+    <div class="row">
+
+
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <form method="post" action="Agregar">
+                    <div class="card-body">
+
+                        <div class="separator">
+                            <label><b>Nuevo Tema</b></label>
+                            <p>&nbsp;</p>
+                        </div>
+
+
+                        <div class="row">
+
+                            <input type="hidden" id="IdContacto" name="IdContacto" value="@Session["IdUsuario"].ToString()" />
+                            <input type="hidden" id="IdEmpresa" name="IdEmpresa" />
+
+
+                            <div class="col-md-6 col-lg-5">
+
+                                <div class="form-group form-inline">
+                                    <label for="Asunto" class="col-md-3 col-form-label">Asunto</label>
+                                    <div class="col-md-9 p-0">
+                                        <input type="text" class="form-control input-solid" name="Asunto" placeholder="Qué se hará en esta tarea" required tabindex="1">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Responsable" class="col-md-3 col-form-label">Responsable</label>
+                                    <div class="col-md-9 p-0">
+                                        <!--input type="text" class="form-control input-full" name="Responsable" placeholder="" required tabindex="3"-->
+                                        <select class="form-control input-solid" name="Responsable" required style="width: 250px" tabindex="3">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (var itm in ViewBag.Usuarios)
+                                            {
+                                                <option value="@itm.Usuarios.Id">@itm.Usuarios.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="FechaInicio" class="col-md-3 col-form-label">Inicio</label>
+                                    <div class="col-md-5 p-0">
+                                        <input type="date" class="form-control  input-solid" name="FechaInicio" required tabindex="5">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="FechaFin" class="col-md-3 col-form-label">Fin</label>
+                                    <div class="col-md-5 p-0">
+                                        <input type="date" class="form-control  input-solid" name="FechaFin" required tabindex="7">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Actividad" class="col-md-3 col-form-label">Actividad</label>
+                                    <select class="form-control input-solid" id="Actividad" name="Actividad" required style="width: 250px" tabindex="9">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Actividades)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Prioridad" class="col-md-3 col-form-label">Prioridad</label>
+                                    <select class="form-control input-solid" id="Prioridad" name="Actividad" required style="width: 250px" tabindex="10">
+                                        <option value="">&nbsp;</option>
+                                        <option value="1">Baja</option>
+                                        <option value="2">Normal</option>
+                                        <option value="3">Alta</option>
+                                    </select>
+                                </div>
+
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-5">
+
+                                <div class="form-group form-inline">
+                                    <label for="Estado" class="col-md-3 col-form-label">Estado</label>
+                                    <select class="form-control input-solid" name="Estado" required style="width: 250px" tabindex="2">
+                                        <option value="">&nbsp;</option>
+                                        <option value="1">No Comenzada</option>
+                                        <option value="2">En Curso</option>
+                                        <option value="3">Completada</option>
+                                        <option value="4">En espera de respuesta</option>
+                                        <option value="5">Aplazada</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="Avance" class="col-md-3 col-form-label">Avance %</label>
+                                    <div class="col-md-3 p-0">
+                                        <input type="number" name="Avance" class="form-control input-solid" min="0" max="100" step="10" style="width:20px" tabindex="4">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="HoraInicio" class="col-md-5 col-form-label">Hora Inicio (hh:mm)</label>
+                                    <div class="col-md-4 p-0">
+                                        <input type="time" name="HoraInicio" class="form-control input-solid" style="width:20px" tabindex="6">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <label for="HoraFin" class="col-md-5 col-form-label">Hora Fin (hh:mm)</label>
+                                    <div class="col-md-4 p-0">
+                                        <input type="time" name="HoraFin" class="form-control input-solid" style="width:20px" tabindex="8">
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-inline">
+                                    <p></p>
+                                    <a href="#" class="nav-link" data-toggle="modal" data-target="#ModalActividadAgregar">Agregar Nueva Actividad</a>
+                                </div>
+
+
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+                                &nbsp;
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Notas">Notas</label>
+                                <textarea name="Notas" class="form-control input-solid" rows="5" cols="100" required tabindex="11"> 
+                            </textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-action label-align-center">
+                        <button type="submit" class="btn btn-primary" tabindex="11">Guardar</button>
+                    </div>
+                </form>
+
+                <script type="text/javascript">
+                    $(function () {
+                        var msg = '@ViewData["Mensaje"]';
+                        if (msg == 'Agregado') {
+                            Mensajes('Exitoso', 'Se guardó el nuevo registro', 2);
+                        }
+                        else if (msg == 'Modificado') {
+                            Mensajes('Exitoso', 'Se guardó el registro modificado', 2);
+                        }
+                        else if (msg == 'Falla') {
+                            Mensajes('Atención', 'No se guardaron los datos, revise su información', 4);
+                        }
+                        else {
+
+                        }
+                    });
+                </script>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalActividadAgregar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalLabel">Agregar una Nueva Actividad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="col-md-12">
+                        <label class="col-md-2">Nombre:</label>
+                        <div class="col-md-10">
+                            <input type="text" id="eNombre" name="eNombre" class="form-control" />
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="AgregarActividad();">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,429 @@
+﻿
+@{
+    ViewBag.Title = "Alta";
+}
+<link href="~/assets/js/plugin/datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+    });
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Alta de Nueva Campaña</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    <p> <a href="/Marketing/Index">Campañas</a></p>
+
+                    @Html.Raw(ViewData["Mensaje"])
+
+                    <form method="post" action="/Marketing/Alta">
+
+                        <div class="card">
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4"></div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" name="NuevaAnterior" value="1" checked="checked">
+                                                <span class="form-radio-sign">Nueva</span>
+                                            </label>
+                                            <label class="form-radio-label ml-3">
+                                                <input class="form-radio-input" type="radio" name="NuevaAnterior" value="2">
+                                                <span class="form-radio-sign">Anterior</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4"></div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Nombre" class="col-md-3 col-form-label">Clave Evento</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" name="Consecutivo" placeholder="Clave Única de Evento" required tabindex="1" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4"></div>
+
+                                <div class="col-md-4 col-lg-4"></div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Nombre" class="col-md-3 col-form-label">Nombre</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" name="Nombre" placeholder="" required tabindex="1" autocomplete="off" style="width: 450px">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Inicio" class="col-md-3 col-form-label">Inicio</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Inicio" name="Inicio" placeholder="" maxlength="12" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Fin" class="col-md-3 col-form-label">Fin</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Fin" name="Fin" placeholder="" maxlength="12" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Envios" class="col-md-3 col-form-label">Envío Correo</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <input type="text" class="form-control form-control-sm input-solid" id="Envios" name="Envios" placeholder="" maxlength="12" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Objetivo" class="col-md-3 col-form-label">Descripción</label>
+                                        <div class="col-md-9">
+                                            <textarea type="text" class="form-control form-control-sm input-solid" cols="92" rows="7" name="Objetivo"></textarea>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-2 col-lg-2">
+                                    <div class="form-group form-inline">
+                                        <label class="col-md-2 col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Medio</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-10 col-lg-10">
+
+                                    <div class="form-group form-inline text-left">
+
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="Correo" value="1" checked>
+                                                <span class="form-check-sign">Correo</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="Facebook" value="1">
+                                                <span class="form-check-sign">Facebook</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="Linkedin" value="1">
+                                                <span class="form-check-sign">Linkedin</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="Llamada" value="1">
+                                                <span class="form-check-sign">Llamada Telefónica</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" name="ASAE" value="1">
+                                                <span class="form-check-sign">Página ASAE</span>
+                                            </label>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Estado" class="col-md-3 col-form-label">Estado</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <select class="form-control form-control-sm input-solid" name="Estado" style="width: 180px">
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var itemss in CRM.Models.Catalogos.Seleccionar("MarketingEstado"))
+                                                {
+                                                    if (itemss.Id == 1)
+                                                    {
+                                                        <option value="@itemss.Id" selected>@itemss.Nombre</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@itemss.Id">@itemss.Nombre</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Estado" class="col-md-3 col-form-label">U. de N.</label>
+                                        <div class="col-md-9 col-lg-9">
+                                            <select class="form-control form-control-sm input-solid" name="UDN" style="width: 180px">
+                                                <option value="">&nbsp;</option>
+                                                @foreach (var itemsss in CRM.Models.Catalogos.Seleccionar("UDN"))
+                                                {
+                                                    <option value="@itemsss.Id">@itemsss.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-2 col-lg-2"></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="card">
+
+                            <div class="card-header">
+									<h4 class="card-title">Datos para la agenda del evento</h4>									
+								</div>
+                            <div class="card-body">
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="InicioEvento" class="col-md-3 col-form-label">Fecha Inicio</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="InicioEvento" name="InicioEvento" placeholder="" maxlength="12" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="HoraInicio" class="col-md-3 col-form-label">Hora Inicio</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="HoraInicio" name="HoraInicio" placeholder="" maxlength="12" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="FinEvento" class="col-md-3 col-form-label">Fecha Fin</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="FinEvento" name="FinEvento" placeholder="" maxlength="12" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="HoraFin" class="col-md-3 col-form-label">Hora Fin</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="HoraFin" name="HoraFin" placeholder="" maxlength="12" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-lg-4">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Ubicacion" class="col-md-3 col-form-label">Ubicación</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Ubicacion" name="Ubicacion" placeholder="CDMX" maxlength="12" autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-8 col-lg-8">
+
+                                        <div class="form-group form-inline">
+                                            <label for="Descripcion" class="col-md-3 col-form-label">Descripción (breve)</label>
+                                            <div class="col-md-9 col-lg-9">
+                                                <input type="text" class="form-control form-control-sm input-solid" id="Descripcion" name="Descripcion" placeholder="" maxlength="150" autocomplete="off" style="width:450px">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-8 col-lg-8">
+
+                                        <div class="form-group form-inline">
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="card-action label-align-center">
+                            <button type="submit" class="btn btn-success">Guardar y continuar con los contactos</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<!--script src="../assets/js/plugin/datetimepicker/moment.js"></script-->
+<!--script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script-->
+<script src="../assets/js/plugin/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+<script>
+
+    $.datetimepicker.setLocale('es');
+
+    $('#Inicio').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+    });
+
+    $('#Fin').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#Envios').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#InicioEvento').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#FinEvento').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+        formatDate: 'Y/m/d',
+    });
+
+    $('#HoraInicio').datetimepicker({
+        datepicker: false,
+        format: 'H:i',
+    });
+
+    $('#HoraFin').datetimepicker({
+        datepicker: false,
+        format: 'H:i',
+    });
+
+</script>

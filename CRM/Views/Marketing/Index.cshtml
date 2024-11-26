@@ -1,0 +1,105 @@
+﻿@model IEnumerable<CRM.Models.Models.Marketing>
+@{
+    ViewBag.Title = "Index";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+
+        $('#basic-datatables-').DataTable({
+            "autoWidth": false,
+            "bDestroy": true,
+            "colReorder": true,
+            "pageLength": 20,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "scrollX": true,
+            //"order": [[6, 7, "desc"]]
+        });
+
+    });
+
+
+</script>
+<style>
+    ligas {
+        color: white
+    }
+</style>
+
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Campañas</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+                    <p> <a href="/Marketing/Alta" class="btn btn-info">Agregar Campaña</a> <a href="#"></a></p>
+
+                    <div class="table-responsive">
+                        <h3>Campañas</h3>
+                        <table id="basic-datatables-" class="display compact table-bordered table-striped table-hover" style="width:100%;">
+
+                            <thead class="header">
+                                <tr>
+                                    <th class="text-center">Campaña</th>
+                                    <th class="text-center">Clave Evento</th>
+                                    <th class="text-center">Inicia</th>
+                                    <th class="text-center">Termina</th>
+                                    <th class="text-center">Envío Correo</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center"></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                @if (Model != null)
+                                {
+                                    foreach (var items in Model)
+                                    {
+                                        var inicial = items.Inicio.ToString().Contains("1900") ? "S/A" : items.Inicio.ToString("dd/MMM/yy");
+                                        var final = items.Fin.ToString().Contains("1900") ? "S/A" : items.Fin.ToString("dd/MMM/yy");
+                                        var enviados = items.Envios.ToString().Contains("1900") ? "S/A" : items.Envios.ToString("dd/MMM/yy");
+
+                                        <tr>
+                                            <td>@items.Nombre</td>
+                                            <td>@items.Consecutivo</td>
+                                            <td>@inicial</td>
+                                            <td>@final</td>
+                                            <td>@enviados</td>
+                                            <td>@CRM.Utilerias.CustomHelpers.EstadosMarketing(items.Estado.ToString())</td>
+                                            <td class="text-center"><a href="/Marketing/ModificarCampaña?IdCampaña=@items.Id" class="ligas"><h4><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='left' title='Ver toda la información de la campaña'></i></h4></a></td>
+                                            <td class="text-center"><a href="/Marketing/SeguimientoCampaña?IdCampaña=@items.Id">Seguimiento</a></td>
+                                        </tr>
+                                    }
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

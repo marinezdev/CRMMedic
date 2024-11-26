@@ -1,0 +1,363 @@
+﻿@model IEnumerable<CRM.Models.Models.DocumentosASAETipoArchivo>
+
+@{
+    ViewBag.Title = "Extensiones";
+}
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcTiArc').addClass("active");
+
+    });
+
+    function Nuevo() {
+        $('#ModalNuevo').modal('show');
+    }
+
+    function guardarNuevo() {
+        $.ajax({
+            url: "/Administracion/ExtensionesGuardarNuevo/",
+            data: { extensiones: $('#nExtensiones').val(), tamaño: $('#nTamaño').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el nuevo registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '/Administracion/Extensiones';
+                        }
+                    );
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Modificar(id) {
+        $('#ModalModificar').modal('show');
+        $.ajax({
+            url: "/Administracion/ExtensionesSeleccionarPorId/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $('#eExtensiones').val(data.Extensiones);
+                $('#eTamaño').val(data.TamMaxPermitido);
+                $('#ePermitir').val(data.Permitir);
+                if (data.Permitir == true) {
+                    $("#ePermitir").prop('checked', true);
+                };
+                $('#eIdExtension').val(data.Id);
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function guardarModificado() {
+        var valorActivo;
+        if ($('#ePermitir').is(":checked")) {
+            valorActivo = 1;
+        }
+        else {
+            valorActivo = 0;
+        }
+        $.ajax({
+            url: "/Administracion/ExtensionesGuardarModificado/",
+            data: {
+                extensiones: $('#eExtensiones').val(),
+                tamaño: $('#eTamaño').val(),
+                permitido: valorActivo,
+                id: $('#eIdExtension').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro modificado',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '/Administracion/Extensiones';
+                        }
+                    );
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+        
+    }
+
+</script>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Tipo de Archivo Permitidos para Subir (DocumentosASAE)</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+
+                <div class="card-body text-right">
+
+                    <a href="#" onclick="Nuevo();" class="btn btn-primary">Nuevo</a>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+
+                <div class="table-responsive">
+                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Extensiones</th>
+                                <th>Tamaño Máximo Permitido (1mb = 1000 kb)</th>
+                                <th>Permitido</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model == null)
+                            {
+                                <tr><td colspan="3">Sin datos para mostrar</td></tr>
+                            }
+                            @foreach (var it in Model)
+                            {
+                                <tr>
+                                    <td>@it.Extensiones</td>
+                                    <td>@it.TamMaxPermitido</td>
+                                    <td>@it.Permitir</td>
+                                    <td><a href="#" onclick="Modificar(@it.Id);">Modificar</a></td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+
+            </div>
+        </div>
+
+
+    </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Nueva Extensión para subir archivos</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="nExtensiones" class="col-md-9 col-form-label text-right">Extensiones</label>
+                                <div class="col-md-3 col-lg-3">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="nExtensiones" required />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="nTamaño" class="col-md-9 col-form-label">Tamaño Máximo Permitido en Mb (1Mb = 1000 Kb)</label>
+                                <div class="col-md-3 col-lg-3">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="nTamaño" required />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <div class="form-group form-inline text-left">
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" name="nPermitir" value="1" checked>
+                                            <span class="form-check-sign">Permitir</span>
+                                        </label>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="guardarNuevo();">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Nueva Extensión para subir archivos</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="eExtensiones" class="col-md-9 col-form-label">Extensiones</label>
+                                <div class="col-md-3 col-lg-3">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="eExtensiones" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="eTamaño" class="col-md-9 col-form-label">Tamaño Máximo Permitido en Mb (1Mb = 1000 Kb)</label>
+                                <div class="col-md-3 col-lg-3">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="eTamaño" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <div class="form-group form-inline text-left">
+
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" id="ePermitir" name="ePermitir" value="" />
+                                            <span class="form-check-sign">Permitir</span>
+                                        </label>
+                                    </div>
+                                
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="eIdExtension" value="" />
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="guardarModificado();">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

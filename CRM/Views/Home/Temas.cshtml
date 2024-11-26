@@ -1,0 +1,469 @@
+﻿
+@{
+    ViewBag.Title = "Temas";
+}
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "/Home/DatosTablas",
+            data: { idconfiguracion: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+
+                Circles.create({
+                    id: 'circles-1',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Contactos,
+                    colors: ['#f1f1f1', '#FF9E27'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-2',
+                    radius: 45,
+                    value: 10,
+                    maxValue: 1000,
+                    width: 7,
+                    text: data.Empresas,
+                    colors: ['#f1f1f1', '#2BB930'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-3',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Tareas,
+                    colors: ['#f1f1f1', '#F25961'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-4',
+                    radius: 45,
+                    value: 40,
+                    maxValue: 100,
+                    width: 7,
+                    text: data.Oportunidades,
+                    colors: ['#f1f1f1', '#F25400'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+                Circles.create({
+                    id: 'circles-5',
+                    radius: 45,
+                    value: 5,
+                    maxValue: 10,
+                    width: 7,
+                    text: data.Comerciales,
+                    colors: ['#f1f1f1', '#F37111'],
+                    duration: 400,
+                    wrpClass: 'circles-wrp',
+                    textClass: 'circles-text',
+                    styleWrapper: true,
+                    styleText: true
+                });
+
+            },
+            error: function (errormessage) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Ha habido un error al intentar procesar los datos',
+                    icon: 'error',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-error'
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    function SeleccionarActividadesPorIdOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        ActividadesContactos(id);
+        ActividadesUsuarios(id);
+    }
+
+    function SeleccionarActividadesDeOportunidad(id) {
+        $('#ModalActividadesOportunidad').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesACtividades/SeleccionarOportunidadesActividades/",
+            data: { Id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividadesoportunidad').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividadesoportunidad').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividadesoportunidad').dataTable().fnAddData([
+                            data[i].ActividadNombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                }
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function ActividadesContactos(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarResponsablesActividades/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].ContactosActividades.Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].Contactos.Nombre,
+                            //data[i].ContactosActividades.TipoActividadNombre,
+                            //fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].ContactosActividades.Notas
+                        ]);
+                    }
+                }
+
+                //if (data.length > 0) {
+                //    $('#basic-datatables-actividades').empty();
+                //    var firstRow = '<thead><tr><th>Responsable</th><th>Actividad</th><th>Fecha</th><th>Notas</th></tr></thead><tbody>';
+                //    $('#basic-datatables-actividades').append(firstRow);
+                //    for (var i = 0; i < data.length; i++) {
+                //        var fecha = new Date(parseInt(data[i].ContactosActividades.Fecha.substr(6)));
+                //        var row = '<tr>' +
+                //            '<td>' + data[i].Contactos.Nombre + '</td>' +
+                //            '<td>' + data[i].ContactosActividades.TipoActividadNombre + '</td>' +
+                //            '<td>' + fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + '</td>' +
+                //            '<td>' + data[i].ContactosActividades.Notas + '</td>' +
+                //            '</tr>';
+                //        $('#basic-datatables-actividades').append(row);
+                //    }
+                //    var lastRow = '</tbody></table>';
+                //    $('#basic-datatables-actividades').append(lastRow);
+                //}
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function ActividadesUsuarios(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/BitacoraUsuarioSeleccionarPorOportunidad/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividades-usuarios').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades-usuarios').DataTable().clear();
+                    for (var i = 0; i < data.length + 1; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades-usuarios').dataTable().fnAddData([
+                            data[i].Nombre,
+                            //data[i].TipoActividadNombre,
+                            //fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                }
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function UsuariosActividadesOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarActividadesPorIdOportunidad/",
+            data: { id: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[1] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].NombreUsuario,
+                            data[i].ActividadNombre,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function UsuariosBitacoraOportunidad(id) {
+        $('#ModalActividades').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/BitacoraUsuarioSeleccionarPorOportunidad/",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //console.log(data[0].NombreUsuario);
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-actividades').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-actividades').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                        $('#basic-datatables-actividades').dataTable().fnAddData([
+                            data[i].Responsable,
+                            data[i].TipoActividad,
+                            fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear(),
+                            data[i].Notas
+                        ]);
+                    }
+                    $('#idOport').val(id);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function IrAlDetalle() {
+        location.href = 'Edicion?Id=' + $('#idOport').val();
+    }
+</script>
+
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@((Session["GranSesion"] as CRM.Models.Models.UsuariosRoles).Configuracion.Id)" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title" id="Titulo">@CRM.Utilerias.Titulos.Oportunidades(Session["IdConfiguracion"].ToString(), "P") en Proceso</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="d-flex flex-wrap around col-md-6 ml-auto mr-auto">
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-2"></div>
+                <a href="/Home/TemasEmpresas">
+                    <h6 class="fw-bold mt-3 mb-0">Empresas</h6>
+                </a>
+            </div>
+
+            @*<div class="px-2 pb-2 pb-md-0 text-center">
+                    <div id="circles-1"></div>
+                    <a href="/Home/TemasContactos">
+                        <h6 class="fw-bold mt-3 mb-0">Contactos</h6>
+                    </a>
+                </div>*@
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-4"></div>
+                <a href="/Home/Temas">
+                    <h6 class="fw-bold mt-3 mb-0">Asuntos</h6>
+                </a>
+            </div>
+            <!--
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-3"></div>
+                <a href="?p=4">
+                    <h6 class="fw-bold mt-3 mb-0">Temas</h6>
+                </a>
+            </div>
+
+            <div class="px-2 pb-2 pb-md-0 text-center">
+                <div id="circles-5"></div>
+                <a href="?p=5">
+                    <h6 class="fw-bold mt-3 mb-0">Comerciales</h6>
+                </a>
+            </div>
+            -->
+        </div>
+
+    </div>
+
+    <div class="row">
+
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+
+                <thead class="header">
+                    <tr>
+                        <th>@CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")</th>
+                        <th>Objeto</th>
+                        <th>Clasificación</th>
+                        <th>SubClasificación</th>
+                        <th>Creado</th>
+                        <th>Cierre</th>                        
+                        <th>Detalle</th>
+                        <!--th>Actividades</th-->
+                        <th>Bitácora</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (ViewBag.Encontrado != null)
+                    {
+                        foreach (var items in ViewBag.Encontrado)
+                        {
+                            <tr>
+                                <td>@items.Empresas.Nombre</td>
+                                <td>@items.Oportunidades.Nombre</td>
+                                <td>@items.Clasificacion.Nombre</td>
+                                <td>@items.Subclasificacion.Nombre</td>
+                                <td>@items.Oportunidades.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@items.Oportunidades.Cierre.ToString("dd/MM/yyyy")</td>
+                                @CRM.Utilerias.CustomHelpers.EstadosdeProcesoSABE(items.Bitacora.NombreEstado, items.Oportunidades.Id.ToString())
+                                @*@CRM.Utilerias.CustomHelpers.ActividadesDeOportunidad(items.Oportunidades.Id.ToString())*@
+                                @CRM.Utilerias.CustomHelpers.ResponsablesSiNo(items.Oportunidades.Id.ToString())
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="ModalActividades" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Actividades Asunto</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades para esta oportunidad -->
+
+
+                    <table id="basic-datatables-actividades" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <br /><br />
+
+                    <table id="basic-datatables-actividades-usuarios" class="display table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Responsable</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalBitacora" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Bitácora Responsables</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <!-- Mostrar las actividades de los responsables para esta oportunidad -->
+
+                    <table id="basic-datatables-bitacora" class="display table-striped table-hover" style="width:100%">
+                        <thead><tr><th>Responsable</th><th>Tipo Actividad</th><th>Fecha</th><th>Notas</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id="idOport" name="idOport" value="" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info animated bounceInRight" data-dismiss="modal" onclick="IrAlDetalle();">Ir al detalle</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <!--button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal">Aceptar</button-->
+            </div>
+        </div>
+    </div>
+</div>

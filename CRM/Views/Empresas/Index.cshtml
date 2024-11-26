@@ -1,0 +1,417 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+
+    var conf2 = Session["IdConfiguracion"].ToString() == "2" ? true : false;
+    var conf3 = Session["IdConfiguracion"].ToString() == "3" ? true : false;
+}
+
+<script>
+    $(document).ready(function () {
+        //Selecciona y deja activa opción del menú
+        $('#opcEmpresas').addClass("nav-item active submenu");
+
+        //Permite un click en la fila de la tabla
+        $("#multi-filter-select").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Empresas/Editar?Id=' + firstCellText;
+            }
+        });
+
+        //Permite un click en la fila de la tabla
+        $("#multi-filter-select2").delegate("tr", "click", function () {
+            var firstCellText = $("td:first", this).text();
+            if (firstCellText != "") {
+                location.href = '/Empresas/Editar?Id=' + firstCellText;
+            }
+        });
+
+        //Validación de opciones de radio
+        if ($("#checado").val() === '1') {
+            $('input:radio[class=form-radio-input][id=tipo1]').prop('checked', true);
+        }
+        else {
+            $('input:radio[class=form-radio-input][id=tipo1]').prop('checked', false);
+        }
+        if ($("#checado").val() === '2') {
+            $('input:radio[class=form-radio-input][id=tipo2]').prop('checked', true);
+        }
+        else {
+            $('input:radio[class=form-radio-input][id=tipo2]').prop('checked', false);
+        }
+
+        //Inicializa tabla
+        $('#multi-filter-select').DataTable({
+            columnDefs: [
+                {
+                    //"orderable": false,
+                    //"targets": [0, 8],
+                    //"width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 50,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        //Inicializa tabla
+        $('#multi-filter-select2').DataTable({
+            columnDefs: [
+                {
+                   // "orderable": false,
+                   // "targets": [0, 8],
+                   // "width": "0px"
+                }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "pageLength": 50,
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+        $('#pieChart').sparkline([20, 50, 30], {
+            type: 'pie',
+            height: '100',
+            width: '60'
+
+        });
+
+        $('#Espera').hide();
+    });
+
+
+    //Solicita un cambio al creador del registro
+    function SolicitarCambios(idusuario,idempresa) {
+        swal({
+            title: 'Solicitar Modificación de Detalle',
+            html: '<br><input class="form-control" placeholder="Agregue brevemente lo que desea que cambie el creador de la empresa" id="input-field">',
+            content: {
+                element: "input",
+                attributes: {
+                    placeholder: "Solicito que se cambie o agregue",
+                    type: "text",
+                    id: "input-field",
+                    className: "form-control"
+                },
+            },
+            buttons: {
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-danger'
+                },
+                confirm: {
+                    className: 'btn btn-success'
+                }
+            },
+        }).then(
+            function () {
+                //Enviar un correo solicitando el cambio o el agregado
+                if ($('#input-field').val() == '') { }
+                else {
+                    EnviarCorreo(idusuario,idempresa,$('#input-field').val());
+                }
+            }
+        );
+    }
+
+    //Envía un correo al creador del registro
+    function EnviarCorreo(idusuario, idempresa, mensaje) {
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/EnviarCorreoCambios",
+            data: { idusuario: idusuario, idempresa: idempresa, mensaje: mensaje },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log(data);
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se envió el correo con la solicitud.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    //Autoenvío de formulario
+    $(document).on('change', 'input[name="tipo"]:radio', function () {
+        $('#formulariotipoempresa').submit();
+    });
+
+
+
+</script>
+
+<input type="hidden" id="checado" value="@TempData["Checado"]" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Médicos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-1">
+                            <a href="/Empresas/Graficos?opc=1" data-toggle="tooltip" data-placement="top" title="Medidores">
+                                <div id="pieChart"></div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <form id="formulariotipoempresa" method="post" action="Index">
+
+                                <div class="form-group">
+
+                                    <div class="form-check" style="background-color: lightgray;">
+                                        <label class="form-radio-label">
+                                            <input class="form-radio-input" type="radio" id="tipo1" name="tipo" value="1">
+                                            <span class="form-radio-sign">Clientes</span>
+                                        </label>
+                                        <label class="form-radio-label">
+                                            <input class="form-radio-input" type="radio" id="tipo2" name="tipo" value="2">
+                                            <span class="form-radio-sign">Prospectos</span>
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                        <div class="col-md-7 text-right">
+                            <a href="/Empresas/Alta2" class="btn btn-primary animated bounceInDown">Agregar Nuevo Médico</a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        @Html.Raw(ViewData["Mensaje"])
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table id="multi-filter-select" class="display table-striped table-hover" style="width: 100%; cursor: pointer">
+                            <thead class="header">
+                                <tr>
+                                    <th></th>
+                                    <th>Nombre</th>
+                                    <th>RFC</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Estado</th>
+                                    <th>Interna/Externa</th>
+                                    <th>Teléfono</th>
+                                    <th style="width: 100px">Web</th>
+                                    <th>Tipo</th>
+                                    <th>Detalle</th>
+                                    <th>Completado</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th>Nombre</th>
+                                    <th>RFC</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U&nbsp;de&nbsp;N</th>
+                                    <th>Estado</th>
+                                    <th>Interna/Externa</th>
+                                    <th>Teléfono</th>
+                                    <th style="width: 100px">Web</th>
+                                    <th>Tipo</th>
+                                    <th>Detalle</th>
+                                    <th>Completado</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+
+                                @foreach (var items in ViewBag.Empresas)
+                                {
+                                    var tipo = items.Tipo == 1 ? "Cliente" : "Prospecto";
+                                    <tr>
+                                        <td style="color: transparent; width:0px">@items.Id</td>
+                                        <td>@items.Nombre</td>
+                                        <td>@items.RFC</td>
+                                        <td>@items.UDNNombre</td>
+                                        <td>@CRM.Utilerias.CustomHelpers.EstadoPorCodigoPostal(@items.CP)</td>
+                                        <td>@CRM.Utilerias.Funciones.TipoEmpresaNombre(items.InternaExterna.ToString())</td>
+                                        <td>@items.Telefono</td>
+                                        <td>@items.PaginaWeb</td>
+                                        <td>@tipo</td>
+                                        <td align="center"><a href="#" onclick="location.href='/Empresas/Editar?Id='@items.Id"><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='left' title='Detalle'></i></a></td>
+                                        @CRM.Utilerias.CustomHelpers.SemaforoCompletadoEmpresa(items.Id.ToString())
+
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            @if (ViewBag.EmpresasCompartidas != null)
+            {
+
+                <div class="card">
+
+                    <div class="card-body">
+
+
+                        <h4>Empresas Compartidas</h4>
+                        <table id="multi-filter-select2" class="display table-striped table-hover" style="width: 100%; cursor: pointer">
+                            <thead class="header2">
+                                <tr>
+                                    <th></th>
+                                    <th>Nombre</th>
+                                    <th>RFC</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</th>
+                                    <th>Estado</th>
+                                    <th>Interna/Externa</th>
+                                    <th>Teléfono</th>
+                                    <th style="width: 100px">Web</th>
+                                    <th>Tipo</th>
+                                    <th>Detalle</th>
+                                    <th>Completado</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th>Nombre</th>
+                                    <th>RFC</th>
+                                    <th data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</th>
+                                    <th>Estado</th>
+                                    <th>Interna/Externa</th>
+                                    <th>Teléfono</th>
+                                    <th style="width: 100px">Web</th>
+                                    <th>Tipo</th>
+                                    <th>Detalle</th>
+                                    <th>Completado</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+
+                                @foreach (var items in ViewBag.EmpresasCompartidas)
+                                {
+                                    var tipo = items.Tipo == 1 ? "Cliente" : "Prospecto";
+                                    <tr>
+                                        <td style="color: transparent; width:0px">@items.Id</td>
+                                        <td>@items.Nombre</td>
+                                        <td>@items.RFC</td>
+                                        <td>@items.UDNNombre</td>
+                                        <td>
+                                            @CRM.Utilerias.CustomHelpers.EstadoPorCodigoPostal(@items.CP)
+                                        </td>
+                                        <td>
+                                            @CRM.Utilerias.Funciones.TipoEmpresaNombre(items.InternaExterna.ToString())
+                                        </td>
+                                        <td>@items.Telefono</td>
+                                        <td>@items.PaginaWeb</td>
+                                        <td>@tipo</td>
+                                        <td align="center"><a href=/Empresas/Editar?Id =@items.Id><i class='fas fa-clipboard-list' data-toggle='tooltip' data-placement='top' title='Detalle'></i></a></td>
+                                        @CRM.Utilerias.CustomHelpers.SemaforoCompletadoEmpresa(items.Id.ToString())
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                        
+
+
+                    </div>
+
+                </div>
+
+            }
+
+        </div>
+    </div>
+</div>
+

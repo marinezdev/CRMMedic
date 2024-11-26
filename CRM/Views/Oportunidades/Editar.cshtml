@@ -1,0 +1,4421 @@
+﻿@model CRM.Models.Models.Modelos
+
+@{
+    ViewBag.Title = "Editar";
+}
+
+<script>
+    $(document).ready(function () {
+
+        $('#opcOport').addClass("nav-item active submenu");
+
+        //$('#oport').addClass("collapse show");
+        //$('#sopcBusq').addClass("active");
+
+        $('[data-toggle="popover"]').popover({ html: true });
+
+        var obtenerParametrodeURL = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+
+        var idd = obtenerParametrodeURL('Id');
+        var idu = obtenerParametrodeURL('IdU');
+
+        var mensajesErrorActivados = false;
+
+        //$('#timeline1').hide();
+
+        OcultarCampos();
+
+        //Obtiene el detalle del registro para modificarlo y/o agregarle mas datos
+        SeleccionarPorId(idd);
+
+
+        if ($('#IdConfiguracion').val() === 3) {
+            //Bloquea las etapas si están completadas
+            //BloquearEtapa1SiCompletada(idd);
+            //BloquearEtapa2SiCompletada(idd);
+            //BloquearEtapa3SiCompletada(idd);
+            //BloquearEtapa4SiCompletada(idd);
+            //BloquearEtapa5SiCompletada(idd);
+            //Bloquear la fecha de vencimiento para que se den de alta las nuevas
+            $('#Cierre').prop('disabled', false);
+        }
+
+        //Aviso
+        $('input[name=optionsRadiosAviso]').change(function () {
+            //alert($(this).val());
+
+            if ($(this).val() == "2") {
+                $('#lContactosAviso').text('Usuarios');
+                UsuariosAviso();
+            }
+            else if ($(this).val() == "1") {
+                $('#lContactosAviso').text('Contactos');
+                ContactosAviso();
+
+            }
+        });
+
+        //Escalación
+        $('input[name=optionsRadios]').change(function () {
+            //alert($(this).val());
+
+            if ($(this).val() == "2") {
+                $('#lContactos').text('Usuarios');
+                Usuarios();
+            }
+            else if ($(this).val() == "1") {
+                $('#lContactos').text('Contactos');
+                Contactos();
+
+            }
+        });
+
+        //window.onbeforeunload = function () {
+        //    return "Do you want to leave?"
+        //}
+
+
+        EstadosOportunidad();
+
+        FechasVencimientoAnteriores();
+
+        if ($('#IdConfiguracion').val() === 2) {
+            SumaImportesOportunidad();
+        }
+
+        $('.input-number').on('input', function () {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+        });
+
+    });
+
+    function formatoMoneda(num) {
+        return '$' + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    }
+
+    function SeleccionarPorId(id) {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarDetalleOportunidadEdicion/" + id,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#Nombre').val(data.Oportunidades.Nombre);
+                $('#Caracteristicas').val(data.Oportunidades.Caracteristicas);
+                //console.log(data.Oportunidades.Importe);
+                $('#Importe').val(formatoMoneda(data.Oportunidades.Importe));
+                $('#ImporteOtro').val(formatoMoneda(data.Oportunidades.ImporteOtro));
+                $('#TipoMoneda').val(data.Oportunidades.IdTipoMoneda);
+
+                var fechaCierre = new Date(parseInt(data.Oportunidades.Cierre.substr(6)));
+                var mes = (fechaCierre.getMonth() + 1) < 10 ? '0' + (fechaCierre.getMonth() + 1) : (fechaCierre.getMonth() + 1);
+                $('#Cierre').val(fechaCierre.getDate() + '/' + mes + '/' + fechaCierre.getFullYear());
+                $('#FechaActual').text(fechaCierre.getDate() + '/' + mes + '/' + fechaCierre.getFullYear());
+                //console.log(fechaCierre.getFullYear() + '-' + mes + '-' + fechaCierre.getDate());
+
+                $('#IdOportunidad').val(data.Oportunidades.Id);
+                $('#IdOportunidad2').val(data.Oportunidades.Id);
+                $('#IdUsuario2').val(data.Oportunidades.IdUsuario);
+                $('#Empresa').val(data.OECU.IdEmpresa);
+
+                $('#Contraparte').val(data.Oportunidades.Contraparte);
+
+                $('#Avance').val(data.Oportunidades.Avance);
+                $('#Notas').val(data.Oportunidades.Notas);
+
+                $('#aIdOportunidad').val(data.Oportunidades.Id);
+                $('#aIdUsuarioAltaActividad').val(data.Oportunidades.IdUsuario);
+
+                if (data.Oportunidades.IdClasificacion > 0) {
+                    $('#Clasificacion').val(data.Oportunidades.IdClasificacion);
+
+                }
+
+                data.UDN.Id === '0' ? "" : $('#UDN').val(data.UDN.Id);
+                //MostrarCamposClasificacionSubClasificacion(data.Oportunidades.IdClasificacion, data.Oportunidades.IdSubClasificacion);
+
+                if (data.Oportunidades.IdClasificacion > 0) {
+                    ObtenerSubclasificaciones(data.Oportunidades.IdClasificacion, data.Oportunidades.IdSubClasificacion);
+                }
+                //Cargar los contactos
+                ContactosPorEmpresaArmado(data.OECU.IdEmpresa, data.OECU.IdContacto);
+
+                //Mostrar las etapas por las que va pasando la oportunidad
+                //EtapasBitacora(data.Oportunidades.Id);
+
+                SeleccionarCamposClassSubClass(data.Oportunidades.IdClasificacion, data.Oportunidades.IdSubClasificacion);
+                $('#campo1').val(data.ClassSubClass.Campo1);
+                $('#campo2').val(data.ClassSubClass.Campo2);
+                $('#campo3').val(data.ClassSubClass.Campo3);
+                $('#campo4').val(data.ClassSubClass.Campo4);
+
+                //Obtener la ultima fecha de escalacion si la hubiere
+                var ultimafechaescalacion = new Date(parseInt(data.Escalacion.Fecha.substr(6)));
+                var mes = (ultimafechaescalacion.getMonth() + 1) < 10 ? '0' + (ultimafechaescalacion.getMonth() + 1) : (ultimafechaescalacion.getMonth() + 1);
+                $('#Escalacion').val(ultimafechaescalacion.getFullYear() + '-' + mes + '-' + ultimafechaescalacion.getDate());
+
+                $('#Atencion').val(data.Oportunidades.PeriodoAtencion);
+                var fechaAviso = new Date(parseInt(data.Oportunidades.Aviso.substr(6)));
+                var mes = (fechaAviso.getMonth() + 1) < 10 ? '0' + (fechaAviso.getMonth() + 1) : (fechaAviso.getMonth() + 1);
+                $('#Aviso').val(fechaAviso.getFullYear() + '-' + mes + '-' + fechaAviso.getDate());
+
+                $('#Estado').val(data.Oportunidades.Estado);
+
+                if (data.Oportunidades.Estado === 1) {
+                    EtapaPorEstado(data.Oportunidades.Id);
+                }
+
+                //console.log(data);
+                //if (data.Oportunidades.RepetirProximoAño === true)
+                //    $("#RepetirProximo").prop('checked', true);
+                $("#RepetirProximo").val(data.Oportunidades.RepetirProximoAño);
+
+                /*
+                if (data.Oportunidades.Estado === 2 || data.Oportunidades.Estado === 5 || data.Oportunidades.Estado === 6 || data.Oportunidades.Estado === 7) {
+                    $('#Btn-Guardar').hide();
+                    //$('#Btn-Guardar2').hide();
+                    $('#Btn-Fase1-Seguir').hide();
+                    $('#Btn-Fase2-Seguir').hide();
+                    $('#Btn-Fase3-Seguir').hide();
+                    $('#Btn-Fase4-Seguir').hide();
+                    $('#btn-e4-cerrado').hide();
+                    $('#BtnAgregarEscalacion').hide();
+                    $('#Clasificacion').prop('disabled', true);
+                    $('#Estado').prop('disabled', true);
+
+                }
+                */
+                //var textofinal = '';
+                //if (data.Oportunidades.ComentariosFinales == '' || data.Oportunidades.ComentariosFinales == null) {
+                //}
+                //else {
+                //    textofinal = 'Comentarios: ' + data.Oportunidades.ComentariosFinales;
+                //}
+                //$('#ComentariosFinales').text(textofinal);
+
+                //Obtener la fecha de aviso si la hubiere
+                SeleccionarAviso();
+
+                //Obtener las fechas de escalación si las hubiere
+                SeleccionarEscalaciones();
+
+                MostrarCompartidos(data.Oportunidades.Id);
+
+                FechasVencimientoAnteriores(data.Oportunidades.Id);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarActividad() {
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesActividades/AgregarActividadAOportunidad",
+            data: {
+                aActividad: $("#aActividad").val(),
+                aFecha: $("#aFecha").val(),
+                aHora: $("#aHora").val(),
+                aUsuarioAsignado: $("#aUsuarioAsignado").val(),
+                aNotas: $("#aNotas").val(),
+                aIdOportunidad: $("#aIdOportunidad").val(),
+                aIdUsuarioAltaActividad: $("#aIdUsuarioAltaActividad").val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#ModalActividadAgregar').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+
+                $('#actividades').empty();
+                var firstRow = '<tr><th>Actividad</th><th>Fecha</th><th>Hora</th><th></th></tr>';
+                $('#actividades').append(firstRow);
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var row = '<tr>' +
+                        '<td>' + data[i].ActividadNombre + '</td>' +
+                        '<td>' + fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + '</td>' +
+                        '<td>' + data[i].Hora + '</td>' +
+                        '<td><a href=# onclick=ObtenerPorId(' + data[i].Id + ');>Modificar</a></td>' +
+                        '</tr > ';
+                    $('#actividades').append(row);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function ObtenerPorId(eid) {
+        $.ajax({
+            url: "/OportunidadesActividades/SeleccionarPorId/" + eid
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            success: function (data) {
+                //console.log(data);
+                $('#ModalActividadModificar').modal('show');
+
+                $('#eActividad').val(data.Actividad);
+                var efecha = new Date(parseInt(data.Fecha.substr(6)));
+                $('#eFecha').val(efecha.getDate() + '/' + (efecha.getMonth() + 1) + '/' + efecha.getFullYear());
+                $('#eHora').val(data.Hora);
+                $('#eUsuarioAsignado').val(data.IdUsuarioAsignado);
+                $('#eNotas').val(data.Notas);
+                $('#eIdOportunidad').val(data.IdOportunidad);
+                $('#eIdOportunidadActividad').val(data.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+        return false;
+    }
+
+    function ModificarRegistroActividadOportunidad() {
+        // Cambiar el detalle del registro
+        $.ajax({
+            type: 'GET',
+            url: "/OportunidadesActividades/Modificar",
+            data: {
+                eActividad: $('#eActividad').val(), eFecha: $('#eFecha').val(), eHora: $('#eHora').val(),
+                eUsuarioAsignado: $('#eUsuarioAsignado').val(), eNotas: $('#eNotas').val(),
+                eIdOportunidad: $('#eIdOportunidad').val(), eIdOportunidadActividad: $('#eIdOportunidadActividad').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#ModalActividadModificar').modal('hide');
+
+                $('#actividades').empty();
+                var firstRow = '<tr><th>Actividad</th><th>Fecha</th><th>Hora</th><th></th></tr>';
+                $('#actividades').append(firstRow);
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var row = '<tr>' +
+                        '<td>' + data[i].ActividadNombre + '</td>' +
+                        '<td>' + fecha.getDate() + '/' + (fecha.getMonth() + 1) + '/' + fecha.getFullYear() + '</td>' +
+                        '<td>' + data[i].Hora + '</td>' +
+                        '<td><a href=# onclick=ObtenerPorId(' + data[i].Id + ');>Modificar</a></td>' +
+                        '</tr > ';
+                    $('#actividades').append(row);
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function EmpresaSeleccionada() {
+        var valor = $('#Empresa').val();
+        //Obtener los contactos que pertenecen a esta empresa y llenar el select correspondiente
+        $.ajax({
+            url: "/Contactos/SeleccionarContactosPorEmpresa/" + valor
+            , type: "GET"
+            , contentType: "application/json"
+            , dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ContactosPorEmpresaArmado(idempresa, idcontacto) {
+        $.ajax({
+            type: 'GET',
+            url: "/Contactos/SeleccionarContactosPorEmpresa/" + idempresa,
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                var len = data.length;
+                for (var i = 0; i < len; i++) {
+                    if (idcontacto == data[i].Id)
+                        $('#Contactos').append('<option value=' + data[i].Id + ' selected>' + data[i].Nombre + '</option>');
+                    else
+                        $('#Contactos').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#Clasificacion').val();
+        if (valor != '') {
+            //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+            $.ajax({
+                url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + valor
+                , type: "GET"
+                , contentType: "application/json"
+                , dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    var len = data.length;
+                    $('#SubClasificacion').empty();
+                    $('#SubClasificacion').append('<option value=></option>');
+                    for (var i = 0; i < len; i++) {
+                        $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+    }
+
+    function SubClasificacionSeleccionada() {
+        //console.log($('#SubClasificacion').val());
+        var obt = $('#SubClasificacion').val();
+        //alert($('#Clasificacion').val() + ' ' + obt);
+        OcultarCampos();
+        MostrarCamposClasificacionSubClasificacion($('#Clasificacion').val(), obt);
+    }
+
+    function ObtenerSubclasificaciones(idcla, idsubcla) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarSubclasificacionPorClasificacion/" + idcla,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (idsubcla == data[i].Id) {
+                        $('#SubClasificacion').append('<option value=' + data[i].Id + ' selected>' + data[i].Nombre + '</option>');
+                    }
+                    else
+                        $('#SubClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function GuardarModificado() {
+        var fecha = $('#Cierre').val().substring(6, 10) + '/' + $('#Cierre').val().substring(3, 5) + '/' + $('#Cierre').val().substring(0, 2);
+
+        //if ($('#RepetirProximo').is(":checked")) {
+        //    valorActivo = 1;
+        //}
+        //else {
+        //    valorActivo = 0;
+        //}
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/Modificar",
+            data: {
+                Nombre: $('#Nombre').val(),
+                Clasificacion: $('#Clasificacion').val(),
+                SubClasificacion: $('#SubClasificacion').val(),
+                Caracteristicas: $('#Caracteristicas').val(),
+                Importe: $('#Importe').val(),
+                ImporteOtro: $('#ImporteOtro').val(),
+                IdTipoMoneda: $('#TipoMoneda').val(),
+                Empresa: $('#Empresa').val(),
+                Cierre: fecha,  // $('#Cierre').val(),
+                Notas: $('#Notas').val(),
+                Atencion: $('#Atencion').val(),
+                Aviso: $('#Aviso').val(),
+                IdOportunidad: $('#IdOportunidad').val(),
+                Contraparte: $('#Contraparte').val(),
+                UDN: $('#UDN').val(),
+                RepetirProximo: $('#RepetirProximo').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == 1) {
+                    AgregarcamposClassSubClass($('#IdOportunidad').val());
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            ClasificacionSeleccionada();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sólo el creador de la oportunidad puede modificarla, solicítele cualquier cambio.',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            SolicitarCambios($('#IdOportunidad').val());
+                        });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function SolicitarCambios(idoportunidad) {
+        swal({
+            title: 'Solicitar Modificación de Detalle',
+            html: '<br><input class="form-control" placeholder="Agregue brevemente lo que desea que cambie el creador de la empresa" id="input-field">',
+            content: {
+                element: "input",
+                attributes: {
+                    placeholder: "Solicito que se cambie o agregue",
+                    type: "text",
+                    id: "input-field",
+                    className: "form-control"
+                },
+            },
+            buttons: {
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-danger'
+                },
+                confirm: {
+                    className: 'btn btn-success'
+                }
+            },
+        }).then(
+            function () {
+                //Enviar un correo solicitando el cambio o el agregado
+                if ($('#input-field').val() == '') { }
+                else {
+                    EnviarCorreo(idoportunidad, $('#input-field').val());
+                }
+            }
+        );
+    }
+
+    function EnviarCorreo(idoportunidad, mensaje) {
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/EnviarCorreoCambios",
+            data: { idoportunidad: idoportunidad, mensaje: mensaje },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data == "1") {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se envió el correo con la solicitud.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+
+            }
+        });
+    }
+
+    function MostrarCamposClasificacionSubClasificacion(valor1, valor2) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarClasificacionSubclasificacionEtiquetas",
+            data: {
+                idClas: valor1, idSubClas: valor2
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('Etiquetas: ' + data.Etiqueta4);
+                $('#CamposClassSubClass').show();
+                if (data.Etiqueta1 === null || data.Etiqueta1 === '') {
+                    $('#label1').hide();
+                    $('#campo1').hide();
+                }
+                else {
+                    $('#label1').text(data.Etiqueta1).show();
+                    $('#campo1').show();
+                }
+
+
+                if (data.Etiqueta2 === null || data.Etiqueta2 === '') {
+                    $('#label2').hide();
+                    $('#campo2').hide();
+                }
+                else {
+                    $('#label2').text(data.Etiqueta2).show();
+                    $('#campo2').show();
+                }
+
+                if (data.Etiqueta3 === null || data.Etiqueta3 === '') {
+                    $('#label3').hide();
+                    $('#campo3').hide();
+                }
+                else {
+                    $('#label3').text(data.Etiqueta3).show();
+                    $('#campo3').show();
+                }
+
+                if (data.Etiqueta4 === null || data.Etiqueta4 === '') {
+                    $('#label4').hide();
+                    $('#campo4').hide();
+                }
+                else {
+                    $('#label4').text(data.Etiqueta4).show();
+                    $('#campo4').show();
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function OcultarCampos() {
+        $('#CamposClassSubClass').hide();
+    }
+
+    function EtapasBitacora(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarEtapasOportunidad/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                var fecha1 = new Date(parseInt(data[0].Fecha.substr(6)));
+                $('#detalleetapasoportunidad00').append('<div class=swiper-slide><div class=timestamp><span class=date>' + fecha1.getDate() + '/' + (fecha1.getMonth() + 1) + '/' + fecha1.getFullYear() + '</span></div><div class=status><span>Creado</span></div></div>');
+                var fecha2 = new Date(parseInt(data[1].Fecha.substr(6)));
+                $('#detalleetapasoportunidad01').append('<div class=swiper-slide><div class=timestamp><span class=date>' + fecha2.getDate() + '/' + (fecha2.getMonth() + 1) + '/' + fecha2.getFullYear() + '</span></div><div class=status><span>En Proceso</span></div></div>');
+                var fecha3 = new Date(parseInt(data[2].Fecha.substr(6)));
+                $('#detalleetapasoportunidad02').append('<div class=swiper-slide><div class=timestamp><span class=date>' + fecha3.getDate() + '/' + (fecha3.getMonth() + 1) + '/' + fecha3.getFullYear() + '</span></div><div class=status><span>Terminado</span></div></div>');
+                var fecha4 = new Date(parseInt(data[3].Fecha.substr(6)));
+                $('#detalleetapasoportunidad03').append('<div class=swiper-slide><div class=timestamp><span class=date>' + fecha4.getDate() + '/' + (fecha4.getMonth() + 1) + '/' + fecha4.getFullYear() + '</span></div><div class=status><span>Cancelado</span></div></div>');
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function AgregarcamposClassSubClass(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarClassSubClass/",
+            data: {
+                IdOportunidad: idopor,
+                Campo1: $('#campo1').val(),
+                Campo2: $('#campo2').val(),
+                Campo3: $('#campo3').val(),
+                Campo4: $('#campo4').val(),
+                IdClasificacion: $('#Clasificacion').val(),
+                IdSubClasificacion: $('#SubClasificacion').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function SeleccionarCamposClassSubClass(idclasificacion, idsubclasificacion) {
+        if (idclasificacion == 1 && idsubclasificacion == 1) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Part. Contr.:');
+            $('#label2').text('Bien Arrend.:');
+            $('#label3').text('Monto Renta:');
+            $('#campo3').show();
+            $('#label4').text('');
+            $('#campo4').hide();
+        }
+        else if (idclasificacion == 1 && idsubclasificacion == 2) {
+        }
+        else if (idclasificacion == 1 && idsubclasificacion == 3) {
+        }
+        else if (idclasificacion == 1 && idsubclasificacion == 4) {
+        }
+        else if (idclasificacion == 1 && idsubclasificacion == 5) {
+        }
+        else if (idclasificacion == 2 && idsubclasificacion == 6) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Actor:');
+            $('#label2').text('Demandado:');
+            $('#label3').text('Expediente:');
+            $('#label4').text('Suerte Prin.');
+            $('#campo3').show();
+            $('#campo4').show();
+        }
+        else if (idclasificacion == 2 && idsubclasificacion == 7) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Actor:');
+            $('#label2').text('Suerte Prin.:');
+            $('#label3').text('3er. Invol.:');
+            $('#campo3').show();
+            $('#label4').text('Localidad.:');
+            $('#campo4').show();
+        }
+        else if (idclasificacion == 2 && idsubclasificacion == 8) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Actor:');
+            $('#label2').text('Demandado:');
+            $('#label3').text('No. Exped.:');
+            $('#campo3').show();
+            $('#label4').text('Suerte Princ.:');
+            $('#campo4').show();
+        }
+        else if (idclasificacion == 2 && idsubclasificacion == 9) {
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 10) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Inmueble:');
+            $('#label2').text('No. Licencia:');
+            $('#label3').text('Tipo de Uso:');
+            $('#campo3').show();
+            $('#label4').text('');
+            $('#campo4').hide();
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 11) {
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 12) {
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 13) {
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 14) {
+
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 15) {
+
+        }
+        else if (idclasificacion == 3 && idsubclasificacion == 16) {
+
+        }
+        else if (idclasificacion == 4 && idsubclasificacion == 17) {
+            $('#CamposClassSubClass').show();
+            $('#label1').text('Nombre:');
+            $('#label2').text('Tipo:');
+            $('#label3').text('Clase:');
+            $('#label4').text('');
+            $('#campo3').show();
+            $('#campo4').hide();
+        }
+        else if (idclasificacion == 4 && idsubclasificacion == 18) {
+
+        }
+        else if (idclasificacion == 4 && idsubclasificacion == 19) {
+
+        }
+        else if (idclasificacion == 4 && idsubclasificacion == 20) {
+
+        }
+    }
+
+    //Etapas **********************************************************************************
+
+    function EtapaPorEstado(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarEtapaEstadoPorOportunidad/" + idopor,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].Etapa === 2 && data[i].Estado === 0) {
+                        $('#Btn-Fase2-Seguir').prop('disabled', true);
+                    }
+                    if (data[i].Etapa === 3 && data[i].Estado === 0) {
+                        $('#Btn-Fase3-Seguir').prop('disabled', true);
+                    }
+                    if (data[i].Etapa === 4 && data[i].Estado === 0) {
+                        $('#Btn-Fase4-Seguir').prop('disabled', true);
+                    }
+                    if (data[i].Etapa === 5 && data[i].Estado === 0) {
+                        $('#btn-e4-cerrado').prop('disabled', true);
+                    }
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Etapa1
+    function Etapa1() {
+        $('#ModalEtapa1').modal('show');
+        if ($('#Clasificacion').val() != null) { $('#cal-et1').text('Listo!').addClass('text-success') } else { $('#cal-et1').text('Pendiente').addClass('text-danger') }
+        if ($('#SubClasificacion').val() != null) { $('#cal-et2').text('Listo!').addClass('text-success') } else { $('#cal-et2').text('Pendiente').addClass('text-danger') }
+        if ($('#Empresa').val() != null) { $('#cal-et3').text('Listo!').addClass('text-success') } else { $('#cal-et3').text('Pendiente').addClass('text-danger') }
+        if ($('#Atencion').val() != null) { $('#cal-et4').text('Listo!').addClass('text-success') } else { $('#cal-et4').text('Pendiente').addClass('text-danger') }
+        if ($('#Responsables').val() > 0) { $('#cal-et5').text('Listo!').addClass('text-success') } else { $('#cal-et5').text('Pendiente').addClass('text-danger') }
+        if ($('#Clasificacion').val() != null && $('#SubClasificacion').val() != null && $('#Empresa').val() != null && $('#Atencion').val() != null
+            && $('#Responsables').val() > 0) {
+            $('#Btn-Fase1-Seguir').prop('disabled', false);
+        }
+    }
+
+    function CalificarEtapa1() {
+        //Cierra la etapa 1 si cumple con todo
+        if ($('#cal-chk-1').val() === 'on' && $('#cal-chk-2').val() === 'on' && $('#cal-chk-3').val() === 'on' && $('#cal-chk-4').val() === 'on' && $('#cal-chk-5').val() === 'on') {
+            //Guardar
+            var idopor = $('#IdOportunidad').val();
+            GuardarEtapa1(idopor);
+        }
+    }
+
+    function GuardarEtapa1(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CerrarEtapasOportunidad1/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 1
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se aplicó la calificación para esta etapa exitosamente',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    },
+                }).then(
+                    function () {
+                        location.href = '/Oportunidades/Editar?Id=' + $('#IdOportunidad').val();
+                    }
+                );
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function BloquearEtapa1SiCompletada(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/VerificarEstadoEtapa/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 1
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data === 1) {
+                    $('#ModalEtapa1').prop('disabled', true);
+                    $('#cal-chk-1').prop('checked', true).prop('disabled', true);
+                    $('#cal-chk-2').prop('checked', true).prop('disabled', true);
+                    $('#cal-chk-3').prop('checked', true).prop('disabled', true);
+                    $('#cal-chk-4').prop('checked', true).prop('disabled', true);
+                    $('#cal-chk-5').prop('checked', true).prop('disabled', true);
+                    $('#Btn-Fase1-Seguir').hide();
+                    $('#ModalEtapa1').prop('disabled', true);
+                    $('#tl-etapa2').addClass('selected');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Etapa 2
+    function Etapa2() {
+        //Mostrar los que ya han leído el asunto
+        var idopo = $('#IdOportunidad').val();
+        $.ajax({
+            url: "/Oportunidades/SeleccionarReponsablesHanLeido/" + idopo,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('Leído: ' + data.length);
+                $('#ModalEtapa2').modal('show');
+                $('#responsables-leido-asunto').empty();
+                var cuentaunos = 0;
+                var cuentaceros = 0;
+                for (var i = 0; i < data.length; i++) {
+                    var row = '<span>' + data[i].Contactos.Nombre + '</span>-';
+                    row += data[i].Bitacora.Estado === 1 ? '<span class=text-success>Leído</span><br />' : '<span class=text.danger>No Leído</span><br />';
+                    $('#responsables-leido-asunto').append(row);
+                    if (data[i].Bitacora.Estado === 1) {
+                        cuentaunos += 1;
+                    }
+                    else {
+                        cuentaceros += 1;
+                    }
+                }
+                if (cuentaunos > cuentaceros) {
+                    $('#Btn-Fase2-Seguir').prop('disabled', false).addClass('btn-success');
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarEtapa2() {
+        var idopor = $('#IdOportunidad').val();
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CerrarEtapasOportunidad2/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 2
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se aplicó la calificación para esta etapa exitosamente',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    },
+                }).then(
+                    function () {
+                        location.href = '/Oportunidades/Editar?Id=' + $('#IdOportunidad').val();
+                    }
+                );
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function BloquearEtapa2SiCompletada(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/VerificarEstadoEtapa/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 2
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data === 1) {
+                    $('#Btn-Fase2-Seguir').hide();
+                    $('#tl-etapa3').addClass('selected');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Etapa 3
+    function Etapa3() {
+        $('#ModalEtapa3').modal('show');
+        var idopo = $('#IdOportunidad').val();
+        $.ajax({
+            url: "/Oportunidades/SeleccionarReponsablesEnProceso/" + idopo,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#responsables-en-proceso').empty();
+                var cuentaunos = 0;
+                for (var i = 0; i < data.length; i++) {
+                    var row = '<span>' + data[i].Contactos.Nombre + '</span>-<span class=text-primary>En Proceso</span><br />';
+                    $('#responsables-en-proceso').append(row);
+                    cuentaunos += 1;
+                }
+                ResponsablesContadosEnProceso(cuentaunos);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ResponsablesContadosEnProceso(van) {
+        $.ajax({
+            url: "/Oportunidades/ResponsablesEnProcesoContados/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('unos: ' + van + ' data: ' + data);
+                if (van == data) {
+                    $('#Btn-Fase3-Seguir').prop('disabled', false).addClass('btn-success');
+                }
+                else {
+                    $('#Btn-Fase3-Seguir').prop('disabled', true).addClass('btn-primary');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errorjqXHR, textStatus, errorThrownmessage) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarEtapa3() {
+        var idopor = $('#IdOportunidad').val();
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CerrarEtapasOportunidad3/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 3
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se aplicó la calificación para esta etapa exitosamente',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    },
+                }).then(
+                    function () {
+                        location.href = '/Oportunidades/Editar?Id=' + $('#IdOportunidad').val();
+                    }
+                );
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+
+    }
+
+    function BloquearEtapa3SiCompletada(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/VerificarEstadoEtapa/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 3
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data === 1) {
+                    $('#Btn-Fase3-Seguir').hide();
+                    $('#Btn-Fase4-Seguir').prop('disabled', true);
+                    $('#tl-etapa4').addClass('selected');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Etapa 4
+    function Etapa4() {
+        $('#ModalEtapa4').modal('show');
+        var idopo = $('#IdOportunidad').val();
+        $.ajax({
+            url: "/Oportunidades/SeleccionarFechas/" + idopo,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                //var fecha1 = new Date(parseInt(data[0].Oportunidades.Fecha.substr(6)));
+                //var mes1 = (fecha1.getMonth() + 1) < 10 ? '0' + (fecha1.getMonth() + 1) : (fecha1.getMonth() + 1);
+                //$('#cal-et4-1').text(fecha1.getDate() + '-' + mes1 + '-' + fecha1.getFullYear());
+
+                var fecha2 = new Date(parseInt(data[0].Oportunidades.Cierre.substr(6)));
+                var mes2 = (fecha2.getMonth() + 1) < 10 ? '0' + (fecha2.getMonth() + 1) : (fecha2.getMonth() + 1);
+                $('#cal-et4-2').text(fecha2.getDate() + '-' + mes2 + '-' + fecha2.getFullYear());
+
+                //var fecha3 = new Date(parseInt(data[0].Oportunidades.Aviso.substr(6)));
+                //var mes3 = (fecha3.getMonth() + 1) < 10 ? '0' + (fecha3.getMonth() + 1) : (fecha3.getMonth() + 1);
+                //$('#cal-et4-3').text(fecha3.getDate() + '-' + mes3 + '-' + fecha3.getFullYear());
+
+                //var fecha4 = new Date(parseInt(data[0].Escalacion.Fecha.substr(6)));
+                //var mes4 = (fecha4.getMonth() + 1) < 10 ? '0' + (fecha4.getMonth() + 1) : (fecha4.getMonth() + 1);
+                //var fecha4Completada = fecha4.getDate() + '-' + mes4 + '-' + fecha4.getFullYear();
+                //if (fecha4Completada == '31-12-1899')
+                //    fecha4Completada = 'Sin Escalación'
+                //$('#cal-et4-4').text(fecha4Completada);
+                ReponsablesTerminado();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ReponsablesTerminado() {
+        var idopo = $('#IdOportunidad').val();
+        $.ajax({
+            url: "/Oportunidades/SeleccionarReponsablesTerminado/" + idopo,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#responsables-terminado').empty();
+                var cuentaunos = 0;
+                if (data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        var row = '<span>' + data[i].Contactos.Nombre + '</span>-<span class=text-success>Terminado</span><br />';
+                        $('#responsables-terminado').append(row);
+                        cuentaunos += 1;
+                    }
+                }
+                else {
+                    $('#responsables-terminado').append('<span>Ningún responsable ha terminado.</span>');
+                }
+
+                ResponsablesContadosEnProcesoEtapa4(cuentaunos);
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ResponsablesContadosEnProcesoEtapa4(van) {
+        $.ajax({
+            url: "/Oportunidades/ResponsablesEnProcesoContados/",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('unos: ' + van + ' data: ' + data);
+                if (van == data) {
+                    $('#Btn-Fase4-Seguir').prop('disabled', false).addClass('btn-success');
+                }
+                else {
+                    $('#Btn-Fase4-Seguir').prop('disabled', true).addClass('btn-primary');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CalificarEtapa4() {
+        //Cierra la etapa 4 si cumple con todo
+        if ($('#e4-cal-chk-2').val() == 'on') {
+            //Guardar
+            var idopor = $('#IdOportunidad').val();
+            GuardarEtapa4(idopor);
+        }
+    }
+
+    function GuardarEtapa4(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CerrarEtapasOportunidad4/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 4
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se aplicó la calificación para esta etapa exitosamente',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    },
+                }).then(
+                    function () {
+                        location.href = '/Oportunidades/Editar?Id=' + $('#IdOportunidad').val();
+                    }
+                );
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function BloquearEtapa4SiCompletada(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/VerificarEstadoEtapa/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 4
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data == 1) {
+                    //$('#e4-cal-chk-1').prop('checked', true).prop('disabled', true);
+                    $('#e4-cal-chk-2').prop('checked', true).prop('disabled', true);
+                    //$('#e4-cal-chk-3').prop('checked', true).prop('disabled', true);
+                    //$('#e4-cal-chk-4').prop('checked', true).prop('disabled', true);
+
+                    $('#Btn-Fase4-Seguir').hide();
+                    $('#tl-etapa5').addClass('selected');
+                    $('#btn-e4-cerrado').prop('disabled', false).addClass('btn-success');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Etapa Cierre
+    function EtapaCierre() {
+        $('#ModalEtapaCierre').modal('show');
+    }
+
+    function CerrarTema() {
+        var idopo = $('#IdOportunidad').val();
+        var notasfinales = $('#NotasFinales').val();
+        $.ajax({
+            url: "/Oportunidades/CerrarEtapasOportunidad5/",
+            data: {
+                IdOportunidad: idopo,
+                Etapa: 5,
+                ComentariosFinales: notasfinales
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (jqXHR, textStatus, errorThrown) {
+                //$('#Btn-Guardar').hide();
+                //$('#Btn-Guardar2').hide();
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se ha cerrado el tema exitosamente, no se podrá hacer cambios posteriores.',
+                    icon: 'success',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                });
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function BloquearEtapa5SiCompletada(idopor) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/VerificarEstadoEtapa/",
+            data: {
+                IdOportunidad: idopor,
+                Etapa: 5
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data === 1) {
+                    $('#e5-chk-cerrado').prop('checked', true).prop('disabled', true);
+                    $('#btn-e4-cerrado').hide();
+                    //$('#Btn-Guardar').hide();
+                    //$('#Btn-Guardar2').hide();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Aviso
+
+    function MostrarAviso() {
+        $('#ModalAviso').modal('show');
+    }
+
+    function SeleccionarAviso() {
+        var id = $('#IdOportunidad').val();
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarAviso/" + id,
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data.length > 0) {
+                    $('#divAviso').empty();
+                    var tabla = '<table class="table table-head-bg-primary"><thead><tr><th>Fecha Aviso</th><th>Responsable</th><th></th></tr></thead>'
+                    for (var i = 0; i < data.length; i++) {
+                        var fechaaviso = new Date(parseInt(data[i].Aviso.Fecha.substr(6)));
+                        var mes = (fechaaviso.getMonth() + 1) < 10 ? '0' + (fechaaviso.getMonth() + 1) : (fechaaviso.getMonth() + 1);
+                        var fecha = fechaaviso.getDate() + '/' + mes + '/' + fechaaviso.getFullYear();
+                        tabla += '<tr><td>' + fecha + '</td><td>' + data[i].Usuarios.Nombre + '</td><td><a href=# onclick=EliminarAviso(' + data[i].Aviso.IdUsuario + ');><i class="fas fa-trash" data-toggle="tooltip" data-placement="right" title="Eliminar"></i></a></td></tr>';
+                    }
+                    tabla += '</table>';
+                    $('#divAviso').append(tabla);
+                }
+                else {
+                    $('#divAviso').empty();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function AgregarAviso() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarAviso/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                FechaAviso: $('#FechaAviso').val(),
+                IdUsuario: $('#Responsables2').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //$('#divAviso').empty();
+                //for (var i = 0; i < data.length; i++) {
+                //    var fechaaviso = new Date(parseInt(data[i].Aviso.Fecha.substr(6)));
+                //    var mes = (fechaaviso.getMonth() + 1) < 10 ? '0' + (fechaaviso.getMonth() + 1) : (fechaaviso.getMonth() + 1);
+                //    $('#divAviso').append('<span>' + fechaaviso.getFullYear() + '-' + mes + '-' + fechaaviso.getDate() + ' | ' + data[i].Usuarios.Nombre + '</span><br />');
+                //}
+
+                $.notify('Se agregó exitosamente el responsable. Se enviará un correo en la fecha indicada.', {
+                    autohide: true, type: 'success', placement: {
+                        from: 'top',
+                        align: 'center'
+                    }
+                });
+
+                SeleccionarAviso();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+        $('#Aviso').val($('#Aviso').val());
+    }
+
+    function EliminarAviso(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/EliminarUsuarioDeAviso/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                IdUsuario: id
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $.notify('Se eliminó el usuario seleccionado de los avisos.', {
+                    autohide: true, type: 'success', placement: {
+                        from: 'bottom',
+                        align: 'right'
+                    }
+                });
+
+                SeleccionarAviso();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Escalación
+
+    function MostrarEscalacion() {
+        $('#ModalEscalacion').modal('show');
+    }
+
+    function SeleccionarEscalaciones() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarEscalacion/",
+            data: { id: $('#IdOportunidad').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //for (var i = 0; i < data.length; i++) {
+                //    var fechasescaladas = new Date(parseInt(data[i].Escalacion.Fecha.substr(6)));
+                //    var mes = (fechasescaladas.getMonth() + 1) < 10 ? '0' + (fechasescaladas.getMonth() + 1) : (fechasescaladas.getMonth() + 1);
+                //    $('#divEscaladas').append('<span>' + fechasescaladas.getFullYear() + '-' + mes + '-' + fechasescaladas.getDate() + ' | ' + data[i].Usuarios.Nombre +'</span><br />');
+                //}
+
+                if (data.length > 0) {
+                    $('#divEscaladas').empty();
+                    var tabla = '<table class="table table-head-bg-primary"><thead><tr><th>Fecha Escalación</th><th>Responsable</th><th></th></tr></thead>'
+                    for (var i = 0; i < data.length; i++) {
+                        var fechaaviso = new Date(parseInt(data[i].Escalacion.Fecha.substr(6)));
+                        var mes = (fechaaviso.getMonth() + 1) < 10 ? '0' + (fechaaviso.getMonth() + 1) : (fechaaviso.getMonth() + 1);
+                        var fecha = fechaaviso.getDate() + '/' + mes + '/' + fechaaviso.getFullYear();
+                        tabla += '<tr><td>' + fecha + '</td><td>' + data[i].Usuarios.Nombre + '</td><td><a href=# onclick=EliminarEscalacion(' + data[i].Escalacion.IdUsuarioContacto + ');><i class="fas fa-trash" data-toggle="tooltip" data-placement="right" title="Eliminar"></i></a></td></tr>';
+                    }
+                    tabla += '</table>';
+                    $('#divEscaladas').append(tabla);
+                }
+                else {
+                    $('#divEscaladas').empty();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function AgregarEscalacion() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarEscalacion/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                FechaEscalacion: $('#FechaEscalacion').val(),
+                IdUsuario: $('#Responsables1').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //$('#divEscaladas').empty();
+                //for (var i = 0; i < data.length; i++) {
+                //    var fechasescaladas = new Date(parseInt(data[i].Escalacion.Fecha.substr(6)));
+                //    var mes = (fechasescaladas.getMonth() + 1) < 10 ? '0' + (fechasescaladas.getMonth() + 1) : (fechasescaladas.getMonth() + 1);
+                //    $('#divEscaladas').append('<span>' + fechasescaladas.getFullYear() + '-' + mes + '-' + fechasescaladas.getDate() + ' | ' + data[i].Usuarios.Nombre +'</span><br />');
+                //}
+
+
+                $.notify('Se agregó exitosamente el responsable. Se enviará un correo en la fecha indicada.', {
+                    autohide: true, type: 'success', placement: {
+                        from: "top",
+                        align: "center"
+                    }
+                });
+
+                SeleccionarEscalaciones();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+        $('#Escalacion').val($('#FechaEscalacion').val());
+    }
+
+    function EliminarEscalacion(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/EliminarUsuarioDeEscalacion/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                IdUsuario: id
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $.notify('Se eliminó el usuario seleccionado de la escalación.', {
+                    autohide: true, type: 'success', placement: {
+                        from: 'bottom',
+                        align: 'right'
+                    }
+                });
+
+                SeleccionarEscalaciones();
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    //Cambio del estado del asunto
+
+    function CambiarEstado() {
+        //Cambio de estado sobre el proceso
+        swal({
+            title: 'Cambio de Estado del Tema',
+            html: '<br><input class="form-control" placeholder="Agregue un comentario sobre el motivo del cambio" id="input-field">',
+            content: {
+                element: "input",
+                attributes: {
+                    placeholder: "Texto relacionado al cambio",
+                    type: "text",
+                    id: "input-field",
+                    className: "form-control"
+                },
+            },
+            buttons: {
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-danger'
+                },
+                confirm: {
+                    className: 'btn btn-success'
+                }
+            },
+        }).then(
+            function () {
+                if ($('#input-field').val() != "") {
+                    var texto = $('#input-field').val();
+                    CambiodeEstado($('#Estado').val(), texto);
+                }
+            }
+        );
+    }
+
+    function CambiodeEstado(estado, texto) {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/CambiarEstadoOportunidad/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                Estado: estado,
+                ComentariosFinales: texto
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //MostrarEstadosOportunidad();
+                if (estado == 8 && $('#IdConfiguracion').val() == 2) {
+                    //Se reasignará la oportunidad a otro usuario (para ASAE)
+                    $('#ModalReasignacion').modal('show');
+                }
+                else {
+                    EstadosOportunidad();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function EstadosOportunidad() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarEstadosOportunidad/",
+            data: { idoportunidad: $('#IdOportunidad').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#divEstadosOportunidadDesc').empty();
+                var tabla = '<table class="table table-head-bg-primary"><thead><tr><th>Ultimo Estado</th><th>Comentarios</th><th>Fecha</th><th></th></tr></thead>'
+                for (var i = 0; i < data.length; i++) {
+                    var fechas = new Date(parseInt(data[i].Fecha.substr(6)));
+                    var mes = (fechas.getMonth() + 1) < 10 ? '0' + (fechas.getMonth() + 1) : (fechas.getMonth() + 1);
+                    var fecha = fechas.getDate() + '/' + mes + '/' + fechas.getFullYear();
+                    tabla += '<tr><td>' + data[i].EstadoNombre + '</td><td>' + data[i].Comentarios + '</td><td>' + fecha + '</td><td><a href="#" onclick=VerEstadoaModificar('+ data[i].Id +')>Modificar</a></td></tr>';
+                }
+                tabla += '</table>';
+                $('#divEstadosOportunidadDesc').append(tabla);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function MostrarEstadosOportunidad() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/SeleccionarEstadosOportunidad/",
+            data: { idoportunidad: $('#IdOportunidad').val(), },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //for (var i = 0; i < data.length; i++) {
+                //    var fecha = new Date(parseInt(data[i].Fecha.substr(6)));
+                //    var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                //    $('#divAviso').append('<span>' + fecha.getFullYear() + '-' + mes + '-' + fecha.getDate() + ' | ' + data[i].Usuarios.Nombre + '</span><br />');
+                //}
+
+                $('#divAviso').empty();
+                var tabla = '<table class=table><tr><th>Fecha Aviso</th><th>Responsable</th></tr>'
+                for (var i = 0; i < data.length; i++) {
+                    var fechaaviso = new Date(parseInt(data[i].Aviso.Fecha.substr(6)));
+                    var mes = (fechaaviso.getMonth() + 1) < 10 ? '0' + (fechaaviso.getMonth() + 1) : (fechaaviso.getMonth() + 1);
+                    var fecha = fechas.getDate() + '/' + mes + '/' + fechas.getFullYear();
+                    tabla += '<tr><td>' + fecha + '</td><td>' + data[i].Usuarios.Nombre + '</td></tr>';
+                }
+                tabla += '</table>';
+                $('#divAviso').append(tabla);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function VerEstadoaModificar(id) {
+        
+        $.ajax({
+            url: "/Oportunidades/SeleccionarEstadoPorId/" + id,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalModificarEstado').modal('show');
+                $('#mEstado').val(data.Estado);
+                $('#mComentarios').val(data.Comentarios);
+                var mfecha = new Date(parseInt(data.Fecha.substr(6)));
+                $('#mFecha').val(mfecha.getDate() + '/' + (mfecha.getMonth() + 1) + '/' + mfecha.getFullYear());
+                $('#mId').val(data.Id);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModificarEstado() {        
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/ModificarEstadoOportunidad",
+            data: JSON.stringify({                
+                idestado: $('#mEstado').val(),
+                comentarios: $('#mComentarios').val(),
+                fecha: $('#mFecha').val(),
+                id: $('#mId').val(),
+                idoportunidad: $('#IdOportunidad').val() 
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#ModalModificarEstado').modal('hide');
+
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sólo el creador de la oportunidad puede modificar su contenido.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+
+                EstadosOportunidad();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    function ReasignarOportunidad() {
+        $.ajax({
+            url: "/Oportunidades/ReasignacionOportunidad",
+            data: { responsableanterior: $('#IdUsuario').val(), idnuevoresponsable: $('#NuevoResponsable').val(), idoportunidad: $('#IdOportunidad').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Se reasignó la oportunidad al usuario asignado, ya no aparecerá ni se podrán hacer más cambios mas que por él.',
+                    icon: 'success',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                }).then(
+                    function () {
+                        location.href = '/Oportunidades/Index';
+                    });
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+
+    }
+
+    //Elementos del formulario
+
+    function Grande(element) {
+        $(element).animate({
+            zIndex: 10002,
+            width: '250px',
+            height: '20px'
+        });
+    }
+
+    function GrandeAmplio(element) {
+        $(element).animate({
+            zIndex: 10100,
+            width: '240px',
+            height: '340px'
+        });
+    }
+
+    function Normal(element) {
+        $(element).animate({
+            width: '175px',
+            height: '20px'
+        });
+    }
+
+    function TextAreaGrande(element) {
+        zIndex: 10003,
+            $(element).attr('rows', '10');
+    }
+
+    function TextAreaNormal(element) {
+        $(element).attr('rows', 0);
+    }
+
+    function ValidaFechaAviso() {
+        if ($('#Aviso').val() > $('#Cierre').val()) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'La fecha de aviso no puede ser mayor a la fecha de vencimiento, corrija.',
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                }
+            });
+        }
+    }
+
+    function ValidaFechaEscalacion() {
+        if ($('#FechaEscalacion').val() > $('#Cierre').val()) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'La fecha de escalación no puede ser mayor a la fecha de vencimiento, corrija.',
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                }
+            });
+        }
+    }
+
+    function AgregarClasSubClass() {
+        $('#ModalClassSubclass').modal('show');
+        $('#aNombreClass').val('');
+
+        $('#aNombreSubClass').val('');
+    }
+
+    function AgregarClasificacion() {
+        //alert($('#aNombreClas').val() + ' ' + $('#IdConfiguracion').val());
+        $.ajax({
+            url: "/Administracion/AgregarClasificacion/",
+            data: { nombre: $('#aNombreClas').val(), empresa: $('#IdConfiguracion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //location.reload();
+                            CargarClasificacion($('#IdConfiguracion').val());
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/AgregarSubClasificacion/",
+            data: { nombre: $('#aNombreSubClas').val(), clasificacion: $('#aClasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data.Ok) {
+                    $('#aNombreClass').val('');
+                    $('#aNombreSubClass').val('');
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha creado el nuevo registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            $('#aNombreClass').val('');
+                            $('#aNombreSubClass').val('');
+                            ClasificacionSeleccionada();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CargarClasificacion(id) {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarClasificacionPorIdConfiguracion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            beforeSend: function () {
+                $('#loaderClas').show();
+            },
+            dataType: "json",
+            success: function (data) {
+                $('#Clasificacion').empty();
+                $('#Clasificacion').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#Clasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+
+                $('#aClasificacion').empty();
+                $('#aClasificacion').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#aClasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+                $('#loaderClas').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Usuarios() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarUsuariosPorRol/",
+            data: {
+                idconfiguracion: $('#IdConfiguracion').val(),
+                idrol: $('#IdRol').val(),
+                idusuario: $('#IdUsuario').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#Contactos').empty();
+                $('#Contactos').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Usuarios.Id + '>' + data[i].Usuarios.Nombre + ' ' + data[i].Usuarios.ApellidoPaterno + ' ' + data[i].Usuarios.ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Contactos() {
+        $.ajax({
+            url: "/Contactos/SeleccionarContactosPorConfiguracion/" + $('#IdConfiguracion').val(),
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#Contactos').empty();
+                $('#Contactos').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#Contactos').append('<option value=' + data[i].Id + '>' + data[i].Nombre + ' ' + data[i].ApellidoPaterno + ' ' + data[i].ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function UsuariosAviso() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarUsuariosPorRol/",
+            data: {
+                idconfiguracion: $('#IdConfiguracion').val(),
+                idrol: $('#IdRol').val(),
+                idusuario: $('#IdUsuario').val()
+            },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#ContactosAviso').empty();
+                $('#ContactosAviso').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#ContactosAviso').append('<option value=' + data[i].Usuarios.Id + '>' + data[i].Usuarios.Nombre + ' ' + data[i].Usuarios.ApellidoPaterno + ' ' + data[i].Usuarios.ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ContactosAviso() {
+        $.ajax({
+            url: "/Contactos/SeleccionarContactosPorConfiguracion/" + $('#IdConfiguracion').val(),
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                var len = data.length;
+                $('#ContactosAviso').empty();
+                $('#ContactosAviso').append('<option value=></option>');
+                for (var i = 0; i < len; i++) {
+                    $('#ContactosAviso').append('<option value=' + data[i].Id + '>' + data[i].Nombre + ' ' + data[i].ApellidoPaterno + ' ' + data[i].ApellidoMaterno + '</option>');
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Compartir() {
+        $.ajax({
+            url: "/Oportunidades/CompartirRegistro/",
+            data: { idoportunidad: $('#IdOportunidad').val(), idusuario: $('#NuevoResponsable2').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data == "1") {
+                    $('#ModalCompartir').modal('hide');
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se compartió este registro con el usuario asignado.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                    MostrarCompartidos($('#IdOportunidad').val());
+                }
+                else {
+                    $('#ModalCompartir').modal('hide');
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El registro ya está compartido con el usuario indicado.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function () {
+
+            }
+        });
+    }
+
+    function MostrarCompartidos(id) {
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/OportunidadesUsuariosCompartidos",
+            data: { idoportunidad: id },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data.length === 0) {
+                    $('#divCompartidos').empty();
+                }
+                else {
+                    $('#divCompartidos').empty();
+                    var tabla = '<table class=table><tr><th>Compartido con</th><th></th></tr>';
+                    for (var i = 0; i < data.length; i++) {
+                        tabla += '<tr><td>' + data[i].Usuarios.Nombre + '</td><td><a href=# onclick=EliminarUsuario(' + data[i].Usuarios.Id + ');>Eliminar</a></td></tr>';
+                    }
+                    tabla += '</table>';
+                    $('#divCompartidos').append(tabla);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function EliminarUsuario(idusuario) {
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/EliminarUsuarioCompartido",
+            data: { idoportunidad: $('#IdOportunidad').val(), idusuario: idusuario },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sin permiso para eliminar la relación.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se eliminó el usuario con el que se compartía este registro.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    });
+                    MostrarCompartidos($('#IdOportunidad').val());
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function CambiarFechaCierre() {
+        //if ($('#NuevaFechaCierre').val() < $('#FechaActual').text()) {
+        //    $('#adv01').addClass('text-danger');
+        //}
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/CambiarFechaVencimiento",
+            data: { fecha: $('#NuevaFechaCierre').val(), idoportunidad: $('#IdOportunidad').val(), idusuario: $('#IdUsuario').val() },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                $('#ModalFechaVencimiento').modal('hide');
+                if (data >= 2) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se cambió la fecha de vencimiento, se ha enviado correo a los responsables para su conocimiento.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '/Oportunidades/Editar?Id=' + $('#IdOportunidad').val();
+                        }
+                    );
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function FechasVencimientoAnteriores() {
+        $.ajax({
+            type: "GET",
+            url: "/Oportunidades/SeleccionarFechasVencimientosAnteriores",
+            data: { idoportunidad: $('#IdOportunidad').val() },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data.length === 0) {
+                    $('#divFechasVencimientoAnteriores').empty();
+                }
+                else {
+                    $('#divFechasVencimientoAnteriores').empty();
+                    var tabla = '<table class=table><tr><th>Fechas Anteriores</th></tr>';
+                    for (var i = 0; i < data.length; i++) {
+                        var fecha = new Date(parseInt(data[i].FechaVencimientoAnterior.substr(6)));
+                        var mes = (fecha.getMonth() + 1) < 10 ? '0' + (fecha.getMonth() + 1) : (fecha.getMonth() + 1);
+                        var fechaVencimiento = fecha.getDate() + '/' + mes + '/' + fecha.getFullYear();
+                        tabla += '<tr><td>' + fechaVencimiento + '</td></tr>';
+                    }
+                    tabla += '</table>';
+                    $('#divFechasVencimientoAnteriores').append(tabla);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    //OportunidadesImportes
+    function SeleccionarOportunidadImportes() {
+        $('#BtnAgregarOportunidadImporte').show();
+        $('#BtnModificarOportunidadImporte').hide();
+        $('#ModalImportes').modal('show');
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/SeleccionarOportunidadImportes",
+            data: JSON.stringify({ idoportunidad: $('#IdOportunidad').val() }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data.length === 0) {
+                    $('#divImportes').empty();
+                }
+                else {
+                    $('#divImportes').empty();
+                    var tabla = '<table class=table style=width:100%>';
+                    tabla += '<tr>';
+                    tabla += '<th>Importe</th>';
+                    tabla += '<th>Moneda</th>';
+                    tabla += '<th>Tipo Cambio</th>';
+                    tabla += '<th>Rubro</th>';
+                    tabla += '<th>Observaciones</th>';
+                    tabla += '<th></th>';
+                    tabla += '<th></th>';
+                    tabla += '</tr> ';
+                    for (var i = 0; i < data.length; i++) {
+                        tabla += '<tr>';
+                        tabla += '<td>' + formatoMoneda(data[i].Importe) + '</td>';
+                        tabla += '<td>' + data[i].MonedaNombre + '</td>';
+                        tabla += '<td>' + formatoMoneda(data[i].TipoCambio) + '</td>';
+                        tabla += '<td>' + data[i].RubroNombre + '</td>';
+                        tabla += '<td>' + data[i].Observaciones + '</td>';
+                        tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaModificarPorId(' + data[i].Id + ')><i class="fas fa-clipboard-list" data-toggle="tooltip" data-placement="left" title="Modificar"></i></a></td>';
+                        tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaEliminarPorId(' + data[i].Id + ')><i class="fas fa-trash text-danger" data-toggle="tooltip" data-placement="left" title="Eliminar"></i></a></td>';
+                        tabla += '</tr>';
+                    }
+                    tabla += '</table>';
+                    $('#divImportes').append(tabla);
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarOportunidadImporteParaModificarPorId(id) {
+        ValidarOportunidadUsuarioPermisos();
+        $('#BtnAgregarOportunidadImporte').hide();
+        $('#BtnModificarOportunidadImporte').show();
+
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/SeleccionarOportunidadImporteParaModificarId",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#Importes').val(data.Importe);
+                $('#TipoMonedas').val(data.Moneda);
+                $('#TipoCambios').val(data.TipoCambio);
+                $('#Rubros').val(data.Rubro);
+                $('#Observacioness').val(data.Observaciones);
+                $('#IdOportunidadImporte').val(data.Id);
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarOportunidadImporte() {
+        ValidarOportunidadUsuarioPermisos();
+        if ($('#Importes').val() == '' || $('#TipoMonedas').val() == '' || $('#Rubros').val() == '') {
+            swal({
+                title: 'CRM ASAE',
+                text: 'Complete los datos en los campos.',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                },
+            });
+            return;
+        }
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/AgregarOportunidadImporte",
+            data: JSON.stringify({
+                idoportunidad: $('#IdOportunidad').val(),
+                importe: $('#Importes').val(),
+                tipomoneda: $('#TipoMonedas').val(),
+                tipocambio: $('#TipoCambios').val(),
+                rubro: $('#Rubros').val(),
+                observaciones: $('#Observacioness').val()
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+
+                $('#Importes').val('');
+                $('#TipoMonedas').index = 0;
+                $('#TipoCambios').val('');
+                $('#Rubros').index = 0;
+                $('#Observacioness').val('');
+
+                $('#divImportes').empty();
+                var tabla = '<table class=table style=width:100%>';
+                tabla += '<tr>';
+                tabla += '<th>Importe</th>';
+                tabla += '<th>Moneda</th>';
+                tabla += '<th>Tipo Cambio</th>';
+                tabla += '<th>Rubro</th>';
+                tabla += '<th>Observaciones</th>';
+                tabla += '<th></th>';
+                tabla += '<th></th>';
+                tabla += '</tr>';
+                for (var i = 0; i < data.length; i++) {
+                    tabla += '<tr>';
+                    tabla += '<td>' + formatoMoneda(data[i].Importe) + '</td>';
+                    tabla += '<td>' + data[i].MonedaNombre + '</td>';
+                    tabla += '<td>' + formatoMoneda(data[i].TipoCambio) + '</td>';
+                    tabla += '<td>' + data[i].RubroNombre + '</td>';
+                    tabla += '<td>' + data[i].Observaciones + '</td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaModificarPorId(' + data[i].Id + ')><i class="fas fa-clipboard-list" data-toggle="tooltip" data-placement="left" title="Modificar"></i></a></td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaEliminarPorId(' + data[i].Id + ')><i class="fas fa-trash text-danger" data-toggle="tooltip" data-placement="left" title="Eliminar"></i></a></td>';
+                    tabla += '</tr>';
+                }
+                tabla += '</table>';
+                $('#divImportes').append(tabla);
+                SumaImportesOportunidad();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ModificarOportunidadImporte() {
+        ValidarOportunidadUsuarioPermisos();
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/ModificarOportunidadImporte",
+            data: JSON.stringify({
+                idoportunidad: $('#IdOportunidad').val(),
+                importe: $('#Importes').val(),
+                tipomoneda: $('#TipoMonedas').val(),
+                tipocambio: $('#TipoCambios').val(),
+                rubro: $('#Rubros').val(),
+                observaciones: $('#Observacioness').val(),
+                id: $('#IdOportunidadImporte').val()
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#BtnAgregarOportunidadImporte').show();
+                $('#BtnModificarOportunidadImporte').hide();
+
+                $('#Importes').val('');
+                $('#TipoMonedas').val(0);
+                $('#TipoCambios').val('');
+                $('#Rubros').val(0);
+                $('#Observacioness').val('');
+
+                $('#divImportes').empty();
+                var tabla = '<table class=table style=width:100%>';
+                tabla += '<tr>';
+                tabla += '<th>Importe</th>';
+                tabla += '<th>Moneda</th>';
+                tabla += '<th>Tipo Cambio</th>';
+                tabla += '<th>Rubro</th>';
+                tabla += '<th>Observaciones</th>';
+                tabla += '<th></th>';
+                tabla += '<th></th>';
+                tabla += '</tr>';
+                for (var i = 0; i < data.length; i++) {
+                    tabla += '<tr>';
+                    tabla += '<td>' + formatoMoneda(data[i].Importe) + '</td>';
+                    tabla += '<td>' + data[i].MonedaNombre + '</td>';
+                    tabla += '<td>' + formatoMoneda(data[i].TipoCambio) + '</td>';
+                    tabla += '<td>' + data[i].RubroNombre + '</td>';
+                    tabla += '<td>' + data[i].Observaciones + '</td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaModificarPorId(' + data[i].Id + ')><i class="fas fa-clipboard-list" data-toggle="tooltip" data-placement="left" title="Modificar"></i></a></td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaEliminarPorId(' + data[i].Id + ')><i class="fas fa-trash text-danger" data-toggle="tooltip" data-placement="left" title="Eliminar"></i></a></td>';
+                    tabla += '</tr>';
+                }
+                tabla += '</table>';
+                $('#divImportes').append(tabla);
+                SumaImportesOportunidad();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarOportunidadImporteParaEliminarPorId(id) {
+        ValidarOportunidadUsuarioPermisos();
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/EliminarOportunidadImporte",
+            data: JSON.stringify({
+                idoportunidad: $('#IdOportunidad').val(),
+                id: id
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                $('#BtnAgregarOportunidadImporte').show();
+                $('#BtnModificarOportunidadImporte').hide();
+
+                $('#divImportes').empty();
+                var tabla = '<table class=table style=width:100%>';
+                tabla += '<tr>';
+                tabla += '<th>Importe</th>';
+                tabla += '<th>Moneda</th>';
+                tabla += '<th>Tipo Cambio</th>';
+                tabla += '<th>Rubro</th>';
+                tabla += '<th>Observaciones</th>';
+                tabla += '<th></th>';
+                tabla += '<th></th>';
+                tabla += '</tr>';
+                for (var i = 0; i < data.length; i++) {
+                    tabla += '<tr>';
+                    tabla += '<td>' + formatoMoneda(data[i].Importe) + '</td>';
+                    tabla += '<td>' + data[i].MonedaNombre + '</td>';
+                    tabla += '<td>' + formatoMoneda(data[i].TipoCambio) + '</td>';
+                    tabla += '<td>' + data[i].RubroNombre + '</td>';
+                    tabla += '<td>' + data[i].Observaciones + '</td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaModificarPorId(' + data[i].Id + ')><i class="fas fa-clipboard-list" data-toggle="tooltip" data-placement="left" title="Modificar"></i></a></td>';
+                    tabla += '<td><a href=# onclick=SeleccionarOportunidadImporteParaEliminarPorId(' + data[i].Id + ')><i class="fas fa-trash text-danger" data-toggle="tooltip" data-placement="left" title="Eliminar"></i></a></td>';
+                    tabla += '</tr>';
+                }
+                tabla += '</table>';
+                $('#divImportes').append(tabla);
+                SumaImportesOportunidad();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SumaImportesOportunidad() {
+        $.ajax({
+            type: "POST",
+            url: "/Oportunidades/SeleccionarSumaImportesOportunidad",
+            data: JSON.stringify({
+                idoportunidad: $('#IdOportunidad').val()
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                console.log('=>' + data);
+                $('#Importe').val(formatoMoneda(data));
+                $('#SumaTotal').text('Suma Total: ' + formatoMoneda(data) + ' (las monedas extranjeras se multiplican por su tipo de cambio)');
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ValidarOportunidadUsuarioPermisos() {
+        $.ajax({
+            type: "POST",
+            url: "/Administracion/ValidarOportunidadSiUSuarioEsPropietarioOTienePermisoParaModificar",
+            data: JSON.stringify({
+                idoportunidad: $('#IdOportunidad').val(),
+                idusuario: $('#IdUsuario').val()
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sólo el creador de la oportunidad puede modificar su contenido.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                }
+                return;
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+
+
+</script>
+<style>
+    *,
+    *:after,
+    *:before {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .timeline {
+        width: 100%;
+        height: 2px;
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+        .timeline .events {
+            position: relative;
+            background-color: #606060;
+            height: 3px;
+            width: 100%;
+            border-radius: 4px;
+            margin: 5em 0;
+        }
+
+            .timeline .events ol {
+                margin: 0;
+                padding: 0;
+                text-align: center;
+            }
+
+            .timeline .events ul {
+                list-style: none;
+            }
+
+                .timeline .events ul li {
+                    display: inline-block;
+                    width: 14.65%;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                    .timeline .events ul li a {
+                        font-family: 'Arial', sans-serif;
+                        font-size: .9em;
+                        color: #606060;
+                        text-decoration: none;
+                        position: relative;
+                        top: -32px;
+                    }
+
+                        .timeline .events ul li a:after {
+                            content: '';
+                            position: absolute;
+                            bottom: -25px;
+                            left: 50%;
+                            right: auto;
+                            height: 20px;
+                            width: 20px;
+                            border-radius: 50%;
+                            border: 3px solid #606060;
+                            background-color: #fff;
+                            transition: 0.3s ease;
+                            transform: translateX(-50%);
+                        }
+
+                        .timeline .events ul li a:hover::after {
+                            background-color: #194693;
+                            border-color: #194693;
+                        }
+
+                        .timeline .events ul li a.selected:after {
+                            background-color: #4cff00;
+                            border-color: #194693;
+                        }
+
+    .events-content {
+        width: 100%;
+        height: 100px;
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: left;
+    }
+
+        .events-content li {
+            display: none;
+            list-style: none;
+        }
+
+            .events-content li.selected {
+                display: initial;
+            }
+
+            .events-content li h2 {
+                font-family: 'Frank Ruhl Libre', serif;
+                font-weight: 500;
+                color: #919191;
+                font-size: 2.5em;
+            }
+
+    .popover {
+        background: orange;
+    }
+
+        .popover.bottom .arrow:after {
+            border-bottom-color: orange;
+        }
+</style>
+
+<input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+<input type="hidden" id="Responsables" value="@ViewBag.Responsables.Count" />
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdRol" name="IdRol" value="@Session["IdRol"].ToString()" />
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Modificar Oportunidad</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <!--i style="color:cadetblue;" class="fab fa-wpforms fa-2x fa-pull-left" aria-hidden="true"></!i-->
+                        @Session["NombreTema"] &nbsp;
+                        @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())
+                    </h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Cargando...</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="col-md-12" style="text-align:center;">
+                        @*@Model.Oportunidades.Id*@
+                        @Model.Bitacora.NombreEstado
+                    </div>
+
+                    <!-- Menu -->
+                    <div class="col-md-12" style="text-align:center;">
+                        @Html.Partial("_MenuEdicionOportunidades")
+                    </div>
+
+                    <!-- Timeline 2 -->
+                    <div class="card-header">
+                        <div class="col-md-12">
+                            <center>
+                                <ul class="breadcrumbs">
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-filter text-success" data-toggle="popover" data-content="<ul class='nav'><li>Registro en CRM</li><li>Registro de llamada, email</li><li>Reunión inicial</li</ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Generar Leads<br />20%</div>
+                                        </center>
+                                    </li>
+                                    <li class="separator">&nbsp;</li>
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-eye text-primary" data-toggle="popover" data-content="<ul class='nav'><li>Registro de necesidades y expectativas</li><li>Email de validación</li></ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Descubrir<br />40%</div>
+                                        </center>
+                                    </li>
+                                    <li class="separator">&nbsp;</li>
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-cogs text-primary" data-toggle="popover" data-content="<ul class='nav'><li>El prospecto se involucra en el ROO</li></li>Acepta presentación de propuesta</li><li>Registro en CRM de fecha de presentación</li></ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Personalizar<br />60%</div>
+                                        </center>
+                                    </li>
+                                    <li class="separator">&nbsp;</li>
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-lightbulb text-primary" data-toggle="popover" data-content="<ul class='nav'><li>Registro de comentarios sobre la propuesta</li><li>Prospecto acepta avanzar al cierre</li><li>Seguimiento en CRM</li></ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Negociar<br />80%</div>
+                                        </center>
+                                    </li>
+                                    <li class="separator">&nbsp;</li>
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-handshake text-primary" data-toggle="popover" data-content="<ul class='nav'><li>Cierre administrativo con contrato, orden de compra o factura</li></ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Cerrar<br />100%</div>
+                                        </center>
+                                    </li>
+                                    <li class="separator">&nbsp;</li>
+                                    <li class="nav-item submenu">
+                                        <center>
+                                            <h2><i class="fas fa-truck text-primary" data-toggle="popover" data-content="<ul class='nav'><li>Entrega, seguimiento, firma</li></ul>" data-placement="right" data-trigger="hover"></i></h2>
+                                            <div class="icon-class">Entrega<br />120%</div>
+                                        </center>
+                                    </li>
+                                </ul>
+                            </center>
+                        </div>
+
+                    </div>
+                    <br />
+
+
+                    <!-- Formulario -->
+
+                    <div class="card-action label-align-center">
+                        <button id="Btn-Guardar" name="Btn-Guardar" class="btn btn-sm btn-success position-fixed" onclick="GuardarModificado();" style="z-index:50">Guardar Cambios</button>
+                    </div>
+
+                    <div id="Formulario" class="row">
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                @CRM.Utilerias.CustomHelpers.EtiquetaNombre(Session["IdConfiguracion"].ToString())
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="" maxlength="50" required tabindex="1" onfocus="Grande(this);" onblur="Normal(this);">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Empresa" class="col col-form-label">Empresa</label>
+                                <div class="col-md-7 p-0">
+                                    @CRM.Utilerias.CustomHelpers.SelectEmpresas(Session["IdConfiguracion"].ToString(), Session["IdRol"].ToString(), Session["IdUsuario"].ToString())
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Atencion" class="col-md-5 col-form-label" data-toggle="tooltip" data-placement="top" title="Período de Atención">Período de Atn</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Atencion" name="Atencion" required style="width: 180px" tabindex="3">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var atn in ViewBag.Atencion)
+                                        {
+                                            <option value="@atn.Id">@atn.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    @if (Session["IdRol"].ToString() == "2" || Session["IdRol"].ToString() == "3")
+                    {
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4">&nbsp;</div>
+                            <div class="col-md-6 col-lg-8">
+                                <center>
+                                    <a href="#" onclick="AgregarClasSubClass();">Agregar más Clasificaciones/SubClasificaciones</a>
+                                    <div id="loaderClas" class="loader loader-success" style="display: none"></div>
+                                </center>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row">
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+
+                                <label for="UDN" class="col-md-4 col-form-label" data-toggle="tooltip" data-placement="top" title="Unidad de Negocio">U de N</label>
+                                <div class="col-md-8 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="UDN" name="UDN" style="width: 180px" tabindex="10">
+                                        @foreach (var udn in ViewBag.UDN)
+                                        {
+                                            <option value="@udn.Id">@udn.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Clasificacion" class="col-md-5 col-form-label">Clasificación</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Clasificacion" name="Clasificacion" style="width: 180px" required tabindex="5" onchange="ClasificacionSeleccionada();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="SubClasificacion" class="col-md-5 col-form-label">Sub-Clasificación</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="SubClasificacion" name="SubClasificacion" required style="width: 180px" tabindex="6"></select> <!-- onchange=SubClasificacionSeleccionada();-->
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Importe" class="col-md-4 col-form-label">Importe</label>
+                                <div class="col-md-7 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Importe" name="Importe" required placeholder="$000,000.00" tabindex="4" data-toggle="tooltip" data-placement="top" title="La cantidad sólo puede agregarse en Importes adicionales" readonly>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+
+                            <center>
+                                <a href="#" class="nav-link" onclick="SeleccionarOportunidadImportes();">Importes adicionales</a>
+                            </center>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4"></div>
+
+                    </div>
+
+
+                    <!-- Vencimiento, Aviso, Escalación -->
+
+                    <div class="row">
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Vencimiento</label>
+                                <div class="col-md-8 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Cierre" name="Cierre" required tabindex="7">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <label for="Aviso" class="col-md-4 col-form-label">Aviso</label><h3><a href="#" class="far fa-calendar-alt" onclick="MostrarAviso();" data-toggle="tooltip" data-placement="right" title="Dé click para agregar una nueva fecha de Aviso y a quién se le asignará"></a></h3>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <label for="Escalacion" class="col-md-4 col-form-label">Escalación</label><h3><a href="#" class="far fa-calendar-alt" onclick="MostrarEscalacion();" data-toggle="tooltip" data-placement="right" title="Dé click para agregar una nueva fecha de Escalación y a quién se le asignará"></a></h3>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 col-lg-4"></div>
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="card full-height">
+                                <div class="card-body">
+
+                                    <div class="table-responsive">
+                                        <div id="divAviso"></div>
+                                    </div>
+                                    <script>
+                                      @Html.Raw(ViewBag.CorreoEnviado)
+                                    </script>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="card full-height">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <div id="divEscaladas"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Campos de clasificacion y subclasificacion dinámicos -->
+
+                    <div id="CamposClassSubClass" class="row">
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label id="label1" name="label1" class="col-md-3 col-form-label"></label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" id="campo1" name="campo1" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label id="label3" name="label3" class="col-md-3 col-form-label"></label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" id="campo3" name="campo3" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label id="label2" name="label2" class="col-md-4 col-form-label"></label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" id="campo2" name="campo2" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label id="label4" name="label4" class="col-md-4 col-form-label"></label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" id="campo4" name="campo4" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4"></div>
+
+                    </div>
+
+                    <!-- Notas -->
+
+                    <div class="form-group">
+                        <label for="Notas">Notas</label>
+                        <textarea id="Notas" name="Notas" class="form-control form-inline input-solid" tabindex="11" cols="100" rows="7"></textarea>
+                    </div>
+
+                    <!-- Timeline 1 -->
+                    @if (Session["IdConfiguracion"].ToString() == "0")
+                    {
+                        <div class="timeline" id="timeline1">
+                            <div class="events">
+                                <ol>
+                                    <ul>
+                                        <li>
+                                            <a href="#0" class="selected" onclick="Etapa1();" data-toggle="tooltip" data-placement="left" title="Calificar si se han cumplido los requisitos originales de inicio">Inicio</a>
+                                        </li>
+                                        <li>
+                                            <a href="#1" id="tl-etapa2" name="tl-etapa2" onclick="Etapa2();" data-toggle="tooltip" data-placement="left" title="Calificar si el o los responsables han leído su asignación">Asignado</a>
+                                        </li>
+                                        <li>
+                                            <a href="#2" id="tl-etapa3" name="tl-etapa3" onclick="Etapa3();" data-toggle="tooltip" data-placement="left" title="Calificar si los responsables ya se encuentran procesando su asignación">En Proceso</a>
+                                        </li>
+                                        <li>
+                                            <a href="#3" id="tl-etapa4" name="tl-etapa4" onclick="Etapa4();" data-toggle="tooltip" data-placement="left" title="Calificar si los responsables están procesando su asignación antes del tiempo de vencimiento">Vencido</a>
+                                        </li>
+                                        <li>
+                                            <a href="#4" id="tl-etapa5" name="tl-etapa5" onclick="EtapaCierre();" data-toggle="tooltip" data-placement="left" title="Cerrar el tema si se ha cumplido con las entregas de los responsables, aun fuera de tiempo">Cerrado</a>
+                                        </li>
+                                    </ul>
+                                </ol>
+                            </div>
+                        </div>
+                        <br /><br /><br />
+                    }
+
+                    <!--Estado-->
+
+                    <div class="row">
+
+                        <div class="col"></div>
+
+                        <div class="col-10">
+
+                            <div class="card full-height">
+                                <div class="card-body">
+
+                                    <div class="form-group form-inline">
+                                        <label for="Estado" class="col-md-4 col-form-label">Estado</label>
+                                        <div class="col-md-6 p-0">
+                                            <select class="form-control form-control-sm input-solid" id="Estado" name="Estado" style="width: 180px" onchange="CambiarEstado();" tabindex="12">
+                                                @foreach (var edt in ViewBag.Estado)
+                                                {
+                                                    <option value="@edt.Id">@edt.Nombre</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <div id="divEstadosOportunidadDesc" style="width:100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col"></div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col">
+
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#ModalCompartir">Compartir esta oportunidad con otro(s) usuario(s)</a>
+
+                            <div id="divCompartidos"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="form-group form-inline">
+                            <label id="ComentariosFinales" name="ComentariosFinales" class="label"></label>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+                <script type="text/javascript">
+                    $(function () {
+                        var msg = '@ViewData["Mensaje"]';
+                        if (msg == 'Agregado') {
+                            $.notify('Asignado Correctamente', { autohide: true, });
+                        }
+                        else if (msg == 'Fallo') {
+                            $.notify('Falló el envío, contacte a administrador', { autohide: true, });
+                        }
+                        else { }
+                    });
+                </script>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Etapas -->
+
+<div class="modal fade" id="ModalEtapa1" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Calificar Inicio</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="cal-chk-1" name="cal-chk-1">
+                            <span class="form-check-sign">Clasificación</span>
+                        </label>
+                        <label id="cal-et1" class="col-md-3"></label>
+                    </div>
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="cal-chk-2" name="cal-chk-2">
+                            <span class="form-check-sign">Sub-Clasificación</span>
+                        </label>
+                        <label id="cal-et2" class="col-md-3"></label>
+                    </div>
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="cal-chk-3" name="cal-chk-3">
+                            <span class="form-check-sign">Empresa</span>
+                        </label>
+                        <label id="cal-et3" class="col-md-3"></label>
+                    </div>
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="cal-chk-4" name="cal-chk-4">
+                            <span class="form-check-sign">Período de Atención</span>
+                        </label>
+                        <label id="cal-et4" class="col-md-3"></label>
+                    </div>
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="cal-chk-5" name="cal-chk-5">
+                            <span class="form-check-sign">Responsable(s)</span>
+                        </label>
+                        <label id="cal-et5" class="col-md-3"></label>
+                    </div>
+
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="Btn-Fase1-Seguir" name="Btn-Fase1-Seguir" class="btn btn-success animated bounceInRight" data-dismiss="modal" disabled onclick="CalificarEtapa1();">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalEtapa2" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Asignación</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    Responsable(s) han leído el asunto<br />
+                    Está enterado<br />
+                    Está tomando acciones
+
+                    <div id="responsables-leido-asunto"></div>
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="Btn-Fase2-Seguir" name="Btn-Fase2-Seguir" class="btn btn-success animated bounceInRight" data-dismiss="modal" disabled onclick="GuardarEtapa2();">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalEtapa3" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Proceso</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <label class="col-md-5">Responsable En Proceso</label>
+
+                <div class="col-md-12">
+
+                    <div id="responsables-en-proceso"></div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="Btn-Fase3-Seguir" name="Btn-Fase3-Seguir" class="btn btn-success animated bounceInRight" data-dismiss="modal" disabled onclick="GuardarEtapa3();">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalEtapa4" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Vencimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    Fechas de seguimiento concluídas, por concluir, prorroga
+
+                    <div id="responsables-terminado"></div>
+
+                    <!--div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="e4-cal-chk-1" name="e4-cal-chk-1">
+                            <span class="form-check-sign">Creación</span>
+                        </label>
+                        <label id="cal-et4-1" class="col-md-3"></label>
+                    </div-->
+
+                    <div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="e4-cal-chk-2" name="e4-cal-chk-2">
+                            <span class="form-check-sign">Cierre</span>
+                        </label>
+                        <label id="cal-et4-2" class="col-md-3"></label>
+                    </div>
+
+                    <!--div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="e4-cal-chk-3" name="e4-cal-chk-3">
+                            <span class="form-check-sign">Aviso</span>
+                        </label>
+                        <label id="cal-et4-3" class="col-md-3"></label>
+                    </div-->
+                    <!--div class="form-check">
+                        <label class="form-check-label col-md-7">
+                            <input class="form-check-input" type="checkbox" id="e4-cal-chk-4" name="e4-cal-chk-4">
+                            <span class="form-check-sign">Última Escalación</span>
+                        </label>
+                        <label id="cal-et4-4" class="col-md-3"></label>
+                    </div-->
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="Btn-Fase4-Seguir" name="Btn-Fase4-Seguir" class="btn btn-success animated bounceInRight" data-dismiss="modal" disabled onclick="CalificarEtapa4();">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalEtapaCierre" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Cierre</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="e5-chk-cerrado" name="e5-chk-cerrado">
+                            <span class="form-check-sign">Cierre</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Notas">Notas Finales:</label>
+                        <textarea id="NotasFinales" name="NotasFinales" class="form-control form-inline input-solid" rows="3" cols="5"></textarea>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btn-e4-cerrado" class="btn btn-success animated bounceInRight" data-dismiss="modal" disabled onclick="CerrarTema();">Terminar</button>
+                <button type="button" class="btn btn-secondary animated bounceInLeft" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fin Etapas -->
+<!-- Aviso -->
+<div class="modal fade" id="ModalAviso" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Fecha de Aviso</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12 col-lg-12">
+
+                    <div class="form-group form-inline">
+                        <label class="col-md-4 col-form-label">Fecha de Aviso</label>
+                        <div class="col-md-7 p-0">
+                            <input type="text" id="FechaAviso" name="FechaAviso" class="form-control form-control-sm input-solid" onblur="ValidaFechaAviso();" />
+                        </div>
+                    </div>
+
+
+                    <div class="form-group form-inline">
+                        <label id="lContactosAviso" for="Responsables2" class="col-md-4 col-form-label">Responsables</label>
+                        <div class="col-md-7 p-0">
+                            <select class="form-control form-control-sm input-solid" id="Responsables2" name="Responsables2" required style="width: 150px">
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsablesOptionsSABE(Session["IdConfiguracion"].ToString(), Session["IdEmpresa"].ToString(), Session["IdUsuario"].ToString(), Session["IdRol"].ToString());
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsablesOptionsASAE(Session["IdConfiguracion"].ToString(), Session["IdUsuario"].ToString());
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <center>
+                        <button type="button" id="BtnAgregarAviso" class="btn btn-sm btn-success" onclick="AgregarAviso();" data-dismiss="modal">Agregar</button>
+                    </center>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Escalación -->
+<div class="modal fade" id="ModalEscalacion" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Fecha de Escalación</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12 col-lg-12">
+
+                    <div class="form-group form-inline">
+                        <label class="col-md-4 col-form-label">Fecha de Escalación</label>
+                        <div class="col-md-7 p-0">
+                            <input type="text" id="FechaEscalacion" name="FechaEscalacion" class="form-control form-control-sm input-solid" onblur="ValidaFechaEscalacion();" />
+                        </div>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label id="lContactos" for="Responsables1" class="col-md-4 col-form-label" style="width: 90px">Responsables</label>
+                        <div class="col-md-76 p-0">
+                            <select class="form-control form-control-sm input-solid" id="Responsables1" name="Responsables1" required style="width: 150px">
+                                @if (Session["IdConfiguracion"].ToString() == "3")
+                                {
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsablesOptionsSABE(Session["IdConfiguracion"].ToString(), Session["IdEmpresa"].ToString(), Session["IdUsuario"].ToString(), Session["IdRol"].ToString());
+                                }
+                                else if (Session["IdConfiguracion"].ToString() == "2")
+                                {
+                                    @CRM.Utilerias.CustomHelpers.SelectResponsablesOptionsASAE(Session["IdConfiguracion"].ToString(), Session["IdUsuario"].ToString());
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <center>
+                        <button type="button" id="BtnAgregarEscalacion" class="btn btn-sm btn-success" onclick="AgregarEscalacion();" data-dismiss="modal">Agregar</button>
+                    </center>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clasificaciones/subclasificaciones-->
+<div class="modal fade" id="ModalClassSubclass" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Clasificaciones/SubClasificaciones</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Clasificaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">SubClasificaciones</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3 mb-4" id="pills-tabContent">
+
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreClas" class="col-md-3 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-7 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreClas" id="aNombreClas" placeholder="Nombre de la Clasificación" required>
+                                </div>
+                            </div>
+
+                            <center>
+                                <button type="button" class="btn btn-success btn-sm animated bounceInRight" data-dismiss="modal" onclick="AgregarClasificacion();">Agregar Nueva Clasificación</button>
+                            </center>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-5 col-form-label fc-left">Clasificación</label>
+                                <div class="col-md-7 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="aClasificacion" name="aClasificacion" style="width: 180px" required>
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm in ViewBag.Clasificacion2)
+                                        {
+                                            <option value="@itm.Id">@itm.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="aNombreSubClas" class="col-md-5 col-form-label fc-left">Nombre</label>
+                                <div class="col-md-7 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" name="aNombreSubClas" id="aNombreSubClas" placeholder="Nombre SubClasificación" required>
+                                </div>
+                            </div>
+
+                            <center>
+                                <button type="button" class="btn btn-success btn-sm animated bounceInRight" data-dismiss="modal" onclick="AgregarSubClasificacion();">Aceptar</button>
+                            </center>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reasignación de oportunidad -->
+<div class="modal fade" id="ModalReasignacion" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Reasignación de Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <p>Seleccionar el usuario al que se le asignará la oportunidad.</p>
+                    <p>A partir de ahora el usuario seleccionado será el propietario absoluto de la oportunidad.</p>
+
+                    <p>
+                        <select id="NuevoResponsable" class="form-group">
+                            <option value=""></option>
+                            @foreach (var item in ViewBag.ResponsablesParaReasignar)
+                            {
+                                <option value="@item.Id">@item.Nombre @item.ApellidoPaterno @item.ApellidoMaterno</option>
+                            }
+                        </select>
+                    </p>
+
+                    <p><button type="button" class="btn btn-success" onclick="ReasignarOportunidad();">Aceptar</button></p>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compartir oportunidad -->
+<div class="modal fade" id="ModalCompartir" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Compartir Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <p>Seleccionar el usuario con el que se compartirá la oportunidad.</p>
+                    <p>A partir de ahora el usuario seleccionado podra modificar el detalle de la oportunidad.</p>
+
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+
+                            <div class="form-group form-inline">
+                                <label for="Cierre" class="col-md-4 col-form-label">Usuario</label>
+                                <div class="col-md-8 p-0">
+                                    <select id="NuevoResponsable2" class="form-group form-control-sm input-solid" style="width: 180px">
+                                        <option value=""></option>
+                                        @foreach (var item in ViewBag.ResponsablesParaReasignar)
+                                        {
+                                            <option value="@item.Id">@item.Nombre @item.ApellidoPaterno @item.ApellidoMaterno</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <button type="button" class="btn btn-sm btn-success" onclick="Compartir();">Aceptar</button>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cambiar Fecha de Vencimiento -->
+<div class="modal fade" id="ModalFechaVencimiento" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Cambiar Fecha de Vencimiento</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <p>Agregue la nueva fecha de vencimiento.</p>
+                    <h4 id="adv01"><strong>No podrá cambiar la fecha de vencimiento a una fecha anterior</strong></h4>
+                    <p>Se enviará un correo a los responsables asignados para su conocimiento de este cambio.</p>
+
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="NuevaFechaCierre" class="col-md-7 col-form-label">Fecha actual de Vencimiento:</label>
+                                <div class="col-md-3 p-0">
+                                    <label id="FechaActual" class="col-md-3 col-form-label"></label>
+                                </div>
+                            </div>
+
+                            <div class="form-group form-inline">
+                                <label for="NuevaFechaCierre" class="col-md-4 col-form-label">Nueva Fecha</label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="NuevaFechaCierre" name="NuevaFechaCierre" required />
+                                </div>
+                                <div class="col-md-2 p-0">
+                                    <button type="button" class="btn btn-sm btn-success" onclick="CambiarFechaCierre();">Aceptar</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group form-inline">
+
+                            <div id="divFechasVencimientoAnteriores"></div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Otros importes -->
+<div class="modal fade" id="ModalImportes" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Importes</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="Importes" class="col-md-4 col-form-label">Importe</label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="Importes" name="Importes" required data-toggle="tooltip" data-placement="top" title="Agregue sólo numeros sin separadores, solo el punto para los decimales">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoMonedas" class="col-md-4 col-form-label">Moneda</label>
+                                <div class="col-md-6 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="TipoMonedas" name="TipoMonedas" required style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var itm2 in ViewBag.Monedas)
+                                        {
+                                            <option value="@itm2.Id">@itm2.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoCambios" class="col-md-4 col-form-label">Tipo de Cambio</label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid input-number" id="TipoCambios" name="TipoCambios" placeholder="0" required data-toggle="tooltip" data-placement="top" title="Agregue sólo números, sólo el punto para decimales, 0 si la moneda es nacional">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="Rubros" class="col-md-4 col-form-label">Rubro</label>
+                                <div class="col-md-6 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="Rubros" name="Rubros" required style="width: 180px" data-toggle="tooltip" data-placement="top" title="Seleccione un rubro aún si no existe, solicite que sea agregado después">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var rub in CRM.Models.Catalogos.Seleccionar("Rubros"))
+                                        {
+                                            <option value="@rub.Id">@rub.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" id="IdOportunidadImporte" />
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12 col-lg-12">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoCambios" class="col-md-4 col-form-label">Observaciones</label>
+                                <div class="col-md-8 p-0">
+                                    <textarea id="Observacioness" class="form-control form-control-sm input-solid" cols="50"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12 p-0">
+                            <center>
+                                <button id="BtnAgregarOportunidadImporte" type="button" class="btn btn-success" onclick="AgregarOportunidadImporte();">Agregar</button>
+                                <button id="BtnModificarOportunidadImporte" type="button" class="btn btn-success" onclick="ModificarOportunidadImporte();">Modificar</button>
+                            </center>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="form-group form-inline">
+
+                            <div id="divImportes"></div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col">
+                            <div id="SumaTotal"></div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modificar estado oportunidad -->
+<div class="modal fade" id="ModalModificarEstado" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar Estado de la Oportunidad</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="mEstado" class="col-md-4 col-form-label">Estado</label>
+                                <div class="col-md-6 p-0">
+                                    <select class="form-control form-control-sm input-solid" id="mEstado" name="mEstado" style="width: 180px" tabindex="12">
+                                        @foreach (var edt in ViewBag.Estado)
+                                        {
+                                            <option value="@edt.Id">@edt.Nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoMonedas" class="col-md-4 col-form-label">Comentarios</label>
+                                <div class="col-md-6 p-0">
+                                    <textarea id="mComentarios" cols="50" rows="4" class="form-group"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-6">
+
+                            <div class="form-group form-inline">
+                                <label for="mFecha" class="col-md-4 col-form-label">Fecha</label>
+                                <div class="col-md-6 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="mFecha" name="mFecha" placeholder="">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" id="mId" />                        
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="ModificarEstado();">Modificar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Datetime picker -->
+<script src="../assets/js/plugin/datetimepicker/moment.js"></script>
+<script src="../assets/js/plugin/datetimepicker/datetimepicker.js"></script>
+
+<script>
+
+    $('#Cierre').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#FechaAviso').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#FechaEscalacion').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+    $('#NuevaFechaCierre').datetimepicker({
+        format: 'DD/MM/YYYY',
+    });
+
+</script>

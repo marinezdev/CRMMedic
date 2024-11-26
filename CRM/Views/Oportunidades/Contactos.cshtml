@@ -1,0 +1,342 @@
+﻿
+@{
+    ViewBag.Title = "Contactos";
+}
+
+    <script>
+
+        $(document).ready(function () {
+
+            var obtenerParametrodeURL = function getUrlParameter(sParam) {
+                var sPageURL = window.location.search.substring(1),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName,
+                    i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+            };
+
+            var ide = obtenerParametrodeURL('IdE');
+            $('#IdEmpresa').val(ide);
+
+        $('#opcOport').addClass("nav-item active submenu");
+        $('#Espera').hide();
+
+        $('#basic-datatables-contactos').DataTable({
+            'columnDefs': [
+                { 'targets': 0, width: '35%' },
+                { 'targets': 5, className: 'text-center' }
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            }
+        });
+
+        CargaInicial();
+    });
+
+    function CargaInicial() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarContactosAsignadosAOportunidad/",
+            data: { idconfiguracion: $('#IdConfiguracion').val(), idoportunidad: $('#IdOportunidad').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log('->' + data[1].Contactos.Nombre);
+                if (typeof data[0] === 'undefined') {
+                    $('#basic-datatables-contactos').dataTable().fnClearTable();
+                }
+                else {
+                    $('#basic-datatables-contactos').DataTable().clear();
+                    for (var i = 0; i < data.length; i++) {
+                        $('#basic-datatables-contactos').dataTable().fnAddData([
+                            data[i].Contactos.Nombre,
+                            data[i].TipoPersona.Nombre,
+                            data[i].Contactos.Correo,
+                            data[i].Contactos.Telefono,
+                            data[i].Contactos.Celular,
+                            '<a href="#" onclick="SeguroEliminarArchivo(' + data[i].Contactos.Id + ');"><i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="Eliminar"></i></a>'
+                        ]);
+                    }
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarContactoAOportunidad() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarOportunidadContactos/",
+            data: {
+                IdOportunidad: $('#IdOportunidad').val(),
+                IdContacto: $('#Contactos').val(),
+                IdTipoPersona: $('#TipoContacto').val(),
+                IdConfiguracion: $('#IdConfiguracion').val(),
+                IdEmpresa: $('#IdEmpresa').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                //console.log(data);
+                if (data == 1) {
+                    swal({
+                        title: 'Guardado Exitoso',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href='/Oportunidades/Contactos';
+                            //CargaInicial();
+                        });
+
+                }
+                //CargaInicial();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function AbrirModalNuevoTipoPersona() {
+        $('#ModalTipoPersona').modal('show');
+    }
+
+    function AgregarTipoPersona() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarTipoPersona/",
+            data: { Nombre: $('#aNombreTipoPersona').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+
+                $('#TipoContacto').empty();
+                $('#TipoContacto').append('<option value=></option>');
+                for (var i = 0; i < data.length; i++) {
+                    $('#TipoContacto').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                }
+            },
+            error: function (data) {
+            },
+        });
+    }
+
+    function SeguroEliminarArchivo(idcontacto) {
+        swal({
+            title: 'Eliminación de Contacto',
+            text: "¿Está seguro de querer eliminar este contacto?",
+            type: 'warning',
+            buttons: {
+                confirm: {
+                    text: 'Si, eliminarlo!',
+                    className: 'btn btn-danger'
+                },
+                cancel: {
+                    visible: true,
+                    className: 'btn btn-warning',
+                    text: 'Cancelar'
+                }
+            }
+        }).then((Delete) => {
+            if (Delete) {
+                location.href = '/Oportunidades/EliminarContacto?idcontacto=' + idcontacto + '&idoportunidad=' + $('#IdOportunidad').val();
+                //CargaInicial();
+            }
+        });
+    }
+
+    </script>
+
+<input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdEmpresa" value="" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Contactos</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Session["NombreTema"] &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString())</h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Menu -->
+                    <div class="row">
+
+                        @Html.Partial("_MenuEdicionOportunidades")
+
+                    </div>
+
+                    <br />
+
+                    @Html.Raw(ViewBag.Procesado)
+
+                    @Html.Raw(ViewBag.Mensaje)
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4"></div>
+                        <div class="col-md-6 col-lg-4"> <a href="#" onclick="AbrirModalNuevoTipoPersona();">Agregar nuevo tipo de persona</a></div>
+                        <div class="col-md-6 col-lg-4"></div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Contactos" class="col-form-label" style="width: 90px">Contactos</label>
+      
+                                <select multiple class="form-control" name="Contactos" style="width: 180px" data-trigger="hover" data-toggle="popover" title="" data-content="Solo aparecerán los contactos que pertenezcan a la empresa asignada">
+                                    @foreach (var itm in ViewBag.Contactos)
+                                    {
+                                        <option value="@itm.Id">@itm.Nombre @itm.ApellidoPaterno @itm.ApellidoMaterno</option>
+                                    }
+                                </select>
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="TipoContacto" class="col-md-3 col-form-label">Tipo:</label>
+                                <select class="form-control form-control-sm input-solid" id="TipoContacto" name="TipoContacto" style="width: 190px" tabindex="13">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var tp in ViewBag.TipoPersona)
+                                    {
+                                        <option value="@tp.Id">@tp.Nombre</option>
+                                    }
+                                </select>
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 col-lg-4"><button class="btn btn-success" onclick="AgregarContactoAOportunidad();">Agregar Contacto</button></div>
+
+                    </div>
+
+                    @if (ViewBag.Asignados.Count > 0)
+                    {
+
+                        <table id="basic-datatables-contactos" class="display table-striped table-hover" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Contacto</th>
+                                    <th>Tipo Persona</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Celular</th>
+                                    <th>Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @*@if (ViewBag.Asignados != null)
+                        {
+
+                            foreach (var items in ViewBag.Asignados)
+                            {
+                        <tr>
+                            <td>@items.Contactos.Nombre </td>
+                            <td>@items.TipoPersona.Nombre</td>
+                            <td>@items.Contactos.Correo</td>
+                            <td>@items.Contactos.Telefono</td>
+                            <td>@items.Contactos.Celular</td>
+                            <td><a href="#" onclick="SeguroEliminarArchivo(@items.Contactos.Id);"><i class='fas fa-trash' data-toggle='tooltip' data-placement='top' title='Eliminar'></i></a></td>
+                        </tr>
+                            }
+                        }*@
+
+                            </tbody>
+                        </table>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="ModalTipoPersona" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Tipo de Persona</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="form-group form-inline">
+                        <label for="aNombreTipoPersona" class="col-md-3 col-form-label fc-left">Nombre</label>
+                        <div class="col-md-9 p-0">
+                            <input type="text" class="form-control form-control-sm input-solid" name="aNombreTipoPersona" id="aNombreTipoPersona" placeholder="" required>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="AgregarTipoPersona();">Aceptar</button>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+

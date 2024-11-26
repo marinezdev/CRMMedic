@@ -1,0 +1,429 @@
+﻿
+@{
+    ViewBag.Title = "NIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    table.dataTable thead tr {
+        background-color: #1572E8;
+        background: linear-gradient(-45deg,#17a2b8,#1572e8) !important;
+        color: white;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: cadetblue;
+        background-color: #1572E8;
+        background: linear-gradient(-45deg,#17a2b8,#1572e8) !important;
+        color: white;
+    }
+</style>
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Pacientes</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="#">
+                    <i class="flaticon-user-6"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <h4 class="card-title">Lista de pacientes </h4>
+
+                        <div class="card-tools">
+                            <a href="/Contactos/Graficos?opc=1" class="btn btn-default">
+                                <span class="btn-label">
+                                    <i class="fas fa-chart-bar"></i>
+                                </span>
+                                Medidores
+                            </a>
+                            <a href="@Url.Action("NNuevoContacto", "Contactos")" class="btn btn-primary">
+                                <span class="btn-label">
+                                    <i class="fa fa-plus"></i>
+                                </span>
+                                Nuevo paciente
+                            </a>
+                        </div>
+                    </div>
+
+                    <p class="card-category">
+                        Selecciona el tipo de paciente que deseas listar
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group">
+                                <label for="defaultSelect"> * Tipo paciente  </label>
+                                <select class="form-control form-control" id="Select_TipoContato">
+                                    <option value="0">Seleccionar </option>
+                                    <option value="1">Cliente  </option>
+                                    <option value="2">Prospecto </option>
+                                    <option value="3">Todo </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="ListContactos" style="display: none;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <h4 class="card-title">Lista de contactos </h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">&nbsp;</div>
+                        <div class="col-md-3">&nbsp;</div>
+                        <div class="col-md-3">&nbsp;</div>
+                        <div class="col-md-3">
+                          @*  <button name="btnExcel" id="btnExcel" type="submit" value="ExpExcel" class="btn btn-success" style="width:100%;" onclick="ExportarContactos();">&nbsp;&nbsp;<i class="fas fa-file-excel" style="color:#fff; font-size:24px;"></i>&nbsp;&nbsp;&nbsp;Reporte de Prospectos&nbsp;&nbsp;&nbsp;</button>*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12" id="ContenidoContactos">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="ListContactosCompartidos" style="display: none;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <h4 class="card-title">Lista de contactos compartidos</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-12" id="ContenidoContactosCompartidos">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#opcContactos').addClass("nav-item active submenu");
+    });
+
+    $(document).on('change', '#Select_TipoContato', function (event) {
+        var IdTipoContacto = $("#Select_TipoContato option:selected").val();
+        $("#ListContactos").css("display", "none");
+        $("#ListContactosCompartidos").css("display", "none");
+
+        if (IdTipoContacto > 0) {
+            var obj = {};
+            obj['TipoContacto'] = IdTipoContacto;
+            var jsonObject = {
+                "Contactos": obj
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Contactos_Selecionar_Roles", "Contactos")",
+                async: false,
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultado,
+                error: errores
+            });
+
+
+
+             $.ajax({
+                type: "POST",
+                url: "@Url.Action("Contactos_Compartidos", "Contactos")",
+                async: false,
+                data: JSON.stringify(jsonObject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: resultadoCompartidos,
+                error: errores
+             });
+
+        } else {
+            $.notify({
+                message: "Selecciona el tipo de persona!."
+            }, {
+                type: 'danger',
+                allow_dismiss: false,
+                animate: {
+                    enter: 'animated rollIn',
+                    exit: 'animated rollOut'
+                }
+            });
+        }
+    });
+
+    function resultadoCompartidos(data) {
+        $("#ListContactosCompartidos").show();
+
+        var contenido = "";
+        contenido += "" +
+        "<div class='table-responsive'>" +
+            "<table id='multi-filter-select2' class='display compact table-striped table-hover' style='width:100%; cursor: pointer;text-align:center;'>"+
+                "<thead class='header'>" +
+                    "<tr>" +
+                        "<th>Nombre</th>" +
+                        "<th>Médico</th>" +
+                        "<th>Correo</th>" +
+                        "<th>Celular</th>" +
+                        "<th>Teléfono</th>" +
+                        "<th data-toggle='tooltip' data-placement='top' title='Unidad de Negocio'>U&nbsp;de&nbsp;N</th>" +
+                        "<th>Tipo <br> Persona</th>" +
+                        "<th>Tipo</th>" +
+                        "<th>Cargo</th>" +
+                        "<th>Area</th>" +
+                        "<th>Detalle</th>" +
+                    "</tr>" +
+                "</thead>" +
+                "<tfoot>" +
+                    "<tr>" +
+                        "<th>Nombre</th>" +
+                        "<th>Médico</th>" +
+                        "<th>Correo</th>" +
+                        "<th>Celular</th>" +
+                        "<th>Teléfono</th>" +
+                        "<th data-toggle='tooltip' data-placement='top' title='Unidad de Negocio'>U&nbsp;de&nbsp;N</th>" +
+                        "<th>Tipo Persona</th>" +
+                        "<th>Tipo</th>" +
+                        "<th>Cargo</th>" +
+                        "<th>Area</th>" +
+                        "<th>Detalle</th>" +
+                    "</tr>" +
+                "</tfoot>" +
+                "<tbody>";
+
+        for (var i = 0; i < data.length; i++) {
+            contenido += "<tr onclick='ConsultaContacto(" + data[i].Contactos.Id + ")'>" +
+                "<td>" + data[i].Contactos.Nombre + " " + data[i].Contactos.ApellidoPaterno + " " + data[i].Contactos.ApellidoMaterno + "</td>" +
+                "<td>" + data[i].Empresas.Nombre + "</td>" +
+                "<td>" + data[i].Contactos.Correo + "</td>" +
+                "<td>" + data[i].Contactos.Celular + "</td>" +
+                "<td>" + data[i].Contactos.Telefono + "</td>" +
+                "<td>" + data[i].UDN.Nombre + "</td>" +
+                "<td>" + data[i].Contactos.sTipoPersona + "</td>";
+
+                if (data[i].Contactos.TipoContacto == 1) {
+                    contenido += "<td> Cliente </td>";
+                } else if (data[i].Contactos.TipoContacto == 2){
+                    contenido += "<td> Prospecto </td>";
+                }
+
+            contenido += "<td>" + data[i].Contactos.Cargo + "</td>";
+            contenido += "<td>" + data[i].Contactos.Area + "</td>";
+
+
+            contenido += "<td><button type='button' class='btn btn-icon btn-round btn-default'>" +
+				    "<i class='fa fa-archive'></i>" +
+			    "</button>" +
+             "</td> " +
+                "</tr>";
+        }
+
+        contenido +=
+                "</tbody>" +
+            "</table>" +
+        "</div>";
+
+        $('#ContenidoContactosCompartidos').html(contenido);
+
+        $('#multi-filter-select2').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+    }
+
+    function resultado(data) {
+
+        $("#ListContactos").show();
+
+        var contenido = "";
+        contenido += "" +
+        "<div class='table-responsive'>" +
+            "<table id='multi-filter-select' class='display compact table-striped table-hover' style='width:100%; cursor: pointer;text-align:center;'>"+
+                "<thead class='header'>" +
+                    "<tr>" +
+                        "<th>Nombre</th>" +
+                        "<th>Médico</th>" +
+                        "<th>Correo</th>" +
+                        "<th>Celular</th>" +
+                        "<th>Teléfono</th>" +
+                        "<th data-toggle='tooltip' data-placement='top' title='Unidad de Negocio'>U&nbsp;de&nbsp;N</th>" +
+                        "<th>Tipo <br> Persona</th>" +
+                        "<th>Tipo</th>" +
+                        "<th>Cargo</th>" +
+                        "<th>Area</th>" +
+                        "<th>Detalle</th>" +
+                    "</tr>" +
+                "</thead>" +
+                "<tfoot>" +
+                    "<tr>" +
+                        "<th>Nombre</th>" +
+                        "<th>Médico</th>" +
+                        "<th>Correo</th>" +
+                        "<th>Celular</th>" +
+                        "<th>Teléfono</th>" +
+                        "<th data-toggle='tooltip' data-placement='top' title='Unidad de Negocio'>U&nbsp;de&nbsp;N</th>" +
+                        "<th>Tipo Persona</th>" +
+                        "<th>Tipo</th>" +
+                        "<th>Cargo</th>" +
+                        "<th>Area</th>" +
+                        "<th>Detalle</th>" +
+                    "</tr>" +
+                "</tfoot>" +
+                "<tbody>";
+
+        for (var i = 0; i < data.length; i++) {
+            contenido += "<tr onclick='ConsultaContacto(" + data[i].Contactos.Id + ")'>" +
+                "<td>" + data[i].Contactos.Nombre + " " + data[i].Contactos.ApellidoPaterno + " " + data[i].Contactos.ApellidoMaterno + "</td>" +
+                "<td>" + data[i].Empresas.Nombre + "</td>" +
+                "<td>" + data[i].Contactos.Correo + "</td>" +
+                "<td>" + data[i].Contactos.Celular + "</td>" +
+                "<td>" + data[i].Contactos.Telefono + "</td>" +
+                "<td>" + data[i].UDN.Nombre + "</td>" +
+                "<td>" + data[i].Contactos.sTipoPersona + "</td>";
+
+                if (data[i].Contactos.TipoContacto == 1) {
+                    contenido += "<td> Cliente </td>";
+                } else if (data[i].Contactos.TipoContacto == 2){
+                    contenido += "<td> Prospecto </td>";
+                }
+
+            contenido += "<td>" + data[i].Contactos.Cargo + "</td>";
+            contenido += "<td>" + data[i].Contactos.Area + "</td>";
+
+            contenido += "<td><button type='button' class='btn btn-icon btn-round btn-default'>" +
+				    "<i class='fa fa-archive'></i>" +
+			    "</button>" +
+             "</td> " +
+                "</tr>";
+        }
+
+        contenido +=
+                "</tbody>" +
+            "</table>" +
+        "</div>";
+
+        $('#ContenidoContactos').html(contenido);
+
+        $('#multi-filter-select').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select class="form-control"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+
+    }
+
+    function errores() {
+        $.notify({
+            message: "Inténtelo mas tarde."
+        }, {
+            type: 'danger',
+            allow_dismiss: false,
+            animate: {
+                enter: 'animated rollIn',
+                exit: 'animated rollOut'
+            }
+        });
+    }
+
+    function ConsultaContacto(Id) {
+        location.href = '/Contactos/Editar?Id=' + Id;
+    }
+
+
+    function ExportarContactos()
+    {
+        var IdTipoContacto = $("#Select_TipoContato option:selected").val();
+
+
+        var obj = {}
+        obj['Id'] = IdTipoContacto;
+        var jsonObject = {
+            "Marketing": obj
+        }
+
+        $.ajax({
+            url: "@Url.Action("ExcelContactos", "Contactos")",
+            type: "POST",
+            data: JSON.stringify(jsonObject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data) {
+                window.location = '/Marketing/Download?fileName=' + data.FileGuid;
+            },
+            error: function(data) {
+                alert('error...........................................');
+            }
+        });
+    }
+</script>

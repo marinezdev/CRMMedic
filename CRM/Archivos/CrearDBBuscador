@@ -1,0 +1,234 @@
+
+USE [master]
+GO
+/****** Object:  Database [Buscador]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+CREATE DATABASE [Buscador]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Buscador', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLEXPRESS\MSSQL\DATA\Buscador.mdf' , SIZE = 5120KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'Buscador_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.SQLEXPRESS\MSSQL\DATA\Buscador_log.ldf' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [Buscador] SET COMPATIBILITY_LEVEL = 120
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Buscador].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Buscador] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [Buscador] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [Buscador] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [Buscador] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [Buscador] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [Buscador] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [Buscador] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [Buscador] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [Buscador] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [Buscador] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [Buscador] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [Buscador] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [Buscador] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [Buscador] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [Buscador] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [Buscador] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [Buscador] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [Buscador] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [Buscador] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [Buscador] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [Buscador] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [Buscador] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [Buscador] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [Buscador] SET  MULTI_USER 
+GO
+ALTER DATABASE [Buscador] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [Buscador] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [Buscador] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [Buscador] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+GO
+ALTER DATABASE [Buscador] SET DELAYED_DURABILITY = DISABLED 
+GO
+USE [Buscador]
+GO
+/****** Object:  Table [dbo].[__MigrationHistory]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[__MigrationHistory](
+	[MigrationId] [nvarchar](150) NOT NULL,
+	[ContextKey] [nvarchar](300) NOT NULL,
+	[Model] [varbinary](max) NOT NULL,
+	[ProductVersion] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK_dbo.__MigrationHistory] PRIMARY KEY CLUSTERED 
+(
+	[MigrationId] ASC,
+	[ContextKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Cliente]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Cliente](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL,
+	[Direccion] [nvarchar](50) NULL,
+	[Edad] [int] NULL,
+	[Telefono] [nvarchar](50) NULL,
+	[Sexo] [char](1) NULL,
+	[CuentaBancaria] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Clientes]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Clientes](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](max) NULL,
+	[Direccion] [nvarchar](max) NULL,
+	[Edad] [int] NOT NULL,
+	[Telefono] [nvarchar](max) NULL,
+	[Sexo] [nvarchar](max) NULL,
+	[CuentaBancaria] [nvarchar](max) NULL,
+ CONSTRAINT [PK_dbo.Clientes] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Detalle1]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Detalle1](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[NumeroTarjeta] [nvarchar](50) NULL,
+	[Compra] [nvarchar](50) NULL,
+	[Monto] [decimal](18, 0) NULL,
+	[TipoTarjeta] [int] NULL,
+	[TipoProducto] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Procesos]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Procesos](
+	[IdCliente] [int] NULL,
+	[IdDetalle1] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TipoProducto]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TipoProducto](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TipoTarjeta]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TipoTarjeta](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  StoredProcedure [dbo].[Clientes_Seleccionar]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[Clientes_Seleccionar]
+AS
+BEGIN	
+	SELECT Id, Nombre, direccion, edad, telefono, sexo, CuentaBancaria
+	FROM cliente
+END
+
+GO
+/****** Object:  StoredProcedure [dbo].[DetalleCompra_Seleccionar]    Script Date: 21/04/2020 07:37:12 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[DetalleCompra_Seleccionar] 
+	@id INT
+AS
+BEGIN
+	SELECT  det1.Id, det1.NumeroTarjeta,det1.Compra,det1.Monto,det1.TipoTarjeta, det1.TipoProducto,
+	tt.Nombre AS TipoTarjeta,
+	tp.Nombre AS TipoProducto
+	FROm Detalle1 det1
+	INNER JOIN TipoTarjeta tt ON tt.id=det1.TipoTarjeta
+	INNER JOIN TipoProducto tp ON tp.id=det1.TipoProducto
+	WHERE det1.Id=@id
+END
+
+GO
+USE [master]
+GO
+ALTER DATABASE [Buscador] SET  READ_WRITE 
+GO

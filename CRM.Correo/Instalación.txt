@@ -1,0 +1,19 @@
+﻿Debe inciarse el cmd en modo administrador
+
+El archivo de arranque creado tomarlo desde el directorio release
+
+Instalar
+InstallUtil.exe C:\CorreosEnvios\CRMCorreos\CRM.Correo.exe
+
+-Detener el servicio desde el administrador de windows si  no quiere de modo normal
+Ir a la pestaña Servicios
+Buscar Service1
+Abrir menú popup y dar click en Ir a detalles
+Buscar CRM.Correo.exe
+Abrir menú popup y dar click en Finalizar
+
+Desinstalar
+-Detener el servicio
+InstallUtil.exe /u C:\Users\jlvru\Documents\Proyectos\CRM\CRM.Correo\bin\Release\CRM.Correo.exe
+
+

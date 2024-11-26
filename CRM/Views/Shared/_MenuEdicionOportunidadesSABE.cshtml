@@ -1,0 +1,133 @@
+﻿<ul class="nav nav-line nav-color-secondary">
+    <li class="nav-item">
+        @if (ViewBag.Title == "Editar")
+        {
+            <a href="/Oportunidades/Edicion?Id=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fab fa-wpforms"></i>
+                </span>
+                Detalle
+            </a>
+        }
+        else
+        {
+            <a href="/Oportunidades/Edicion?Id=@Session["IdOportunidad"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fab fa-wpforms"></i>
+                </span>
+                Detalle
+            </a>
+
+        }
+    </li>
+
+    <li class="nav-item">
+        @if (ViewBag.Title == "AgregarArchivo")
+        {
+            <a href="/Oportunidades/AgregarArchivo?Id=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fas fa-file-alt"></i>
+                </span>
+                Archivos/Documentos
+            </a>
+        }
+        else
+        {
+            <a href="/Oportunidades/AgregarArchivo?Id=@Session["IdOportunidad"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-file-alt"></i>
+                </span>
+                Archivos/Documentos
+            </a>
+        }
+    </li>
+    <li class="nav-item">
+        @if (ViewBag.Title == "Responsables")
+        {
+            <a href="/Oportunidades/Responsables?Id=@Session["IdOportunidad"].ToString()&IdE=@Session["IdEmpresa"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fas fa-users"></i>
+                </span>
+                Responsable
+            </a>
+        }
+        else
+        {
+            <a href="/Oportunidades/Responsables?Id=@Session["IdOportunidad"].ToString()&IdE=@Session["IdEmpresa"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-users"></i>
+                </span>
+                Responsable
+            </a>
+
+        }
+    </li>
+    @if (Session["IdConfiguracion"].ToString() == "2")
+    {
+        <li class="nav-item">
+            @if (ViewBag.Title == "Contactos")
+            {
+                <a href="/Oportunidades/Contactos?Id=@Session["IdOportunidad"].ToString()&IdE=@Session["IdEmpresa"].ToString()" class="nav-link active">
+                    <span class="btn-label">
+                        <i class="fas fa-users"></i>
+                    </span>
+                    Contactos
+                </a>
+            }
+            else
+            {
+                <a href="/Oportunidades/Contactos?Id=@Session["IdOportunidad"].ToString()&IdE=@Session["IdEmpresa"].ToString()" class="nav-link">
+                    <span class="btn-label">
+                        <i class="fas fa-users"></i>
+                    </span>
+                    Contactos
+                </a>
+
+            }
+        </li>
+    }
+    @if (Session["IdConfiguracion"].ToString() == "2")
+    {
+        <li class="nav-item">
+            @if (ViewBag.Title == "Actividades")
+            {
+                <a href="/Oportunidades/Actividades?Id=@Session["IdOportunidad"].ToString()" class="nav-link active" data-trigger="hover" data-toggle="popover" title="" data-content="Ahora puede enviar correo a un responsable asignado en Actividad-Aviso con envío de correo" data-original-title="Nuevo" data-placement="top">
+                    <span class="btn-label">
+                        <i class="fas fa-check-square"></i>
+                    </span>
+                    Actividades
+                </a>
+            }
+            else
+            {
+                <a href="/Oportunidades/Actividades?Id=@Session["IdOportunidad"].ToString()" class="nav-link" data-trigger="hover" data-toggle="popover" title="" data-content="Ahora puede enviar correo a un responsable asignado en Actividad-Aviso con envío de correo" data-original-title="Nuevo" data-placement="top">
+                    <span class="btn-label">
+                        <i class="fas fa-check-square"></i>
+                    </span>
+                    Actividades
+                </a>
+
+            }
+        </li>
+    }
+    <li class="nav-item">
+        @if (ViewBag.Title == "BitacoraUsuario")
+        {
+            <a href="/Oportunidades/BitacoraUsuario?Id=@Session["IdOportunidad"].ToString()" class="nav-link active">
+                <span class="btn-label">
+                    <i class="fas fa-check-square"></i>
+                </span>
+                Bitácora
+            </a>
+        }
+        else
+        {
+            <a href="/Oportunidades/BitacoraUsuario?Id=@Session["IdOportunidad"].ToString()" class="nav-link">
+                <span class="btn-label">
+                    <i class="fas fa-check-square"></i>
+                </span>
+                Bitácora
+            </a>
+        }
+    </li>
+</ul>

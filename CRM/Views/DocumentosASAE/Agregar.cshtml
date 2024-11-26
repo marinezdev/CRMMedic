@@ -1,0 +1,814 @@
+﻿
+@{
+    ViewBag.Title = "Agregar";
+}
+
+<link href="~/assets/js/plugin/datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+
+        $('#opcDocs').addClass("nav-item active submenu");
+        $('#Espera').hide();
+
+        $('#catalogos').DataTable({
+            "searching": false,
+            "paging": false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            info: false,
+            columns: [
+                { data: 'Id' },
+                { data: 'Nombre' }
+            ],
+            columnDefs: [
+                {
+                    targets: [2],
+                    data: "Id",
+                    render: function (data) {
+                        return '<a href="#" onclick=EliminarClasificacion(' + data + ');><i class="fas fa-trash text-danger"></i></a>';
+                    }
+                }
+            ]
+        });
+
+        ValidarSiUsuarioPuedeAgregarClasSubClas();
+
+    });
+
+    function SubirArchivo() {
+        if (window.FormData == undefined) {
+            $.notify('Navegador no soportado para subir archivos.', {
+                autohide: true, type: 'warning', placement: {
+                    from: 'bottom',
+                    align: 'right'
+                }
+            });
+        }
+        else {
+
+            var fileUpload = $("#ArchivoASubir").get(0);
+            var files = fileUpload.files;
+            
+            //No se seleccionó un archivo
+            if (files.length == 0) {
+                $.notify('Seleccione un archivo para subir.', {
+                    autohide: true, type: 'danger', placement: {
+                        from: 'bottom',
+                        align: 'right'
+                    }
+                });
+                return;
+            }
+
+            //Validar el tamaño del archivo
+            var extension = files[0].name.substring(files[0].name.lastIndexOf("."));
+
+            //Validar si la extensión está permitida
+            if (extension) {
+
+            }
+
+            if (files[0].size > ValidarPesoArchivo(extension)) {
+                //alert(files[0].name);
+                swal({
+                    title: 'CRM ASAE',
+                    text: 'Archivo excedido en tamaño permitido (' + files[0].size + '). Verifique con Sistemas.)',
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-danger'
+                        }
+                    },
+                });
+                return;
+            }
+            else {
+                //Archivo cumple, se guarda
+                var fileData = new FormData();
+
+                fileData.append('Clasificacion', $('#clasificacion').val());
+                fileData.append('Descripcion', $('#descripcion').val());
+                fileData.append('Version', $('#version').val());
+                fileData.append('Vigencia', $('input:radio[name=vigente]:checked').val());
+                fileData.append('VersionUsuarios', $('#versionusuarios').val());
+                fileData.append('FechaOficial', $('#fechaoficial').val());
+                fileData.append('SubClasificacion', $('#subclasificacion').val());
+                fileData.append(files[0].name, files[0]);
+
+                $.ajax({
+                    url: '/DocumentosASAE/SubirArchivo',
+                    type: 'post',
+                    datatype: 'json',
+                    contentType: false,
+                    processData: false,
+                    async: false,
+                    data: fileData,
+                    beforeSend: function () {
+                        $('#Espera').show();
+                    },
+                    success: function (data) {
+
+                        if (data == 0) {
+
+                            $('#ArchivoASubir').val('');
+
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Se guardó el nuevo registro',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                },
+                            }).then(
+                                function () {
+                                    location.href = '/DocumentosASAE/Index';
+                                }
+                            );
+
+                        }
+                        else if (data == 1) {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Extensión de archivo no registrada.',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                },
+                            });
+                        }
+                        else if (data == 2) {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'Ya existe un archivo con ese nombre.',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                },
+                            });
+                        }
+                        else {
+                            swal({
+                                title: 'CRM ASAE',
+                                text: 'El archivo podría tener un peso excesivo, verifique.',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                },
+                            });
+                        }
+
+                    },
+                    complete: function () {
+                        $('#Espera').hide();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log('jqXHR:');
+                        console.log(jqXHR);
+                        console.log('textStatus:');
+                        console.log(textStatus);
+                        console.log('errorThrown:');
+                        console.log(errorThrown);
+                    }
+                });
+            }
+        }
+    }
+
+    function ValidarPesoArchivo(extension) {
+        $.ajax({
+            type: "GET",
+            url: '/DocumentosASAE/SeleccionarSiPermitido/',
+            data: { extension: extension },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                console.log("->" + data);
+                if (data == "1") {
+                    return;
+                }
+                else if (data == "2") {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El peso o extensión del archivo podrían no estar permitidos, checar con el administrador.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        },
+                    });
+                    return
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Error desconocido con el archivo podría ser el peso o la extensión, checar con el administrador.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        },
+                    });
+                    return
+                }
+
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ClasificacionSeleccionada() {
+        var valor = $('#clasificacion').val();
+        if (valor != '') {
+            //Obtener las subclasificaciones que pertenecen a esta clasificacion y llenar el select correspondiente
+            $.ajax({
+                url: "/DocumentosASAE/SeleccionarSubclasificacionesPorClasificacion/",
+                data: { idclasificacion: valor },
+                type: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    $('#Espera').show();
+                },
+                success: function (data) {
+                    //console.log(data);
+                    var len = data.length;
+                    $('#subclasificacion').empty();
+                    $('#subclasificacion').append('<option value=></option>');
+                    for (var i = 0; i < len; i++) {
+                        $('#subclasificacion').append('<option value=' + data[i].Id + '>' + data[i].Nombre + '</option>');
+                    }
+                },
+                complete: function () {
+                    $('#Espera').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('jqXHR:');
+                    console.log(jqXHR);
+                    console.log('textStatus:');
+                    console.log(textStatus);
+                    console.log('errorThrown:');
+                    console.log(errorThrown);
+                }
+            });
+        }
+    }
+
+    function AdministrarClasificaciones() {
+        $('#ModalClasificaciones').modal('show');
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/SeleccionarTabla',
+            data: { tabla: 'DocumentosASAEClasificacion' },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                //$('#catalogos').val(tabla);
+                $('#catalogos').DataTable().clear().rows.add(data).draw();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AgregarClasificacion() {
+        $.ajax({
+            type: "GET",
+            url: '/Administracion/TablasAgregarNuevo',
+            data: { tabla: 'DocumentosASAEClasificacion', nombre: $('#aClasificacion').val() },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                $('#catalogos').DataTable().clear().rows.add(data).draw();
+                location.reload();
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function EliminarClasificacion(id) {
+        $.ajax({
+            url: "/Administracion/EliminarDocumentosASAEClasificacion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se eliminó el registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            //location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Si hay registros relacionados NO se borrará, revise bien la tabla de documentos (sólo para documentos, no es para borrar de otras tablas).',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function AdministrarSubClasificaciones() {
+        $('#ModalSubClasificaciones').modal('show');        
+    }
+
+    function AgregarSubClasificacion() {
+        $.ajax({
+            url: "/Administracion/GuardarDocumentosASAESubClasificacion/",
+            data: { nombre: $('#aSubClasificacion').val(), clasificacion: $('#aaclasificacion').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se ha guardado el cambio al registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Ha habido un error al intentar procesar los datos',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function EliminarSubClasificacion(id) {
+        $.ajax({
+            url: "/Administracion/EliminarDocumentosASAESubClasificacion/",
+            data: { id: id },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                if (data >= 1) {
+                    swal({
+                        title: 'CRM',
+                        text: 'Se eliminó el registro exitosamente',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            $('#aaclasificacion').val('');
+                            location.reload();
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM',
+                        text: 'Si hay registros relacionados NO se borrará, revise bien la tabla de documentos.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-danger'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function ValidarSiUsuarioPuedeAgregarClasSubClas() {
+        $.ajax({
+            type: "GET",
+            url: "/DocumentosASAE/ValidaSiUsuarioPuedeAgregarClasificacionSubClasificacion/",
+            data: {
+                idusuario: $('#IdUsuario').val() },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data == true) {
+                    $('#ListaClasificaciones').show();
+                    $('#ListaSubClasificaciones').show();
+                }
+                else {
+                    $('#ListaClasificaciones').hide();
+                    $('#ListaSubClasificaciones').hide();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdUsuario" value="@Session["IdUsuario"]" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Agregar nuevo documento</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <h3>Agregar Nuevo</h3>
+
+                    <div class="row">
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="Descripcion" class="col-md-3 col-form-label">Descripción</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <textarea id="descripcion" class="form-control form-control-sm input-solid" cols="60" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <label for="Version" class="col-md-3 col-form-label">Estatus</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="version" name="Version" value="1" placeholder="" required autocomplete="off" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="versionusuarios" class="col-md-3 col-form-label">Versión</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="versionusuarios" name="versionusuarios" placeholder="" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+                            <div class="form-group form-inline">
+                                <label for="fechaoficial" class="col-md-3 col-form-label">Fecha Oficial</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="fechaoficial" name="fechaoficial" placeholder="" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4 text-center"><a id="ListaClasificaciones" href="#" onclick="AdministrarClasificaciones();">Crear Clasificación</a></div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label class="col-md-2 col-form-label">Vigente</label>
+
+                                <div class="form-group form-inline text-left">
+                                    <div class="form-check">
+                                        <label class="form-radio-label">
+                                            <input class="form-radio-input" type="radio" id="vig1" name="vigente" value="1" checked>
+                                            <span class="form-radio-sign">&nbsp;Sí</span>
+                                        </label>
+                                        <label class="form-radio-label ml-3">
+                                            <input class="form-radio-input" type="radio" id="vig2" name="vigente" value="2">
+                                            <span class="form-radio-sign">&nbsp;No</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-4">
+
+                            <div class="col-md-12 col-lg-12">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 col-form-label">Clasificación&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                    &nbsp;&nbsp;&nbsp;<select class="form-control form-control-sm input-solid" id="clasificacion" name="clasificacion" style="width: 180px" onchange="ClasificacionSeleccionada();">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var clas in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                                        {
+                                            <option value="@clas.Id">@clas.Nombre</option>
+                                        }
+                                    </select>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4 text-center"><a id="ListaSubClasificaciones" href="#" onclick="AdministrarSubClasificaciones()">Crear SubClasificación</a></div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4">
+
+                            <div class="form-group form-inline">
+                                <label class="col-md-3 col-form-label">SubClasificación&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                &nbsp;&nbsp;&nbsp;<select class="form-control form-control-sm input-solid" id="subclasificacion" name="subclasificacion" style="width: 180px">
+                                </select>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row form-inline col-md-12 text-right">
+                        <div class="form-group col-sm-12">
+
+                            <div class="input-group">
+                                <input type="file" id="ArchivoASubir" class="form-control" /> <br />
+                                <button id="SubirArchivo" class="btn btn-sm btn-success" onclick="SubirArchivo();">
+                                    <span class="btn-label">
+                                        <i class="fa fa-file-upload"></i>
+                                    </span>
+                                    Subir Archivo y Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Administrar clasificaciones -->
+<div class="modal fade" id="ModalClasificaciones" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1">Agregar/Eliminar Clasificaciones</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-3 col-form-label">Nombre</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="aClasificacion" required autocomplete="off">
+                                    <button type="button" class="btn btn-success" data-dismiss="modal" onclick="AgregarClasificacion();">Agregar</button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <table id="catalogos" class="display compact" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th width="1%">Id</th>
+                                    <th width="60%">Nombre</th>
+                                    <th width="3%" align="center"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Administrar subclasificaciones -->
+<div class="modal fade" id="ModalSubClasificaciones" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel1">Agregar/Eliminar SubClasificaciones</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="col-md-12">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-group form-inline">
+                                <label for="aSubClasificacion" class="col-md-3 col-form-label">Nombre</label>
+                                <div class="col-md-9 col-lg-9">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="aSubClasificacion" required autocomplete="off">                                    
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="form-group form-inline">
+                                <label for="aClasificacion" class="col-md-3 col-form-label">Nombre</label>
+                                <div class="col-md-9 col-lg-9">
+
+                                    <select class="form-control form-control-sm input-solid" id="aaclasificacion" name="aaclasificacion" style="width: 180px">
+                                        <option value="">&nbsp;</option>
+                                        @foreach (var clas in CRM.Models.Catalogos.Seleccionar("DocumentosASAEClasificacion"))
+                                        {
+                                            <option value="@clas.Id">@clas.Nombre</option>
+                                        }
+                                    </select>
+
+                                    <button type="button" class="btn btn-success" data-dismiss="modal" onclick="AgregarSubClasificacion();">Agregar</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <table class="display compact table-striped table-hover" style="width:100%">
+                            <thead class="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Nombre</th>
+                                    <th>Clasificación</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var items in ViewBag.SubClas)
+                                {
+                                    <tr>
+                                        <td>@items.Id</td>
+                                        <td>@items.Nombre</td>
+                                        <td>@CRM.Models.Catalogos.SeleccionarNombrePorId(items.IdClasificacion.ToString(), "DocumentosASAEClasificacion")</td>
+                                        <td width="3%"><a href="#" onclick="EliminarSubClasificacion(@items.Id)"><i class="fas fa-trash text-danger"></i></a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/plugin/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+<script>
+    $.datetimepicker.setLocale('es');
+
+    $('#fechaoficial').datetimepicker({
+        timepicker: false,
+        format: 'd/m/Y',
+    });
+</script>

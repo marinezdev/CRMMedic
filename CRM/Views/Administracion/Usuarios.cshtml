@@ -1,0 +1,626 @@
+﻿@model IEnumerable<CRM.Models.Models.UsuariosRoles>
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+<script src="../assets/js/CRM.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        $('#opcAdmin').addClass("nav-item active submenu");
+        $('#admin').addClass("collapse show");
+        $('#sopcUsuarios').addClass("active");
+
+    });
+
+    var app = angular.module("Apps", []);
+    app.controller("Ctrls", function ($scope) {
+
+    });
+
+    function ModalModificar(eId) {
+        //$('#ModalModificar').modal('show');
+        SeleccionarPorId(eId);
+    }
+
+    function GuardarNuevo() {
+        if (!validarCorreo($('#aCorreo').val())) {
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/AgregarUsuario/",
+            data: {
+                aNombre: $('#aNombre').val(), aApellidoPaterno: $('#aApellidoPaterno').val(), aApellidoMaterno: $('#aApellidoMaterno').val(),
+                aCorreo: $('#aCorreo').val(), aClave: $('#aClave').val(), aContraseña: $('#aContraseña').val(), arol: $('#aRol').val(),
+                aEmpresa: $('#aEmpresa').val(), aActivo: $('#aActivo').val(), IdConfiguracion: $('#aEmpresa').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                var len = data.length;
+                if (len > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location.href = '';
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Ha intentando guardar un usuario existente, revise el listado de usuarios y sus datos.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-error'
+                            }
+                        }
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function GuardarModificado() {
+        if (!validarCorreo($('#eCorreo').val())) {
+            return;
+        }
+        var valorActivo;
+        if ($('#eActivo').is(":checked")) {
+            //alert('Si');
+            valorActivo = 1;
+        }
+        else {
+            //alert('no');
+            valorActivo = 0;
+        }
+        var valorArchivosPermiso;
+        if ($('#eArchivosPermiso').is(":checked")) {
+            //alert('Si');
+            valorArchivosPermiso = 1;
+        }
+        else {
+            //alert('no');
+            valorArchivosPermiso = 0;
+        }
+        var valorClasSubClasPermiso;
+        if ($('#eDocsClasPermiso').is(":checked")) {
+            //alert('Si');
+            valorClasSubClasPermiso = 1;
+        }
+        else {
+            //alert('no');
+            valorClasSubClasPermiso = 0;
+        }
+        $.ajax({
+            type: "GET",
+            url: "/Administracion/ModificarUsuario",
+            data: {
+                eNombre: $('#eNombre').val(),
+                eApellidoPaterno: $('#eApellidoPaterno').val(),
+                eApellidoMaterno: $('#eApellidoMaterno').val(),
+                eCorreo : $('#eCorreo').val(),
+                eClave: $('#eClave').val(),
+                eContraseña: $('#eContraseña').val(),
+                eActivo: valorActivo,
+                eRol: $('#eRol').val(),
+                eId: $('#eId').val(),
+                eArchivosPermiso: valorArchivosPermiso,
+                eClasSubClasPermiso: valorClasSubClasPermiso,
+                eIdUDN: $('#eUDN').val(),
+                eEmpresa: $('#eConfiguracionEmpresa').val()
+            },
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('body').removeClass('modal-open');
+                if (data.length > 0) {
+
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se modificó el registro',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href='';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        text: "No se guardó el registro, revise",
+                        type: 'warning'
+                    });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function SeleccionarPorId(valor) {
+        $.ajax({
+            url: "/Administracion/SeleccionarPorId/",
+            data: { Id: valor },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $('#ModalModificar').modal('show');
+
+                $('#eNombre').val(data.Usuarios.Nombre);
+                $('#eApellidoPaterno').val(data.Usuarios.ApellidoPaterno);
+                $('#eApellidoMaterno').val(data.Usuarios.ApellidoMaterno);
+                $('#eCorreo').val(data.Usuarios.Correo);
+                $('#eClave').val(data.Usuarios.Clave);
+                $('#eContraseña').val(data.Usuarios.Contraseña);
+                $('#eRol').val(data.Roles.Id);
+                $('#eConfiguracionEmpresa').val(data.Configuracion.Id);
+
+                if (data.Usuarios.Activo) {                          // Para un checkbox
+                    $("#eActivo").prop('checked', true);
+                }
+                else {
+                    $("#eActivo").prop('checked', false);
+                }
+
+                if (data.Usuarios.ArchivosPermiso) {                          // Para un checkbox
+                    $("#eArchivosPermiso").prop('checked', true);
+                }
+                else {
+                    $("#eArchivosPermiso").prop('checked', false);
+                }
+
+                if (data.Usuarios.ClasSubClasPermiso) {                          // Para un checkbox
+                    $("#eDocsClasPermiso").prop('checked', true);
+                }
+                else {
+                    $("#eDocsClasPermiso").prop('checked', false);
+                }
+
+                $('#eUDN').val(data.Usuarios.IdUDN);
+
+                $('#eId').val(data.Usuarios.Id);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function validarCorreo(email) {
+        var regex = /[\w-\.]{2,}@@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+
+        if (!regex.test(email)) {
+            swal({
+                title: 'CRM ASAE',
+                text: 'El correo electrónico es inválido, revise, de lo contrario, no podrá guardar el registro ni modificarlo',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                },
+            });
+            return false;
+        }
+        return true;
+    }
+
+
+</script>
+
+<style>
+    .strike {
+        text-decoration: line-through;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .green {
+        color: green;
+    }
+
+    .one {
+        color: greenyellow;
+    }
+</style>
+
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Usuarios del Sistema</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+
+                <div class="card-body text-right">
+
+                    <button class="btn btn-primary animated bounceInDown" data-toggle="modal" data-target="#ModalNuevo">Nuevo</button>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-body">
+
+
+                <div class="table-responsive">
+                    <table id="basic-datatables" class="display compact table-striped table-hover" style="width:100%">
+                        <thead class="header2">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Clave</th>
+                                <th>Correo</th>
+                                <th>Activo</th>
+                                <th>Bajar/Ver&nbsp;Archivos</th>
+                                <th>Empresa</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model == null)
+                            {
+                                <tr><td colspan="6" align="center">Sin datos para mostrar</td></tr>
+                            }
+                            @foreach (CRM.Models.Models.UsuariosRoles items in Model)
+                            {
+                                var mensaje = items.Usuarios.Activo == true ? "Activo" : "Inactivo";
+                                var permiso = items.Usuarios.ArchivosPermiso == true ? "Sí" : "No";
+                                <tr>
+                                    <td>@items.Usuarios.Nombre @items.Usuarios.ApellidoPaterno @items.Usuarios.ApellidoMaterno</td>
+                                    <td>@items.Usuarios.Clave</td>
+                                    <td>@items.Usuarios.Correo</td>
+                                    <td>@mensaje</td>
+                                    <td align="center">@permiso</td>
+                                    <td>@items.Configuracion.Nombre</td>
+                                    <td><a href="#" onclick="ModalModificar(@items.Usuarios.Id);">Detalle</a></td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <script type="text/javascript">
+                    $(function () {
+                        var msg = '@ViewData["Mensaje"]';
+                        if (msg == 'Agregado') {
+                            //Mensajes('Exitoso', 'Se guardó el nuevo registro', 2);
+                            swal({
+                                title: 'Exitoso',
+                                text: 'Se guardó el nuevo registro',
+                                icon: 'success',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            });
+                        }
+                        else if (msg == 'Modificado') {
+                            //Mensajes('Exitoso', 'Se guardó el registro modificado', 2);
+                            swal({
+                                title: 'Exitoso',
+                                text: 'Se guardó el registro modificado',
+                                icon: 'success',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-success'
+                                    }
+                                }
+                            });
+                        }
+                        else if (msg == 'Falla') {
+                            //Mensajes('Atención', 'No se guardaron los datos, revise su información', 4);
+                            swal({
+                                title: 'Atención',
+                                text: 'No se guardaron los datos, revise su información',
+                                icon: 'warning',
+                                buttons: {
+                                    confirm: {
+                                        className: 'btn btn-warning'
+                                    }
+                                }
+                            });
+                        }
+                        else {
+
+                        }
+                    });
+                </script>
+
+            </div>
+        </div>
+
+
+    </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalNuevo" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Agregar Nuevo Usuario del Sistema</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="aNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aNombre" id="aNombre" placeholder="" required tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoPaterno" class="col-md-3 col-form-label fc-left">Ap. Paterno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aApellidoPaterno" id="aApellidoPaterno" placeholder="" required tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aApellidoMaterno" class="col-md-3 col-form-label fc-left">Ap. Materno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aApellidoMaterno" id="aApellidoMaterno" placeholder="" required tabindex="3">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aCorreo" class="col-md-3 col-form-label fc-left">Correo E.</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" name="aCorreo" id="aCorreo" placeholder="" required tabindex="4">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aClave" class="col-md-3 col-form-label">Clave</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="aClave" name="aClave" placeholder="" required tabindex="5">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aContraseña" class="col-md-3 col-form-label">Contraseña</label>
+                            <div class="col-md-9 p-0">
+                                <input type="password" class="form-control input-solid" id="aContraseña" name="aContraseña" placeholder="" required tabindex="6">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="aRol" class="col-md-3 col-form-label">Rol</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="aRol" name="Rol" required style="width: 250px" tabindex="7">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.Roles)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="Empresa" class="col-md-3 col-form-label">Empresa</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="aEmpresa" name="aEmpresa" required style="width: 250px" tabindex="6">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.ConfiguracionEmpresas)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-inline">
+                            <label for="aActivo" class="col-md-3 col-form-label fc-left">Activo</label>
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="aActivo" name="aActivo">
+                                <span class="form-check-sign"></span>
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success animated bounceInRight" data-dismiss="modal" onclick="GuardarNuevo();">Guardar</button>
+                <button type="button" class="btn btn-warning animated bounceInLeft" data-dismiss="modal">Cerrar</button>                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalModificar" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="ModalLabel">Modificar los Datos del Usuario del Sistema</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+
+                        <div class="form-group form-inline">
+                            <label for="eNombre" class="col-md-3 col-form-label fc-left">Nombre</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eNombre" name="eNombre" placeholder="" tabindex="1">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eApellidoPaterno" class="col-md-3 col-form-label fc-left">Ap. Paterno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eApellidoPaterno" name="eApellidoPaterno" placeholder="" tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eApellidoMaterno" class="col-md-3 col-form-label fc-left">Ap. Materno</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eApellidoMaterno" name="eApelllidoMaterno" placeholder="" tabindex="3">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eCorreo" class="col-md-3 col-form-label fc-left">Correo E.</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eCorreo" name="eCorreo" placeholder="" tabindex="4">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eClave" class="col-md-3 col-form-label">Clave</label>
+                            <div class="col-md-9 p-0">
+                                <input type="text" class="form-control input-solid" id="eClave" name="eClave" placeholder="" tabindex="5">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eContraseña" class="col-md-3 col-form-label">Contraseña</label>
+                            <div class="col-md-9 p-0">
+                                <div class="position-relative">
+                                    <input type="password" class="form-control input-solid" id="eContraseña" name="eContraseña" placeholder="" require tabindex="6">
+                                    <div class="show-password">
+                                        <i class="icon-eye"></i> Mostrar la contraseña
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eRol" class="col-md-3 col-form-label">Rol</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eRol" name="eRol" style="width: 250px" tabindex="7">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.Roles)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eConfiguracionEmpresa" class="col-md-3 col-form-label">Empresa</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eConfiguracionEmpresa" name="eConfiguracionEmpresa" style="width: 250px" tabindex="8">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.ConfiguracionEmpresas)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline">
+                            <label for="eUDN" class="col-md-3 col-form-label">U de N</label>
+                            <div class="col-md-9 p-0">
+                                <select class="form-control input-solid" id="eUDN" name="eUDN" required style="width: 250px" tabindex="9">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var item in ViewBag.UDN)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="eActivo" name="eActivo" value="">
+                                <span class="form-check-sign">Activo</span>
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="eArchivosPermiso" name="eArchivosPermiso" value="">
+                                <span class="form-check-sign">Visualizar Documentos</span>
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" id="eDocsClasPermiso" name="eDocsClasPermiso" value="">
+                                <span class="form-check-sign">Crear clasificación/subclasificación documentos</span>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="eId" name="eId" />
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" data-dismiss="modal" onclick="GuardarModificado();">Guardar</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+                
+            </div>
+        </div>
+    </div>
+</div>

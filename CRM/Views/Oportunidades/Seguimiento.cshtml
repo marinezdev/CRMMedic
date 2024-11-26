@@ -1,0 +1,90 @@
+﻿
+@{
+    ViewBag.Title = "Seguimiento";
+}
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Seguimiento de Tema</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="separator">
+                        <label><b>Agregar notas y documentos referentes a lo asignado</b></label>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <form method="post" action="">
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-6">
+
+                                <div class="form-group form-inline">
+                                    <label for="Responsable" class="col-form-label">Notas</label>
+                                    <textarea class="form-control input-solid" id="Notas" name="Notas"></textarea>
+                                </div>
+
+
+                            </div>
+
+                            <div class="col-md-8 col-lg-6">
+
+                                <div class="form-group form-inline">
+                                    <label for="Estado" class="col-form-label">Estado</label>
+                                    <input type="text" class="form-control input-solid" id="Estado" />
+                                </div>
+
+
+
+                            </div>
+
+
+
+
+                        </div>
+                    </form>
+
+
+                    <div class="separator">&nbsp;</div>
+                    <!-- Tabla -->
+
+                    @if (ViewBag.Responsables != null)
+                    {
+                        <div class="table-responsive">
+                            <table id="basic-datatables" class="display table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+
+                                    @foreach (var items in ViewBag.Responsables)
+                                    {
+                                        <tr>
+                                            <td>@items.Oportunidades.Nombre</td>
+                                            <td>@items.Bitacora.Estado</td>
+                                            <td><a href="#" onclick="BitacoraSeleccionarPorId(@items.Bitacora.Id);">Bitácora</a></td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+

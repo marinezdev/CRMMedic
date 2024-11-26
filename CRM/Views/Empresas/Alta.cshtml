@@ -1,0 +1,217 @@
+﻿
+@{
+    ViewBag.Title = "Empresas";
+}
+
+
+<script>
+    $(document).ready(function () {
+        $('#opcEmpresas').addClass("nav-item active submenu");
+        $('#Nombre').select();
+
+        if ($('#IdRol').val() == '3') {
+            $("#test2").attr('checked', 'checked');
+        }
+    });
+
+    function Guardar() {
+        if ($('#RFC').val().length < 12 || $('#RFC').val().length > 12 || $('#RFC').val() === "") {
+            swal({
+                title: 'Error',
+                text: 'La longitud del RFC debe ser de 12 caracteres y no puede quedarse vacío.',
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-warning'
+                    }
+                },
+            });
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: "/Empresas/Guardar/",
+            data: {
+                Nombre: $('#Nombre').val().toUpperCase(),
+                RFC: $('#RFC').val(),
+                TipoEmpresa: $("input[name='optionsRadios']:checked").val(),
+                Direccion: $('#Direccion').val(),
+                Ciudad: $('#Ciudad').val(),
+                Estado: $('#Estado').val(),
+                IdConfiguracion: $('#IdConfiguracion').val()
+
+            },
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data > 0) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se agregó el médico exitosamente.',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        },
+                    }).then(
+                        function () {
+                            location.href = '/Empresas/Index';
+                        }
+                    );
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'El RFC del médico ya existe, revise sus datos.',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (errormessage) {
+                //swal({
+                //    title: 'CRM ASAE',
+                //    text: 'Ha habido un error al intentar procesar los datos',
+                //    icon: 'error',
+                //    buttons: {
+                //        confirm: {
+                //            className: 'btn btn-error'
+                //        }
+                //    }
+                //});
+            }
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdUsuario" name="IdUsuario" value="@Session["IdUsuario"].ToString()" />
+<input type="hidden" id="IdConfiguracion" name="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+<input type="hidden" id="IdRol" name="IdRol" value="@Session["IdRol"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Alta de @CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "P")</h4>
+    </div>
+    <div class="row">
+
+        <div id="Espera" style="display:none; width:69px;height:90px;position:fixed;top:20%;left:50%;padding:2px;z-index:1000">
+            <img src="../assets/img/spinner.gif" width="64" height="64" /><br />Cargando...
+        </div>
+
+
+        <div class="col-md-12">
+
+
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="separator">
+                        <p class="text-secondary">Las etiquetas con * indican campos de captura obligatorios</p>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Nombre" class="col-md-3 col-form-label">* Nombre</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="Nombre" name="Nombre" placeholder="Nombre @CRM.Utilerias.Titulos.Empresa(Session["IdConfiguracion"].ToString(), "S")" required tabindex="1" autocomplete="off">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="RFC" class="col-md-3 col-form-label">* RFC</label>
+                                <div class="col-md-9 p-0">
+                                    <input type="text" class="form-control form-control-sm input-solid" id="RFC" name="RFC" placeholder="LLLNNNNNNAAA" maxlength="12" required tabindex="2" autocomplete="off"  data-toggle="tooltip" data-placement="top" title="El RFC se compone de 3 letras, 6 números y tres letras o números, agregar sin guiones">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <!--div class="form-group">
+                                <div class="form-check">
+                                    <label class="form-radio-label">
+                                        <input class="form-radio-input" type="radio" id="test1" name="optionsRadios" value="1" checked>
+                                        <span class="form-radio-sign">Interna</span>
+                                    </label>
+                                    <label class="form-radio-label ml-3">
+                                        <input class="form-radio-input" type="radio" id="test2" name="optionsRadios" value="2">
+                                        <span class="form-radio-sign">Externa</span>
+                                    </label>
+                                </div>
+                            </div-->
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Direccion" class="col-md-3 col-form-label">Dirección</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Direccion" name="Direccion" type="text" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Ciudad" class="col-md-3 col-form-label">Ciudad</label>
+                                <div class="col-md-9 p-0">
+                                    <input id="Ciudad" name="Ciudad" type="text" class="form-control form-control-sm input-solid">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="form-group form-inline">
+                                <label for="Estado" class="col-md-3 col-form-label">Estado</label>
+                                <select class="form-control form-control-sm input-solid" id="Estado" name="Estado" style="width: 190px">
+                                    <option value="">&nbsp;</option>
+                                    @foreach (var edos in ViewBag.Estados)
+                                    {
+                                        <option value="@edos.Id">@edos.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="card-action label-align-center">
+                    <button type="submit" class="btn btn-success animated bounceInDown" tabindex="11" onclick="Guardar();">Crear Médico</button>
+
+                </div>
+
+                
+            </div>
+
+        </div>
+    </div>
+</div>
+

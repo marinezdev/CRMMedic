@@ -1,0 +1,106 @@
+﻿@model List<CRM.Models.Models.MarketingSeguimiento>
+@{
+    ViewBag.Title = "Seguimiento Campaña";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcMark').addClass("nav-item active submenu");
+        $('#mark').addClass("collapse show");
+        $('#sopcCampañas').addClass("active");
+        $('#Espera').hide();
+
+        $('form').submit(function () {
+            $(this).find("button[type='submit']").addClass('is-loading').prop('disabled', true);
+        });
+
+
+    });
+
+
+</script>
+
+<input type="hidden" id="IdConfiguracion" value="@Session["IdConfiguracion"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Seguimiento General de la Campaña</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    Card content
+                </div>
+
+                <div class="card-body">
+
+                    <p>Resultados Obtenidos sobre la Campaña <strong>@ViewBag.Campaña</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="ModificarCampaña?IdCampaña=@Request["IdCampaña"]">Detalle</a> </p>
+
+                    <form method="post" action="/Marketing/SeguimientoCampaña">
+
+                        <input type="hidden" name="IdCampaña" value="@Request["IdCampaña"]" />
+                        <h4>Agregar</h4>
+
+                        <div class="row">
+
+                            <div class="col-md-8 col-lg-8">
+
+                                <div class="form-group form-inline">
+                                    <label for="Objetivo" class="col-md-3 col-form-label">Seguimiento</label>
+                                    <div class="col-md-9">
+                                        <textarea name="Seguimiento" rows="2" cols="92" class="form-control" required></textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4 col-lg-4">
+                                <label class="col-md-3 col-form-label">&nbsp;</label>
+                            </div>
+
+
+                        </div>
+
+                        <div class="card-action label-align-center">
+                            <button id="guardado" type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+
+                    </form>
+
+                    @if (Model != null)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Seguimiento</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Fecha.ToString("dd/MMM/yy")</td>
+                                        <td>@item.Seguimiento</td>
+                                        <td><a href="/Marketing/SeguimientoCampañaModificar?Registro=@item.Id&IdCampaña=@Request["IdCampaña"]">Modificar</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

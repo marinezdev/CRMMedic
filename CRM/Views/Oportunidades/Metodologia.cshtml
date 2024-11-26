@@ -1,0 +1,341 @@
+﻿
+@{
+    ViewBag.Title = "Metodología";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#opcOport').addClass("nav-item active submenu");
+        $('#Espera').hide();
+
+        SeleccionarPorId();
+    });
+
+    function SeleccionarPorId() {
+        $.ajax({
+            url: "/Oportunidades/SeleccionarMetricaPorId/",
+            data: { id: $('#IdOportunidad').val() },
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data.IdOportunidad > 0) {
+                    $('#Metrica').val(data.Metrica);
+                    $('#Comprador').val(data.Comprador);
+                    $('#Criterios').val(data.Criterios);
+                    $('#Proceso').val(data.Proceso);
+                    $('#Necesidad').val(data.Necesidad);
+                    $('#Campeon').val(data.Campeon);
+                    $('#Fulcro').val(data.Fulcro);
+                    $('#Otros').val(data.Otros);
+                    $('#btnModificar').show();
+                    $('#btnGuardar').hide();
+                }
+                else {
+                    $('#btnModificar').hide();
+                    $('#btnGuardar').show();
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    function Guardar() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/AgregarMetrica/",
+            data: {
+                metrica: $('#Metrica').val(),
+                comprador: $('#Comprador').val(),
+                criterios: $('#Criterios').val(),
+                proceso: $('#Proceso').val(),
+                necesidad: $('#Necesidad').val(),
+                campeon: $('#Campeon').val(),
+                fulcro: $('#Fulcro').val(),
+                otros: $('#Otros').val(),
+                idoportunidad: $('#IdOportunidad').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#Espera').show();
+            },
+            success: function (data) {
+                if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se guardó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location = href = '';
+                        });
+                }
+            },
+            complete: function () {
+                $('#Espera').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+    function Modificar() {
+        $.ajax({
+            type: 'GET',
+            url: "/Oportunidades/ModificarMetrica",
+            data: {
+                metrica: $('#Metrica').val(),
+                comprador: $('#Comprador').val(),
+                criterios: $('#Criterios').val(),
+                proceso: $('#Proceso').val(),
+                necesidad: $('#Necesidad').val(),
+                campeon: $('#Campeon').val(),
+                fulcro: $('#Fulcro').val(),
+                otros: $('#Otros').val(),
+                idoportunidad: $('#IdOportunidad').val()
+            },
+            contentType: "application/json",
+            dataType: 'json',
+            success: function (data) {
+                if (data == 1) {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Se modificó el registro',
+                        icon: 'success',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-success'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location = href = '';
+                        });
+                }
+                else {
+                    swal({
+                        title: 'CRM ASAE',
+                        text: 'Sólo el creador de la oportunidad puede hacer modificaciones.',
+                        icon: 'warning',
+                        buttons: {
+                            confirm: {
+                                className: 'btn btn-warning'
+                            }
+                        }
+                    }).then(
+                        function () {
+                            location = href = '';
+                        });
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+            },
+        });
+    }
+
+</script>
+
+<input type="hidden" id="IdOportunidad" name="IdOportunidad" value="@Session["IdOportunidad"].ToString()" />
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Metodología</h4>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-header">
+                    <h4 class="card-title">@Session["NombreTema"] &nbsp; @CRM.Utilerias.CustomHelpers.EstadosdeProceso(Session["EstadoOportunidad"].ToString(), Session["IdOportunidad"].ToString()) </h4>
+                </div>
+
+                <div id="Espera" class="card-body is-loading is-loading-lg">
+                    <h4>Card content</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Menu -->
+
+                    @Html.Partial("_MenuEdicionOportunidades")
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Metrica" class="col-md-3 col-form-label">Métricas&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Indicadores o cuantificación de la ganancia potencial de la implantación de la solución o producto, o el beneficio económico." style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0 text-left">
+                                    <textarea class="form-control form-control-sm input-solid" id="Metrica" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Comprador" class="col-md-3 col-form-label">Comprador económico/decisor&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Identificación de la persona que tiene el control de decisión sobre los fondos para la adquisición y/o de la aceptación de la solución" style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0 text-left">
+                                    <textarea class="form-control form-control-sm input-solid" id="Comprador" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Criterios" class="col-md-3 col-form-label">Criterios de decisión&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="En qué se basa la empresa para tomar la decisión de compra y elegir entre las opciones " style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Criterios" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Proceso" class="col-md-3 col-form-label">Proceso de decisión&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Proceso y requerimientos definidos por la empresa para llegar a la decisión de compra-Proceso de compra" style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Proceso" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Necesidad" class="col-md-3 col-form-label">Identificación de la necesidad/dolor&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Los dolores (pain) actuales en la empresa que requieren que su producto o servicio sea utilizado" style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Necesidad" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Campeon" class="col-md-3 col-form-label">Campeón&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Personas poderosas o influyentes en la empresa, que son favorables para la adquisición de la solución o el producto que están convencidos de la solucion" style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Campeon" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Fulcro" class="col-md-3 col-form-label">Fulcro&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Punto de apoyo; razón y momento que se requiere para realizar la compra" style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Fulcro" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+                                <label for="Otros" class="col-md-3 col-form-label">Otros&nbsp;<i class="fas fa-question-circle text-info" data-trigger="hover" data-toggle="popover" title="" data-content="Otra información importante para apoyar la venta de la solución o producto." style="font-size: 9px"></i></label>
+                                <div class="col-md-9 p-0">
+                                    <textarea class="form-control form-control-sm input-solid" id="Otros" cols="70" rows="5"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="form-group form-inline">
+
+                                <div class="col-md-12 p-0 text-center">
+                                    <button id="btnGuardar" class="btn btn-info" onclick="Guardar();">Guardar</button>
+                                    <button id="btnModificar" class="btn btn-default" onclick="Modificar();">Guardar</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
